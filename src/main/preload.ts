@@ -40,6 +40,23 @@ const api: FileSystemApi = {
     }
   },
 
+  // New parseXmlDiff method
+  parseXmlDiff: async (xmlString: string) => {
+    if (!xmlString) {
+      return []
+    }
+    try {
+      const res = await ipcRenderer.invoke('fs:parseXmlDiff', xmlString)
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to parse XML diff.')
+      }
+      return res.changes
+    } catch (error) {
+      console.error('Failed to parse XML diff:', error)
+      throw error
+    }
+  },
+
   applyXmlDiff: async (basePath: string, xmlString: string) => {
     if (!basePath || !xmlString) {
       throw new Error('Base path and XML string are required')

@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { getAllFilePaths, readFileContent } from '../common/fileSystem'
-import { applyDiffPatches } from '../common/diffParser'
+import { parseDiffXml, applyDiffPatches } from '../common/diffParser'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -19,6 +19,7 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
       if (entry.isDirectory()) {
         await traverse(fullPath)
       } else {
+        // Exclude hidden, node_modules, .git
         if (
           !entry.name.startsWith('.') &&
           !relativePath.includes('node_modules') &&
@@ -41,7 +42,6 @@ async function createMainWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      // Point to our built preload script instead of a file in the same folder
       preload: path.join(__dirname, '../preload/index.js'),
       spellcheck: false,
     },
@@ -75,8 +75,21 @@ async function createMainWindow() {
     await mainWindow.loadFile(indexPath)
   }
 
+  // Show once ready
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show()
+  })
+
+  // Add Content-Security-Policy header to mitigate "Insecure Content-Security-Policy" warning
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+        ]
+      }
+    })
   })
 
   mainWindow.on('closed', () => {
@@ -117,6 +130,17 @@ function setupIpcHandlers() {
     } catch (error) {
       console.error('Error reading file:', error)
       throw error
+    }
+  })
+
+  // XML diff parse handler
+  ipcMain.handle('fs:parseXmlDiff', async (_, xmlString: string) => {
+    try {
+      const changes = parseDiffXml(xmlString)
+      return { success: true, changes }
+    } catch (error) {
+      console.error('Error parsing XML diff:', error)
+      return { success: false, error: String(error) }
     }
   })
 
