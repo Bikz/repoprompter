@@ -102,3 +102,14 @@ pnpm dev
 ```
 
 If you still encounter issues, please provide any new error messages or logs for further assistance.
+
+
+####
+
+'''
+rm -rf dist
+rm -rf node_modules/.vite
+rm -rf node_modules/.cache
+pnpm install
+pnpm dev
+'''

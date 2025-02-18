@@ -1,15 +1,62 @@
-/**
- * The React entry point. Renders your App into the #root element.
- */
-
 import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 import App from './App'
 
-const rootElement = document.getElementById('root') as HTMLElement
+// Ensure global is defined
+if (typeof global === 'undefined') {
+  (window as any).global = window;
+}
 
-ReactDOM.createRoot(rootElement).render(
+const container = document.getElementById('root')
+if (!container) {
+  throw new Error('Failed to find the root element')
+}
+
+const root = createRoot(container)
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props)
+    this.state = {
+      hasError: false,
+      error: null
+    }
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return {
+      hasError: true,
+      error
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', color: 'red' }}>
+          <h1>Something went wrong.</h1>
+          <pre>{this.state.error?.message}</pre>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+root.render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 )
