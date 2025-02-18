@@ -19,7 +19,6 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
       if (entry.isDirectory()) {
         await traverse(fullPath)
       } else {
-        // Skip hidden files and certain directories
         if (!entry.name.startsWith('.') &&
             !relativePath.includes('node_modules') &&
             !relativePath.includes('.git')) {
@@ -33,31 +32,68 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
   return files
 }
 
-function createMainWindow() {
+async function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, '../preload/index.js')
+      preload: path.join(__dirname, 'preload.js')
     },
   })
 
+  // Handle development mode
   if (process.env.NODE_ENV === 'development') {
-    const devServerUrl = process.env.VITE_DEV_SERVER_URL
-    if (!devServerUrl) {
-      throw new Error('VITE_DEV_SERVER_URL is not defined')
+    const port = process.env.PORT || 5173
+    const url = `http://localhost:${port}`
+    
+    // Wait for dev server to be ready
+    let retries = 0
+    const maxRetries = 10
+    const retryInterval = 1000
+
+    while (retries < maxRetries) {
+      try {
+        await mainWindow.loadURL(url)
+        console.log('Dev server connected successfully')
+        break
+      } catch (error) {
+        console.log(`Failed to connect to dev server (attempt ${retries + 1}/${maxRetries})`)
+        retries++
+        if (retries === maxRetries) {
+          dialog.showErrorBox(
+            'Development Server Error',
+            `Could not connect to development server at ${url}. Please ensure the dev server is running.`
+          )
+          app.quit()
+          return
+        }
+        await new Promise(resolve => setTimeout(resolve, retryInterval))
+      }
     }
-    mainWindow.loadURL(devServerUrl)
+
     mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+    // Production mode
+    const indexPath = path.join(__dirname, '..', 'renderer', 'index.html')
+    if (!fs.existsSync(indexPath)) {
+      dialog.showErrorBox(
+        'File Error',
+        `Could not find index.html at ${indexPath}`
+      )
+      app.quit()
+      return
+    }
+    await mainWindow.loadFile(indexPath)
   }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
 }
 
 function setupIpcHandlers() {
-  // Select directory handler
   ipcMain.handle('dialog:selectDirectory', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory']
@@ -65,7 +101,6 @@ function setupIpcHandlers() {
     return result.canceled ? undefined : result.filePaths[0]
   })
 
-  // Read directory handler - now with proper error handling
   ipcMain.handle('fs:readDirectory', async (_, dirPath: string) => {
     try {
       console.log('Reading directory:', dirPath)
@@ -78,7 +113,6 @@ function setupIpcHandlers() {
     }
   })
 
-  // Read file handler
   ipcMain.handle('fs:readFile', async (_, { baseDir, relativeFilePath }) => {
     try {
       const fullPath = path.join(baseDir, relativeFilePath)
@@ -90,7 +124,6 @@ function setupIpcHandlers() {
     }
   })
 
-  // Apply XML diff handler
   ipcMain.handle('fs:applyXmlDiff', async (_, { basePath, xmlString }) => {
     try {
       await applyDiffPatches(basePath, xmlString)
@@ -102,13 +135,13 @@ function setupIpcHandlers() {
   })
 }
 
-app.whenReady().then(() => {
-  createMainWindow()
+app.whenReady().then(async () => {
+  await createMainWindow()
   setupIpcHandlers()
 
-  app.on('activate', () => {
+  app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow()
+      await createMainWindow()
     }
   })
 })
@@ -117,4 +150,13 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+// Handle any uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error)
+  dialog.showErrorBox(
+    'Application Error',
+    `An unexpected error occurred: ${error.message}`
+  )
 })
