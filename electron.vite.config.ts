@@ -1,6 +1,6 @@
-import { defineConfig } from 'electron-vite'
-import react from '@vitejs/plugin-react'
-import * as path from 'path'
+import { defineConfig } from 'electron-vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   main: {
@@ -36,21 +36,19 @@ export default defineConfig({
   renderer: {
     root: path.join(__dirname, 'src/renderer'),
     build: {
-      outDir: '../dist/renderer',
+      outDir: path.join(__dirname, 'dist/renderer'),
       rollupOptions: {
         input: {
           index: path.join(__dirname, 'src/renderer/index.html'),
         },
       },
+      emptyOutDir: true,
     },
     resolve: {
       alias: {
         '@': path.join(__dirname, 'src/renderer'),
       },
     },
-    server: {
-      port: 5174,
-    },
     plugins: [react()],
   },
-})
+});

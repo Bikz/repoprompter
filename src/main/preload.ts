@@ -1,52 +1,80 @@
-/**
- * Preload script
- * Exposes safe APIs for directory selection, reading/writing files, and diff application
- */
-
 import { contextBridge, ipcRenderer } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
+// Type declarations for window.api
+declare global {
+  interface Window {
+    api: {
+      sayHello: () => void
+      selectDirectory: () => Promise<string | undefined>
+      readDirectory: (dirPath: string) => Promise<string[]>
+      readFileContents: (baseDir: string, relativeFilePath: string) => Promise<string>
+      applyXmlDiff: (basePath: string, xmlString: string) => Promise<{ success: boolean; error?: string }>
+    }
+  }
+}
+
+// Helper function to safely read directory
+async function readDirRecursive(dirPath: string): Promise<string[]> {
+  const results: string[] = []
+  
+  try {
+    const entries = await fs.promises.readdir(dirPath, { withFileTypes: true })
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name)
+      
+      if (entry.isDirectory()) {
+        const subDirFiles = await readDirRecursive(fullPath)
+        results.push(...subDirFiles)
+      } else {
+        results.push(path.relative(dirPath, fullPath))
+      }
+    }
+  } catch (error) {
+    console.error('Error reading directory:', error)
+    throw error
+  }
+  
+  return results
+}
+
+// Expose APIs to renderer
 contextBridge.exposeInMainWorld('api', {
-  // Basic test
   sayHello: () => {
     console.log('Hello from preload!')
   },
 
-  // Show directory picker dialog
-  selectDirectory: async (): Promise<string | undefined> => {
+  selectDirectory: async () => {
     return ipcRenderer.invoke('dialog:selectDirectory')
   },
 
-  // Recursively read directory structure
-  // Returns an array of file paths relative to the chosen directory
-  readDirectory: (dirPath: string): string[] => {
-    const results: string[] = []
-
-    function readDirRecursive(currentPath: string) {
-      const entries = fs.readdirSync(currentPath, { withFileTypes: true })
-      for (const entry of entries) {
-        const entryPath = path.join(currentPath, entry.name)
-        if (entry.isDirectory()) {
-          readDirRecursive(entryPath)
-        } else {
-          results.push(path.relative(dirPath, entryPath))
-        }
-      }
+  readDirectory: async (dirPath: string) => {
+    try {
+      return await readDirRecursive(dirPath)
+    } catch (error) {
+      console.error('Failed to read directory:', error)
+      throw error
     }
-
-    readDirRecursive(dirPath)
-    return results
   },
 
-  // Read file contents (relative path from baseDir)
-  readFileContents: (baseDir: string, relativeFilePath: string): string => {
-    const fullPath = path.join(baseDir, relativeFilePath)
-    return fs.readFileSync(fullPath, 'utf-8')
+  readFileContents: async (baseDir: string, relativeFilePath: string) => {
+    try {
+      const fullPath = path.join(baseDir, relativeFilePath)
+      return await fs.promises.readFile(fullPath, 'utf-8')
+    } catch (error) {
+      console.error('Failed to read file:', error)
+      throw error
+    }
   },
 
-  // Apply diffs (XML string) to local files
   applyXmlDiff: async (basePath: string, xmlString: string) => {
-    return ipcRenderer.invoke('apply-xml-diff', { basePath, xmlString })
+    try {
+      return await ipcRenderer.invoke('apply-xml-diff', { basePath, xmlString })
+    } catch (error) {
+      console.error('Failed to apply XML diff:', error)
+      return { success: false, error: String(error) }
+    }
   },
 })

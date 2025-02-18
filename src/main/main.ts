@@ -21,13 +21,16 @@ function createMainWindow() {
     },
   })
 
-  // In development, use the Vite dev server URL
-  if (process.env.VITE_DEV_SERVER_URL) {
-    console.log('Loading dev server:', process.env.VITE_DEV_SERVER_URL)
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
+  const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5174'
+
+  // If we're in dev mode, load the dev server. Otherwise, load the production HTML.
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Development mode => Loading:', devServerUrl)
+    mainWindow.loadURL(devServerUrl)
   } else {
+    // Production build
     const indexPath = path.resolve(__dirname, '../../dist/renderer/index.html')
-    console.log('Loading production build:', indexPath)
+    console.log('Production mode => Loading file:', indexPath)
     mainWindow
       .loadFile(indexPath)
       .catch(err => {
@@ -37,6 +40,7 @@ function createMainWindow() {
       })
   }
 
+  // Optionally open DevTools if you want
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools()
   }

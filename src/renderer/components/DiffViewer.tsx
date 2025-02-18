@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
-import { parseDiffXml } from '@/common/diffParser' // if you want to re-parse client-side
+import { parseDiffXml } from '../../common/diffParser'
 
 export function DiffViewer() {
   const { baseDir } = useRepoContext()
@@ -81,7 +81,7 @@ export function DiffViewer() {
                   overflowX: 'auto',
                 }}
               >
-{change.newContent}
+                {change.newContent}
               </pre>
             </div>
           ))}

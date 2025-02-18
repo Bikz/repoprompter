@@ -1,5 +1,5 @@
 /**
- * useRepoContext.ts
+ * useRepoContext.tsx
  * Provides a shared React context for storing selected directory, file list, and selected files.
  */
 
@@ -30,17 +30,17 @@ export function RepoProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
+  const value = {
+    baseDir,
+    setBaseDir,
+    fileList,
+    setFileList,
+    selectedFiles,
+    toggleSelectedFile,
+  }
+
   return (
-    <RepoContext.Provider
-      value={{
-        baseDir,
-        setBaseDir,
-        fileList,
-        setFileList,
-        selectedFiles,
-        toggleSelectedFile,
-      }}
-    >
+    <RepoContext.Provider value={value}>
       {children}
     </RepoContext.Provider>
   )
