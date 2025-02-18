@@ -12,6 +12,11 @@ export default defineConfig({
         },
       },
     },
+    resolve: {
+      alias: {
+        '@': path.join(__dirname, 'src'),
+      },
+    },
   },
   preload: {
     build: {
@@ -22,11 +27,26 @@ export default defineConfig({
         },
       },
     },
+    resolve: {
+      alias: {
+        '@': path.join(__dirname, 'src'),
+      },
+    },
   },
   renderer: {
     root: path.join(__dirname, 'src/renderer'),
     build: {
-      outDir: path.join(__dirname, 'dist/renderer'),
+      outDir: '../dist/renderer',
+      rollupOptions: {
+        input: {
+          index: path.join(__dirname, 'src/renderer/index.html'),
+        },
+      },
+    },
+    resolve: {
+      alias: {
+        '@': path.join(__dirname, 'src/renderer'),
+      },
     },
     server: {
       port: 5174,
