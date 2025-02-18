@@ -39,54 +39,42 @@ async function createMainWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      spellcheck: false,
     },
+    backgroundColor: '#ffffff',
+    show: false,
+    titleBarStyle: 'hiddenInset',
   })
 
-  // Handle development mode
   if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || 5173
     const url = `http://localhost:${port}`
     
-    // Wait for dev server to be ready
-    let retries = 0
-    const maxRetries = 10
-    const retryInterval = 1000
-
-    while (retries < maxRetries) {
-      try {
-        await mainWindow.loadURL(url)
-        console.log('Dev server connected successfully')
-        break
-      } catch (error) {
-        console.log(`Failed to connect to dev server (attempt ${retries + 1}/${maxRetries})`)
-        retries++
-        if (retries === maxRetries) {
-          dialog.showErrorBox(
-            'Development Server Error',
-            `Could not connect to development server at ${url}. Please ensure the dev server is running.`
-          )
-          app.quit()
-          return
-        }
-        await new Promise(resolve => setTimeout(resolve, retryInterval))
-      }
+    try {
+      await mainWindow.loadURL(url)
+      mainWindow.webContents.openDevTools()
+    } catch (error) {
+      console.error('Failed to connect to dev server:', error)
+      dialog.showErrorBox(
+        'Development Server Error',
+        `Could not connect to development server at ${url}. Please ensure the dev server is running.`
+      )
+      app.quit()
     }
-
-    mainWindow.webContents.openDevTools()
   } else {
-    // Production mode
     const indexPath = path.join(__dirname, '..', 'renderer', 'index.html')
     if (!fs.existsSync(indexPath)) {
-      dialog.showErrorBox(
-        'File Error',
-        `Could not find index.html at ${indexPath}`
-      )
+      dialog.showErrorBox('File Error', `Could not find index.html at ${indexPath}`)
       app.quit()
       return
     }
     await mainWindow.loadFile(indexPath)
   }
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow?.show()
+  })
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -135,6 +123,11 @@ function setupIpcHandlers() {
   })
 }
 
+// Minimal app configuration
+if (process.platform === 'darwin') {
+  app.commandLine.appendSwitch('disable-features', 'UseSpellCheck')
+}
+
 app.whenReady().then(async () => {
   await createMainWindow()
   setupIpcHandlers()
@@ -152,7 +145,6 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Handle any uncaught errors
 process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error)
   dialog.showErrorBox(

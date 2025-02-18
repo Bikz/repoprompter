@@ -1,24 +1,27 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { FileSystemApi } from '../common/types'
 
+// Validate that the API methods exist before exposing them
 const api: FileSystemApi = {
   sayHello: () => {
     console.log('Hello from preload!')
   },
 
   selectDirectory: async () => {
-    console.log('Selecting directory...')
-    const result = await ipcRenderer.invoke('dialog:selectDirectory')
-    console.log('Selected directory:', result)
-    return result
+    try {
+      return await ipcRenderer.invoke('dialog:selectDirectory')
+    } catch (error) {
+      console.error('Failed to select directory:', error)
+      throw error
+    }
   },
 
   readDirectory: async (dirPath: string) => {
-    console.log('Reading directory in preload:', dirPath)
+    if (!dirPath) {
+      throw new Error('Directory path is required')
+    }
     try {
-      const files = await ipcRenderer.invoke('fs:readDirectory', dirPath)
-      console.log('Files found:', files)
-      return files
+      return await ipcRenderer.invoke('fs:readDirectory', dirPath)
     } catch (error) {
       console.error('Failed to read directory:', error)
       throw error
@@ -26,6 +29,9 @@ const api: FileSystemApi = {
   },
 
   readFileContents: async (baseDir: string, relativeFilePath: string) => {
+    if (!baseDir || !relativeFilePath) {
+      throw new Error('Base directory and relative file path are required')
+    }
     try {
       return await ipcRenderer.invoke('fs:readFile', { baseDir, relativeFilePath })
     } catch (error) {
@@ -35,6 +41,9 @@ const api: FileSystemApi = {
   },
 
   applyXmlDiff: async (basePath: string, xmlString: string) => {
+    if (!basePath || !xmlString) {
+      throw new Error('Base path and XML string are required')
+    }
     try {
       return await ipcRenderer.invoke('fs:applyXmlDiff', { basePath, xmlString })
     } catch (error) {
@@ -44,4 +53,10 @@ const api: FileSystemApi = {
   }
 }
 
+// Type-safe exposure of the API
 contextBridge.exposeInMainWorld('api', api)
+
+// Handle any errors that occur during preload
+window.addEventListener('error', (event) => {
+  console.error('Preload script error:', event.error)
+})
