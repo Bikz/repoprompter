@@ -1,37 +1,42 @@
+# FILE_STRUCTURE.md
+
 repoprompter/
 ├─ .gitignore
 ├─ package.json
-├─ tsconfig.json               # or jsconfig.json if JavaScript
-├─ electron-builder.yml        # or electron-builder.json for build & auto-update
-├─ yarn.lock / package-lock.json
+├─ pnpm-lock.yaml
+├─ tsconfig.json
+├─ electron-builder.json
+├─ electron.vite.config.ts
+├─ vite.config.ts
 │
 ├─ src/
-│  ├─ main/                    # Electron Main Process
-│  │  ├─ main.ts               # App entry (creates BrowserWindow, etc.)
-│  │  ├─ autoUpdater.ts        # Auto-update logic (GitHub releases)
-│  │  └─ preload.ts            # Optional: expose safe APIs to renderer
+│  ├─ main/                      # Electron Main Process
+│  │  ├─ main.ts                 # App entry (creates BrowserWindow, sets up IPC)
+│  │  ├─ preload.ts              # Expose safe APIs
+│  │  └─ autoUpdater.ts          # (Optional) Auto-update logic
 │  │
-│  ├─ renderer/                # React Frontend
-│  │  ├─ App.tsx               # Root React component
-│  │  ├─ index.tsx             # Renders <App /> into the DOM
-│  │  ├─ components/           # Your UI pieces
+│  ├─ common/                    # Shared logic
+│  │  ├─ fileSystem.ts           # Read/write filesystem
+│  │  ├─ diffParser.ts           # Parse & apply XML diffs
+│  │  └─ promptBuilder.ts        # Combine user instructions + code
+│  │
+│  ├─ renderer/                  # React Frontend
+│  │  ├─ App.tsx                 # Main React App
+│  │  ├─ index.html              # HTML template
+│  │  ├─ index.tsx               # React entry point
+│  │  ├─ components/             # UI pieces
 │  │  │  ├─ DirectorySelector.tsx
 │  │  │  ├─ FileList.tsx
 │  │  │  ├─ PromptEditor.tsx
-│  │  │  ├─ DiffViewer.tsx
-│  │  │  └─ ...
-│  │  ├─ pages/                # (Optional) If using React Router
-│  │  └─ styles/
-│  │     └─ global.css         # Or tailwind.css / custom Apple-like styling
+│  │  │  └─ DiffViewer.tsx
+│  │  ├─ hooks/
+│  │  │  └─ useRepoContext.ts    # Shared context for selected dir/files
+│  │  └─ styles/                 # (Optional) any CSS or tailwind files
 │  │
-│  ├─ common/                  # Shared logic
-│  │  ├─ configManager.ts      # JSON prefs (e.g. last opened directory)
-│  │  ├─ fileSystem.ts         # Functions to read directory, get file contents
-│  │  ├─ promptBuilder.ts      # Combine selected code + user instructions
-│  │  └─ diffParser.ts         # Parse XML diffs & apply changes
+│  └─ stores/                    # (Optional) if you want separate store logic
 │
-├─ public/                     # (Optional) static assets (icons, etc.)
+├─ public/                       # static assets (icons, blank.tsx placeholders)
 │  └─ icon.png
 │
-└─ resources/                  # (Optional) for extra assets or sample files
+└─ resources/                    # (Optional) extra assets or sample files
    └─ sample.json
