@@ -19,9 +19,11 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
       if (entry.isDirectory()) {
         await traverse(fullPath)
       } else {
-        if (!entry.name.startsWith('.') &&
-            !relativePath.includes('node_modules') &&
-            !relativePath.includes('.git')) {
+        if (
+          !entry.name.startsWith('.') &&
+          !relativePath.includes('node_modules') &&
+          !relativePath.includes('.git')
+        ) {
           files.push(relativePath)
         }
       }
@@ -39,7 +41,8 @@ async function createMainWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
+      // Point to our built preload script instead of a file in the same folder
+      preload: path.join(__dirname, '../preload/index.js'),
       spellcheck: false,
     },
     backgroundColor: '#ffffff',
@@ -82,13 +85,17 @@ async function createMainWindow() {
 }
 
 function setupIpcHandlers() {
+  // Directory selection handler
   ipcMain.handle('dialog:selectDirectory', async () => {
-    const result = await dialog.showOpenDialog({
+    if (!mainWindow) return undefined
+    
+    const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory']
     })
     return result.canceled ? undefined : result.filePaths[0]
   })
 
+  // Directory reading handler
   ipcMain.handle('fs:readDirectory', async (_, dirPath: string) => {
     try {
       console.log('Reading directory:', dirPath)
@@ -101,6 +108,7 @@ function setupIpcHandlers() {
     }
   })
 
+  // File reading handler
   ipcMain.handle('fs:readFile', async (_, { baseDir, relativeFilePath }) => {
     try {
       const fullPath = path.join(baseDir, relativeFilePath)
@@ -112,6 +120,7 @@ function setupIpcHandlers() {
     }
   })
 
+  // XML diff application handler
   ipcMain.handle('fs:applyXmlDiff', async (_, { basePath, xmlString }) => {
     try {
       await applyDiffPatches(basePath, xmlString)

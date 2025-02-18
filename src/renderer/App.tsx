@@ -1,11 +1,3 @@
-/**
- * App.tsx
- * Main React App that hosts the 3-pane layout:
- *   Pane 1: Directory selector & file list
- *   Pane 2: Prompt editor & diff viewer
- *   Pane 3: Code editor tabs for reviewing & accepting changes
- */
-
 import React from 'react'
 import { DirectorySelector } from './components/DirectorySelector'
 import { FileList } from './components/FileList'
@@ -32,6 +24,14 @@ const paneStyle: React.CSSProperties = {
 }
 
 function App() {
+  const handleTestPreload = () => {
+    if (!window.api?.sayHello) {
+      alert('Preload API is not available! Make sure you are running inside Electron.')
+      return
+    }
+    window.api.sayHello()
+  }
+
   return (
     <RepoProvider>
       <div style={containerStyle}>
@@ -40,7 +40,7 @@ function App() {
           <h2>RepoPrompter</h2>
           <p style={{ color: '#666' }}>Select a directory, choose files, build a prompt, then paste AI diffs.</p>
           <button
-            onClick={() => window.api.sayHello()}
+            onClick={handleTestPreload}
             style={{
               padding: '8px 16px',
               backgroundColor: '#007bff',

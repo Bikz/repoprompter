@@ -18,6 +18,13 @@ interface DiffSegment {
  * Implementation logic depends on the structure you design for the XML.
  */
 export function parseDiffXml(xmlString: string): DiffSegment[] {
+  // Guard against empty or null strings
+  if (!xmlString?.trim()) {
+    console.warn('parseDiffXml called with empty XML string.')
+    // Return empty array or throw a custom error
+    return []
+  }
+
   const doc = new xmldoc.XmlDocument(xmlString)
   const fileNodes = doc.childrenNamed('file')
   const changes: DiffSegment[] = []
