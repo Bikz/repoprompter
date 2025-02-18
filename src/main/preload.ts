@@ -1,19 +1,24 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { type FileSystemApi } from '../common/types'
+import type { FileSystemApi } from '../common/types'
 
-// Explicitly type the API
 const api: FileSystemApi = {
   sayHello: () => {
     console.log('Hello from preload!')
   },
 
   selectDirectory: async () => {
-    return ipcRenderer.invoke('dialog:selectDirectory')
+    console.log('Selecting directory...')
+    const result = await ipcRenderer.invoke('dialog:selectDirectory')
+    console.log('Selected directory:', result)
+    return result
   },
 
   readDirectory: async (dirPath: string) => {
+    console.log('Reading directory in preload:', dirPath)
     try {
-      return await ipcRenderer.invoke('fs:readDirectory', dirPath)
+      const files = await ipcRenderer.invoke('fs:readDirectory', dirPath)
+      console.log('Files found:', files)
+      return files
     } catch (error) {
       console.error('Failed to read directory:', error)
       throw error
@@ -39,5 +44,4 @@ const api: FileSystemApi = {
   }
 }
 
-// Expose the API to the renderer process
 contextBridge.exposeInMainWorld('api', api)
