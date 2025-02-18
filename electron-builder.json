@@ -1,0 +1,14 @@
+{
+  "appId": "com.repoprompter.app",
+  "productName": "RepoPrompter",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "mac": {
+    "category": "public.app-category.developer-tools"
+  }
+}
