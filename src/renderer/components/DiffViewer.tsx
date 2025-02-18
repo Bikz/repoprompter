@@ -1,30 +1,25 @@
 /**
  * DiffViewer.tsx
- * Where user pastes the AI's XML diff. We parse it, show a preview, and user can accept or reject
+ * Textarea for the AI's XML diff. "Preview" button parses diff into context.
+ * "Apply Diff" button still applies everything at once if desired.
  */
 
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
-import { parseDiffXml } from '../../common/diffParser'
 
 export function DiffViewer() {
-  const { baseDir } = useRepoContext()
+  const { baseDir, setDiffXmlAndParse, applyFullDiff } = useRepoContext()
   const [xmlDiff, setXmlDiff] = useState('')
-  const [preview, setPreview] = useState<{ fileName: string; newContent: string }[]>([])
 
   const handlePreviewDiff = () => {
-    // Just parse it on the client side
-    const changes = parseDiffXml(xmlDiff)
-    setPreview(changes)
+    // Parse it and store results in context
+    setDiffXmlAndParse(xmlDiff)
   }
 
   const handleApplyDiff = async () => {
-    const res = await window.api.applyXmlDiff(baseDir, xmlDiff)
-    if (res.success) {
-      alert('Diff applied successfully!')
-    } else {
-      alert(`Failed to apply diff: ${res.error}`)
-    }
+    // If user wants to apply the entire diff right now
+    await applyFullDiff(xmlDiff)
+    setXmlDiff('')
   }
 
   return (
@@ -65,28 +60,6 @@ export function DiffViewer() {
           Apply Diff
         </button>
       </div>
-
-      {preview.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <h4>Preview Changes</h4>
-          {preview.map(change => (
-            <div key={change.fileName} style={{ marginBottom: 12 }}>
-              <strong>{change.fileName}</strong>
-              <pre
-                style={{
-                  whiteSpace: 'pre-wrap',
-                  background: '#f7f7f7',
-                  padding: 8,
-                  borderRadius: 4,
-                  overflowX: 'auto',
-                }}
-              >
-                {change.newContent}
-              </pre>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
