@@ -1,3 +1,8 @@
+/**
+ * File: types.ts
+ * Description: Holds shared TypeScript interfaces for file changes and the FileSystemApi.
+ */
+
 export interface FileChange {
   fileName: string
   newContent: string

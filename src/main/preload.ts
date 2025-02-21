@@ -1,7 +1,12 @@
+/**
+ * File: preload.ts
+ * Description: Exposes a safe FileSystemApi to the renderer via contextBridge.
+ * Defines methods for reading directories, files, parsing XML diffs, etc.
+ */
+
 import { contextBridge, ipcRenderer } from 'electron'
 import type { FileSystemApi } from '../common/types'
 
-// Validate that the API methods exist before exposing them
 const api: FileSystemApi = {
   sayHello: () => {
     console.log('Hello from preload!')
@@ -40,7 +45,6 @@ const api: FileSystemApi = {
     }
   },
 
-  // New parseXmlDiff method
   parseXmlDiff: async (xmlString: string) => {
     if (!xmlString) {
       return []
@@ -70,10 +74,8 @@ const api: FileSystemApi = {
   }
 }
 
-// Type-safe exposure of the API
 contextBridge.exposeInMainWorld('api', api)
 
-// Handle any errors that occur during preload
 window.addEventListener('error', (event) => {
   console.error('Preload script error:', event.error)
 })

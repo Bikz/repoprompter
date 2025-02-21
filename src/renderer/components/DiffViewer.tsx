@@ -1,7 +1,6 @@
 /**
- * DiffViewer.tsx
- * Textarea for the AI's XML diff. "Preview" button parses diff into context.
- * "Apply Diff" button still applies everything at once if desired.
+ * File: DiffViewer.tsx
+ * Description: Textarea to paste AI's XML diff. Allows previewing parsed diff changes and optionally applying all changes at once.
  */
 
 import React, { useState } from 'react'
@@ -12,50 +11,33 @@ export function DiffViewer() {
   const [xmlDiff, setXmlDiff] = useState('')
 
   const handlePreviewDiff = () => {
-    // Parse it and store results in context
     setDiffXmlAndParse(xmlDiff)
   }
 
   const handleApplyDiff = async () => {
-    // If user wants to apply the entire diff right now
     await applyFullDiff(xmlDiff)
     setXmlDiff('')
   }
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <h3>Diff Viewer</h3>
+    <div className="flex flex-col gap-2">
+      <h3 className="text-lg font-semibold text-gray-700">Diff Viewer</h3>
       <textarea
-        style={{ width: '100%', height: 120 }}
+        className="w-full h-32 border border-gray-300 rounded p-2 text-sm"
         placeholder="Paste AI's XML diff here..."
         value={xmlDiff}
         onChange={e => setXmlDiff(e.target.value)}
       />
-      <div style={{ marginTop: 8 }}>
+      <div className="flex gap-2">
         <button
           onClick={handlePreviewDiff}
-          style={{
-            padding: '6px 12px',
-            marginRight: 8,
-            background: '#ffc107',
-            color: '#000',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-          }}
+          className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-black rounded text-sm"
         >
           Preview Diff
         </button>
         <button
           onClick={handleApplyDiff}
-          style={{
-            padding: '6px 12px',
-            background: '#dc3545',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-          }}
+          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
         >
           Apply Diff
         </button>

@@ -1,24 +1,21 @@
 /**
- * CodeEditorTabs.tsx
- * Displays each changed file in a tab with a Monaco-like editor preview.
- * User can Accept or Reject the file's changes.
- * An "Accept All" button applies all changes in one go.
+ * File: CodeEditorTabs.tsx
+ * Description: Displays a tab for each file in the AI diff.
+ * Provides options to Accept or Reject each change, or Accept All at once.
  */
 
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
-// If you want an actual Monaco Editor, install @monaco-editor/react and uncomment:
-// import { Editor } from '@monaco-editor/react'
 
 export function CodeEditorTabs() {
-  const { baseDir, diffChanges, acceptAllDiffs, acceptSingleDiff, rejectSingleDiff } = useRepoContext()
+  const { diffChanges, acceptAllDiffs, acceptSingleDiff, rejectSingleDiff } = useRepoContext()
   const [activeTab, setActiveTab] = useState<string | null>(
     diffChanges.length > 0 ? diffChanges[0].fileName : null
   )
 
   if (diffChanges.length === 0) {
     return (
-      <div style={{ padding: 10, color: '#888' }}>
+      <div className="p-2 text-gray-500">
         <p>No changes to display. Paste AI diff to see updates here.</p>
       </div>
     )
@@ -31,98 +28,65 @@ export function CodeEditorTabs() {
   const currentFileChange = diffChanges.find(ch => ch.fileName === activeTab)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Tab bar */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #ccc', marginBottom: 8 }}>
+    <div className="flex flex-col h-full">
+      {/* Tabs */}
+      <div className="flex border-b border-gray-300 mb-2">
         {diffChanges.map(change => (
           <div
             key={change.fileName}
             onClick={() => handleTabClick(change.fileName)}
-            style={{
-              padding: '8px 12px',
-              cursor: 'pointer',
-              backgroundColor: change.fileName === activeTab ? '#e9ecef' : 'transparent',
-              borderRight: '1px solid #ccc',
-            }}
+            className={
+              "px-3 py-2 text-sm cursor-pointer " +
+              (change.fileName === activeTab
+                ? "bg-gray-200 border-r border-gray-300"
+                : "hover:bg-gray-100 border-r border-gray-300")
+            }
           >
             {change.fileName}
           </div>
         ))}
       </div>
 
-      {/* Accept All button */}
-      <div style={{ marginBottom: 8 }}>
+      {/* Accept All */}
+      <div className="mb-2">
         <button
           onClick={() => acceptAllDiffs()}
-          style={{
-            padding: '6px 12px',
-            backgroundColor: '#28a745',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-          }}
+          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
         >
           Accept All
         </button>
       </div>
 
       {/* Editor area */}
-      <div style={{ flex: 1, overflow: 'auto', border: '1px solid #ddd', padding: 8 }}>
+      <div className="flex-1 border border-gray-300 rounded p-2 overflow-auto">
         {currentFileChange ? (
           <>
-            <h4>{currentFileChange.fileName}</h4>
-            {/* Placeholder for a Monaco editor. In real usage, do something like: 
-                  <Editor 
-                      height="300px"
-                      defaultLanguage="typescript"
-                      value={currentFileChange.newContent}
-                  /> 
-               */}
-            <pre
-              style={{
-                background: '#f7f7f7',
-                borderRadius: 4,
-                padding: 8,
-                whiteSpace: 'pre-wrap',
-                overflowX: 'auto',
-              }}
-            >
+            <h4 className="font-semibold text-gray-700 mb-2">
+              {currentFileChange.fileName}
+            </h4>
+            <pre className="bg-gray-50 rounded p-2 text-xs overflow-auto whitespace-pre-wrap">
               {currentFileChange.newContent}
             </pre>
 
-            <div style={{ marginTop: 8 }}>
+            <div className="mt-2 flex gap-2">
               <button
-                onClick={() => acceptSingleDiff(currentFileChange.fileName, currentFileChange.newContent)}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#007bff',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  marginRight: 8,
-                }}
+                onClick={() =>
+                  acceptSingleDiff(currentFileChange.fileName, currentFileChange.newContent)
+                }
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
               >
                 Accept
               </button>
               <button
                 onClick={() => rejectSingleDiff(currentFileChange.fileName)}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#dc3545',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                }}
+                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
               >
                 Reject
               </button>
             </div>
           </>
         ) : (
-          <p style={{ color: '#888' }}>Select a file tab to see changes.</p>
+          <p className="text-gray-500">Select a file tab to see changes.</p>
         )}
       </div>
     </div>

@@ -1,3 +1,7 @@
+/**
+ * File: electron-builder.json
+ * Description: Config for packaging the Electron app, specifying output directory and product name.
+ */
 {
   "appId": "com.repoprompter.app",
   "productName": "RepoPrompter",

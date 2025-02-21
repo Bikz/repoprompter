@@ -13,6 +13,7 @@ repoprompter/
 │  ├─ main/                      # Electron Main Process
 │  │  ├─ main.ts                 # App entry (creates BrowserWindow, sets up IPC)
 │  │  ├─ preload.ts              # Expose safe APIs
+│  │  ├─ configStore.ts          # JSON-based config for repos + global known large files
 │  │  └─ autoUpdater.ts          # (Optional) Auto-update logic
 │  │
 │  ├─ common/                    # Shared logic
@@ -30,10 +31,11 @@ repoprompter/
 │  │  │  ├─ FileList.tsx
 │  │  │  ├─ PromptEditor.tsx
 │  │  │  ├─ DiffViewer.tsx
-│  │  │  └─ CodeEditorTabs.tsx   # New: Monaco-like code editor with tabs
+│  │  │  └─ CodeEditorTabs.tsx   # Monaco-like editor with tabs
 │  │  ├─ hooks/
 │  │  │  └─ useRepoContext.ts    # Shared context for selected dir/files + diff changes
-│  │  └─ styles/                 # (Optional) any CSS or tailwind files
+│  │  ├─ tailwind.css            # Tailwind entry
+│  │  └─ styles/                 # (Optional) extra styling
 │  │
 │  └─ stores/                    # (Optional) if you want separate store logic
 │

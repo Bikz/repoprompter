@@ -1,3 +1,8 @@
+/**
+ * File: App.tsx
+ * Description: Main React component. Sets up the 3-pane layout for directory, prompt editor, diff viewer, and code editor tabs.
+ */
+
 import React from 'react'
 import { DirectorySelector } from './components/DirectorySelector'
 import { FileList } from './components/FileList'
@@ -5,23 +10,6 @@ import { PromptEditor } from './components/PromptEditor'
 import { DiffViewer } from './components/DiffViewer'
 import { CodeEditorTabs } from './components/CodeEditorTabs'
 import { RepoProvider } from './hooks/useRepoContext'
-
-const containerStyle: React.CSSProperties = {
-  width: '100%',
-  height: '100vh',
-  display: 'flex',
-  flexDirection: 'row',
-  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-  backgroundColor: '#f0f0f0',
-  overflow: 'hidden',
-}
-
-const paneStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '10px',
-  overflow: 'auto',
-}
 
 function App() {
   const handleTestPreload = () => {
@@ -34,38 +22,33 @@ function App() {
 
   return (
     <RepoProvider>
-      <div style={containerStyle}>
-        {/* Pane 1 */}
-        <div style={{ ...paneStyle, flexBasis: 300, backgroundColor: '#fafafa', borderRight: '1px solid #ccc' }}>
-          <h2>RepoPrompter</h2>
-          <p style={{ color: '#666' }}>Select a directory, choose files, build a prompt, then paste AI diffs.</p>
+      <div className="flex flex-row w-full h-screen overflow-hidden font-sans bg-gray-100">
+        {/* LEFT PANE */}
+        <div className="w-72 bg-gray-50 border-r border-gray-300 p-4 flex flex-col gap-4">
+          <h2 className="text-2xl font-bold text-gray-700">RepoPrompter</h2>
+          <p className="text-sm text-gray-500">
+            Select a directory, choose files, build a prompt, then paste AI diffs.
+          </p>
           <button
             onClick={handleTestPreload}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              marginBottom: '20px',
-            }}
+            className="px-4 py-2 text-sm rounded bg-brand-blue text-white hover:bg-blue-600"
           >
             Test Preload API
           </button>
-
           <DirectorySelector />
-          <FileList />
+          <div className="flex-1 overflow-auto">
+            <FileList />
+          </div>
         </div>
 
-        {/* Pane 2 */}
-        <div style={{ ...paneStyle, flex: 1, borderRight: '1px solid #ccc' }}>
+        {/* MIDDLE PANE */}
+        <div className="flex flex-col flex-1 border-r border-gray-300 p-4 gap-4 overflow-auto">
           <PromptEditor />
           <DiffViewer />
         </div>
 
-        {/* Pane 3 */}
-        <div style={{ ...paneStyle, flexBasis: 400, backgroundColor: '#fff' }}>
+        {/* RIGHT PANE */}
+        <div className="w-96 bg-white p-4 overflow-auto">
           <CodeEditorTabs />
         </div>
       </div>

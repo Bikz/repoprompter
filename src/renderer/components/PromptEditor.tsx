@@ -1,3 +1,9 @@
+/**
+ * File: PromptEditor.tsx
+ * Description: Allows the user to type instructions, builds the final prompt string
+ * from file contents + instructions, and copies to clipboard.
+ */
+
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
@@ -7,7 +13,6 @@ export function PromptEditor() {
   const [combinedPrompt, setCombinedPrompt] = useState('')
   const [showCombinedPrompt, setShowCombinedPrompt] = useState(false)
 
-  // A system prompt that instructs the model to reply in XML
   const systemPrompt = `
 You are a code editing assistant. You can only reply with XML according to the instructions below:
 1) Use the exact XML formatting structure with <file> tags, etc.
@@ -16,19 +21,13 @@ You are a code editing assistant. You can only reply with XML according to the i
 4) Provide changes as needed.
 `
 
-  /**
-   * Helper to gather file contents, build the full prompt string
-   * including system prompt, file_map, and user_instructions.
-   */
   async function buildFullPrompt() {
-    // Gather file contents
     const fileContentMap: Record<string, string> = {}
     for (const file of selectedFiles) {
       const content = await window.api.readFileContents(baseDir, file)
       fileContentMap[file] = content
     }
 
-    // Construct final prompt
     let result = '<system_instructions>\n' + systemPrompt.trim() + '\n</system_instructions>\n\n'
     result += '<file_map>\n'
     selectedFiles.forEach(file => {
@@ -36,13 +35,9 @@ You are a code editing assistant. You can only reply with XML according to the i
     })
     result += '</file_map>\n\n'
     result += `<user_instructions>\n${userInstructions}\n</user_instructions>\n`
-
     return result
   }
 
-  /**
-   * Generates the combined prompt and copies it to clipboard.
-   */
   const handleGenerateAndCopyPrompt = async () => {
     try {
       const prompt = await buildFullPrompt()
@@ -55,9 +50,6 @@ You are a code editing assistant. You can only reply with XML according to the i
     }
   }
 
-  /**
-   * Builds the combined prompt, sets state, and toggles its display (no copy).
-   */
   const handleViewCombinedPrompt = async () => {
     if (!showCombinedPrompt) {
       const prompt = await buildFullPrompt()
@@ -67,57 +59,38 @@ You are a code editing assistant. You can only reply with XML according to the i
   }
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <h3>Prompt Editor</h3>
+    <div className="flex flex-col gap-2">
+      <h3 className="text-lg font-semibold text-gray-700">Prompt Editor</h3>
       <textarea
-        style={{ width: '100%', height: 300 }}
+        className="w-full h-40 border border-gray-300 rounded p-2 text-sm"
         placeholder="Type your instructions here..."
         value={userInstructions}
         onChange={e => setUserInstructions(e.target.value)}
       />
-      <div style={{ marginTop: 8 }}>
-        {/* Generate & Copy Prompt button */}
+      <div className="flex gap-2">
         <button
           onClick={handleGenerateAndCopyPrompt}
-          style={{
-            padding: '6px 12px',
-            background: '#28a745',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            marginRight: 8,
-          }}
+          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
         >
           📋 Generate &amp; Copy Prompt
         </button>
-
-        {/* View/hide combined prompt button */}
         <button
           onClick={handleViewCombinedPrompt}
-          style={{
-            padding: '6px 12px',
-            background: '#6c757d',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-          }}
+          className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
         >
           {showCombinedPrompt ? 'Hide' : 'View'} combined prompt
         </button>
       </div>
 
-      {/* Conditionally show combined prompt */}
       {showCombinedPrompt && combinedPrompt && (
-        <div style={{ marginTop: 16 }}>
-          <h4>Combined Prompt</h4>
+        <div className="mt-2 flex flex-col gap-2">
+          <h4 className="font-semibold text-gray-700">Combined Prompt</h4>
           <textarea
-            style={{ width: '100%', height: 150 }}
+            className="w-full h-40 border border-gray-300 rounded p-2 text-sm"
             value={combinedPrompt}
             readOnly
           />
-          <p style={{ fontSize: '0.9em', color: '#888' }}>
+          <p className="text-xs text-gray-500">
             This is the generated prompt. Use the "Generate &amp; Copy Prompt" button to copy it again if needed.
           </p>
         </div>

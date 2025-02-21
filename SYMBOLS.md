@@ -9,7 +9,11 @@ This document explains key symbols/modules in the RepoPrompter project:
   - `applyXmlDiff(basePath: string, xmlString: string)`: Applies the AI-generated XML diff.
   - (Optional) We could add a single-file write if partial acceptance is needed.
 
-- **`RepoProvider` / `useRepoContext`**:
+- **`configStore.ts`** (main process):
+  - Provides functions for reading/writing a JSON-based config file.
+  - Tracks global known large files and per-repo settings (user instructions, groups).
+
+- **`RepoProvider` / `useRepoContext`** (React context):
   - Global React context that stores:
     - `baseDir`: The selected directory path.
     - `fileList`: All files in the selected directory (recursively).
@@ -32,7 +36,7 @@ This document explains key symbols/modules in the RepoPrompter project:
   - “Preview” button calls `parseDiffXml(...)` to store changes in context.
   - Optionally “Apply Diff” to apply everything at once.
 
-- **`CodeEditorTabs.tsx` (New)**:
+- **`CodeEditorTabs.tsx`**:
   - A Monaco‐like code editor with tabs for each changed file from the diff.
   - Allows user to “Accept” or “Reject” each file individually.
   - “Accept All” button applies all changes in one go.
@@ -41,7 +45,7 @@ This document explains key symbols/modules in the RepoPrompter project:
   - Utility functions for reading/writing local files from the main process.
 
 - **`diffParser.ts`**:
-  - Functions to parse the XML diff and write new content.  
+  - Functions to parse the XML diff and overwrite or merge content.
   - Uses the `xmldoc` library for XML parsing.
 
 - **`promptBuilder.ts`**:

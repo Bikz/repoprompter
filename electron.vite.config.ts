@@ -1,3 +1,8 @@
+/**
+ * File: electron.vite.config.ts
+ * Description: Configuration for electron-vite, specifying main, preload, and renderer build outputs.
+ */
+
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'

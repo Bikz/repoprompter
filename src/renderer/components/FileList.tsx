@@ -1,54 +1,46 @@
+/**
+ * File: FileList.tsx
+ * Description: Displays the user’s repo files in a tree structure with tri-state checkbox selection.
+ * Allows toggling entire folder vs single file selection.
+ */
+
 import React, { useState, useMemo } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
-// We'll define a lightweight interface for a file/folder node.
 interface FileNode {
   name: string
   path: string
   children?: FileNode[]
 }
 
-/**
- * Build a tree from a list of paths by splitting on both forward and backslashes.
- */
 function buildFileTree(files: string[]): FileNode[] {
   const root: Record<string, FileNode> = {}
 
   for (const file of files) {
-    // Split on either slash or backslash
     const parts = file.split(/[/\\]/)
     let currentLevel = root
     let cumulativePath = ''
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
-      // Accumulate the path using forward slash
       cumulativePath = cumulativePath ? `${cumulativePath}/${part}` : part
 
       if (!currentLevel[part]) {
-        currentLevel[part] = {
-          name: part,
-          path: cumulativePath,
-          children: {}
-        }
+        currentLevel[part] = { name: part, path: cumulativePath, children: {} }
       }
       if (i === parts.length - 1) {
-        // It's a file => no children
         currentLevel[part].children = undefined
       } else {
-        // Ensure children object
         if (!currentLevel[part].children) {
           currentLevel[part].children = {}
         }
       }
-      // Move deeper
       if (currentLevel[part].children) {
         currentLevel = currentLevel[part].children as Record<string, FileNode>
       }
     }
   }
 
-  // Convert the nested objects to arrays
   function convertToArray(obj: Record<string, FileNode>): FileNode[] {
     return Object.values(obj).map(node => {
       if (node.children) {
@@ -58,10 +50,7 @@ function buildFileTree(files: string[]): FileNode[] {
           children: convertToArray(node.children as Record<string, FileNode>)
         }
       } else {
-        return {
-          name: node.name,
-          path: node.path
-        }
+        return { name: node.name, path: node.path }
       }
     })
   }
@@ -69,9 +58,6 @@ function buildFileTree(files: string[]): FileNode[] {
   return convertToArray(root)
 }
 
-/**
- * Tri-state (checked, partial, unchecked) for folders based on children states
- */
 function getCheckboxState(node: FileNode, selected: Set<string>): 'checked' | 'partial' | 'unchecked' {
   if (!node.children) {
     return selected.has(node.path) ? 'checked' : 'unchecked'
@@ -116,7 +102,8 @@ function FileTreeNode({
   const isFolder = !!node.children
   const isExpanded = expandedMap[node.path] || false
 
-  const handleCheckboxChange = () => {
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation()
     toggleSelected(node.path, isFolder)
   }
 
@@ -125,17 +112,15 @@ function FileTreeNode({
     setExpandedMap(prev => ({ ...prev, [node.path]: !prev[node.path] }))
   }
 
-  // Folder arrow icons
-  const arrowIcon = isFolder ? (isExpanded ? '▼' : '▶') : ''
-  // Folder or file icon
-  const mainIcon = isFolder ? '📁' : '📃'
-
   return (
-    <div style={{ marginLeft: 16, marginTop: 4 }}>
-      {/* Checkbox + arrow icon + folder/file icon + name row */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div className="ml-4">
+      <div
+        className={"flex items-center " + (isFolder ? "cursor-pointer" : "")}
+        onClick={isFolder ? handleToggleFolder : undefined}
+      >
         <input
           type="checkbox"
+          className="mr-1"
           checked={checkboxState === 'checked'}
           ref={el => {
             if (el) {
@@ -145,31 +130,18 @@ function FileTreeNode({
           onChange={handleCheckboxChange}
           onClick={e => e.stopPropagation()}
         />
-        {/* Arrow icon for folders only; click to expand/collapse */}
-        {isFolder && (
-          <span
-            style={{ margin: '0 4px', cursor: 'pointer' }}
-            onClick={handleToggleFolder}
-          >
-            {arrowIcon}
+        {isFolder ? (
+          <span className="mr-2">
+            {isExpanded ? '📂' : '📁'}
           </span>
+        ) : (
+          <span className="mr-2">📄</span>
         )}
-        {/* Folder/file icon */}
-        <span style={{ marginRight: 4 }}>
-          {mainIcon}
-        </span>
-        {/* Folder/file name (clicking it toggles folder if folder) */}
-        <span
-          onClick={isFolder ? handleToggleFolder : undefined}
-          style={{ userSelect: 'none', cursor: isFolder ? 'pointer' : 'default' }}
-        >
-          {node.name}
-        </span>
+        <span className="text-sm text-gray-700 select-none">{node.name}</span>
       </div>
 
-      {/* If folder is expanded, render children */}
       {isFolder && isExpanded && node.children && (
-        <div style={{ marginTop: 4 }}>
+        <div className="mt-1">
           {node.children.map(child => (
             <FileTreeNode
               key={child.path}
@@ -193,17 +165,12 @@ export function FileList() {
   const selectedSet = useMemo(() => new Set(selectedFiles), [selectedFiles])
   const fileTree = useMemo(() => buildFileTree(fileList || []), [fileList])
 
-  /**
-   * Toggling a folder selects or unselects all its descendants.
-   */
   const handleToggleSelected = (pathStr: string, isFolder: boolean) => {
     if (!isFolder) {
-      // Single file
       toggleSelectedFile(pathStr)
       return
     }
 
-    // 1) find the folder node
     let folderNode: FileNode | null = null
     function findNode(list: FileNode[]): FileNode | null {
       for (const item of list) {
@@ -218,7 +185,6 @@ export function FileList() {
     folderNode = findNode(fileTree)
     if (!folderNode) return
 
-    // 2) gather all descendants
     function gatherAllDescendants(node: FileNode): string[] {
       if (!node.children) return [node.path]
       let result: string[] = []
@@ -232,14 +198,10 @@ export function FileList() {
       return result
     }
     const allDesc = gatherAllDescendants(folderNode)
-
-    // 3) check if they are all selected
     const allSelected = allDesc.every(d => selectedSet.has(d))
 
-    // 4) build new selection list
     const newSelected = [...selectedFiles]
     if (allSelected) {
-      // unselect all
       for (const d of allDesc) {
         const idx = newSelected.indexOf(d)
         if (idx >= 0) {
@@ -247,7 +209,6 @@ export function FileList() {
         }
       }
     } else {
-      // select all
       for (const d of allDesc) {
         if (!newSelected.includes(d)) {
           newSelected.push(d)
@@ -255,47 +216,23 @@ export function FileList() {
       }
     }
 
-    // 5) We only have toggleSelectedFile (which toggles one at a time).
-    // We'll forcibly re-sync the entire selection with a small hack:
-    //   1) unselect all current
-    //   2) select everything in newSelected.
     function setSelectedFilesDirect(newList: string[]) {
-      // Clear existing
       selectedFiles.forEach(sf => toggleSelectedFile(sf))
-      // Then add the new set
       newList.forEach(nf => toggleSelectedFile(nf))
     }
-
     setSelectedFilesDirect(newSelected)
   }
 
-  // If no files
   if (!fileList || fileList.length === 0) {
     return (
-      <div style={{
-        padding: '16px',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '4px',
-        color: '#6c757d',
-        flex: 1,
-        overflow: 'auto'
-      }}>
+      <div className="p-4 bg-gray-100 rounded text-sm text-gray-500">
         No files. Please select a directory.
       </div>
     )
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: '#fff',
-      border: '1px solid #dee2e6',
-      borderRadius: '4px',
-      flex: 1,
-      overflowY: 'auto',
-      padding: 8
-    }}>
+    <div className="bg-white border border-gray-200 rounded p-2 text-sm overflow-auto">
       {fileTree.map(node => (
         <FileTreeNode
           key={node.path}

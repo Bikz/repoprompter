@@ -1,3 +1,8 @@
+/**
+ * File: tsconfig.node.json
+ * Description: TS config references for Node/Electron code in main and preload.
+ */
+
 {
   "compilerOptions": {
     "composite": true,

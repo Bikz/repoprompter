@@ -1,0 +1,7 @@
+/**
+ * File: tailwind.css
+ * Description: Tailwind base imports for styles, components, utilities.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

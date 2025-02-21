@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+/**
+ * File: useRepoContext.tsx
+ * Description: Provides a global React context for repository state:
+ * - baseDir, fileList, selectedFiles, diffChanges, groups, userInstructions
+ * - methods to parse and apply diffs, manage groups, unselect large files, etc.
+ */
+
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import type { FileChange } from '../../common/types'
 
 interface GroupItem {
@@ -21,10 +28,14 @@ interface RepoContextType {
   acceptSingleDiff: (fileName: string, newContent: string) => Promise<void>
   rejectSingleDiff: (fileName: string) => void
 
-  // Groups
   groups: GroupItem[]
   createGroupFromSelection: () => void
   selectGroup: (name: string) => void
+
+  userInstructions: string
+  setUserInstructions: (val: string) => void
+
+  unselectLargeFiles: () => Promise<void>
 }
 
 const RepoContext = createContext<RepoContextType | undefined>(undefined)
@@ -34,29 +45,51 @@ interface RepoProviderProps {
 }
 
 export function RepoProvider({ children }: RepoProviderProps) {
-  const [baseDir, setBaseDir] = useState('')
-  const [fileList, setFileList] = useState<string[]>([])
+  const [baseDir, setBaseDirState] = useState('')
+  const [fileList, setFileListState] = useState<string[]>([])
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [diffChanges, setDiffChanges] = useState<FileChange[]>([])
-
-  // Groups array with name and associated files
   const [groups, setGroups] = useState<GroupItem[]>([])
+  const [userInstructions, setUserInstructionsState] = useState('')
 
-  // Toggle file selection
   const toggleSelectedFile = React.useCallback((file: string) => {
     setSelectedFiles(prev =>
-      prev.includes(file)
-        ? prev.filter(f => f !== file)
-        : [...prev, file]
+      prev.includes(file) ? prev.filter(f => f !== file) : [...prev, file]
     )
   }, [])
 
-  // Helper to ensure fileList is always an array
-  const safeSetFileList = (files: string[] | undefined | null) => {
-    setFileList(Array.isArray(files) ? files : [])
+  const setFileList = (files: string[] | undefined | null) => {
+    setFileListState(Array.isArray(files) ? files : [])
   }
 
-  // Parse XML string in main process, store as "pending changes"
+  useEffect(() => {
+    if (!baseDir) return
+    // Attempt to load per-repo settings
+    window.api?.invoke?.('config:loadRepoSettings', baseDir)
+      .then((res: any) => {
+        if (res.success && res.settings) {
+          const { userInstructions, groups } = res.settings
+          setUserInstructionsState(userInstructions || '')
+          if (Array.isArray(groups)) {
+            setGroups(groups)
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load repo settings:', err)
+      })
+  }, [baseDir])
+
+  const setBaseDir = async (dir: string) => {
+    setBaseDirState(dir)
+    try {
+      const files = await window.api.readDirectory(dir)
+      setFileList(files)
+    } catch (error) {
+      console.error('Error reading directory:', error)
+    }
+  }
+
   const setDiffXmlAndParse = async (xmlString: string) => {
     if (!xmlString?.trim() || !window.api.parseXmlDiff) return
     try {
@@ -67,7 +100,6 @@ export function RepoProvider({ children }: RepoProviderProps) {
     }
   }
 
-  // Apply the entire XML diff at once
   const applyFullDiff = async (xmlString: string) => {
     try {
       const res = await window.api.applyXmlDiff(baseDir, xmlString)
@@ -82,25 +114,23 @@ export function RepoProvider({ children }: RepoProviderProps) {
     }
   }
 
-  // Accept all currently staged diffs
   const acceptAllDiffs = async () => {
     if (diffChanges.length === 0) return
     let xmlString = '<root>\n'
     diffChanges.forEach(ch => {
       xmlString += `  <file name="${ch.fileName}">\n`
-      xmlString += `    <replace><![CDATA[${ch.newContent}]]></replace>\n`
+      xmlString += `    <replace>${ch.newContent}</replace>\n`
       xmlString += '  </file>\n'
     })
     xmlString += '</root>'
     await applyFullDiff(xmlString)
   }
 
-  // Accept a single file's change
   const acceptSingleDiff = async (fileName: string, newContent: string) => {
     try {
       let xmlString = '<root>\n'
       xmlString += `  <file name="${fileName}">\n`
-      xmlString += `    <replace><![CDATA[${newContent}]]></replace>\n`
+      xmlString += `    <replace>${newContent}</replace>\n`
       xmlString += '  </file>\n'
       xmlString += '</root>'
 
@@ -109,7 +139,6 @@ export function RepoProvider({ children }: RepoProviderProps) {
         alert(`Failed to apply diff for ${fileName}: ${res.error}`)
         return
       }
-      // Remove from local state
       setDiffChanges(prev => prev.filter(fc => fc.fileName !== fileName))
       alert(`Changes for ${fileName} accepted and applied!`)
     } catch (err) {
@@ -117,13 +146,11 @@ export function RepoProvider({ children }: RepoProviderProps) {
     }
   }
 
-  // Reject a single file's change
   const rejectSingleDiff = (fileName: string) => {
     setDiffChanges(prev => prev.filter(fc => fc.fileName !== fileName))
   }
 
-  // Create a new group from the current selection
-  const createGroupFromSelection = () => {
+  const createGroupFromSelection = async () => {
     if (selectedFiles.length === 0) {
       alert('No files/folders selected. Please select something first.')
       return
@@ -132,25 +159,54 @@ export function RepoProvider({ children }: RepoProviderProps) {
     const groupName = window.prompt('Enter a name for this group:', defaultName)
     if (!groupName) return
 
-    const newGroup: GroupItem = {
-      name: groupName,
-      files: [...selectedFiles]
-    }
-    setGroups(prev => [...prev, newGroup])
+    const newGroup: GroupItem = { name: groupName, files: [...selectedFiles] }
+    const newGroups = [...groups, newGroup]
+    setGroups(newGroups)
+
+    // Persist
+    await window.api.invoke('config:updateRepoSettings', {
+      repoPath: baseDir,
+      updates: { userInstructions, groups: newGroups }
+    })
   }
 
-  // Quickly select all files in a group
   const selectGroup = (name: string) => {
     const found = groups.find(g => g.name === name)
     if (!found) return
     setSelectedFiles(found.files)
   }
 
+  const setUserInstructions = async (val: string) => {
+    setUserInstructionsState(val)
+    try {
+      await window.api.invoke('config:updateRepoSettings', {
+        repoPath: baseDir,
+        updates: { userInstructions: val, groups }
+      })
+    } catch (err) {
+      console.error('Failed to save user instructions:', err)
+    }
+  }
+
+  const unselectLargeFiles = async () => {
+    try {
+      const res = await window.api.invoke('config:getKnownLargeFiles')
+      if (!res.success) {
+        alert('Failed to retrieve large file list: ' + res.error)
+        return
+      }
+      const largeFiles: string[] = res.list || []
+      setSelectedFiles(prev => prev.filter(f => !largeFiles.includes(f)))
+    } catch (err) {
+      console.error('unselectLargeFiles error:', err)
+    }
+  }
+
   const contextValue: RepoContextType = {
     baseDir,
     setBaseDir,
     fileList,
-    setFileList: safeSetFileList,
+    setFileList,
     selectedFiles,
     toggleSelectedFile,
 
@@ -163,7 +219,12 @@ export function RepoProvider({ children }: RepoProviderProps) {
 
     groups,
     createGroupFromSelection,
-    selectGroup
+    selectGroup,
+
+    userInstructions,
+    setUserInstructions,
+
+    unselectLargeFiles
   }
 
   return (

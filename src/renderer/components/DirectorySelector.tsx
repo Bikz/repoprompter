@@ -1,3 +1,9 @@
+/**
+ * File: DirectorySelector.tsx
+ * Description: Provides buttons to pick a repo directory, refresh files,
+ * unselect large known files, and create a group from the current selection.
+ */
+
 import React from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
@@ -39,48 +45,25 @@ export function DirectorySelector() {
   }
 
   const handleUnselectLargeFiles = () => {
-    // Example list of large/unnecessary files to unselect
-    const largeFiles = ['pnpm-lock.yaml', 'project.pbxproj']
-    // We can refine logic later. For now, just remove them from selection if present
-    console.log('Unselecting large known files from selection...')
-    // We'll do this by simulating a click to remove them from the selection
-    // But simpler is to just setSelected directly in the future. For now let's do something minimal:
-    // We'll rely on the fact that there's no direct function to remove files except toggling them.
-    window.alert('Unselecting known large/unnecessary files...')
-    // We'll call toggle if we want. But we don't have direct access to toggle here.
-    // Alternatively, we can do a direct setSelected approach in the context in the future.
-    // For now let's just do an IPC approach. We'll do a minimal approach since we only have the context interface.
-
-    // This approach modifies the context state directly. We'll do a hack: read them from context, remove them, set them again.
-    // Because we only have selectedFiles, not a direct setter for it. We'll do a small approach:
-    // We'll just do a typical approach: selectedFiles minus largeFiles
-    // This is for demonstration. A better approach might be in the context with a specialized function.
+    // For demonstration only
+    window.alert('Unselecting known large/unnecessary files... (Not fully implemented)')
   }
 
   const handleCreateGroup = () => {
     createGroupFromSelection()
   }
 
-  // Render groups list
   const renderGroupsList = () => {
     if (groups.length === 0) return null
-
     return (
-      <div style={{ marginTop: 8 }}>
-        <h4 style={{ margin: '4px 0' }}>Groups</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div className="mt-2">
+        <h4 className="text-sm font-semibold mb-1">Groups</h4>
+        <div className="flex flex-col gap-1">
           {groups.map((group) => (
             <button
               key={group.name}
               onClick={() => selectGroup(group.name)}
-              style={{
-                textAlign: 'left',
-                padding: '4px 8px',
-                backgroundColor: '#eee',
-                border: '1px solid #ccc',
-                borderRadius: 4,
-                cursor: 'pointer'
-              }}
+              className="text-left px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
               title={`Select group "${group.name}"`}
             >
               {group.name}
@@ -92,19 +75,11 @@ export function DirectorySelector() {
   }
 
   return (
-    <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {/* Toolbar */}
-      <div style={{ display: 'flex', gap: 8 }}>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
         <button
           onClick={handleSelectDirectory}
-          style={{
-            padding: '6px 10px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}
+          className="px-3 py-1 bg-brand-blue hover:bg-blue-600 text-white rounded text-sm"
           title="Select repository folder"
         >
           📁 Repo
@@ -112,14 +87,7 @@ export function DirectorySelector() {
 
         <button
           onClick={handleRefreshDirectory}
-          style={{
-            padding: '6px 10px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}
+          className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
           title="Refresh files"
         >
           🔄
@@ -127,14 +95,7 @@ export function DirectorySelector() {
 
         <button
           onClick={handleUnselectLargeFiles}
-          style={{
-            padding: '6px 10px',
-            backgroundColor: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}
+          className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
           title="Unselect known large/unnecessary files"
         >
           🗑
@@ -142,28 +103,21 @@ export function DirectorySelector() {
 
         <button
           onClick={handleCreateGroup}
-          style={{
-            padding: '6px 10px',
-            backgroundColor: '#6f42c1',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer'
-          }}
+          className="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm"
           title="Create group from currently selected files"
         >
           🔖
         </button>
       </div>
 
-      {/* Groups section */}
       {renderGroupsList()}
 
-      {/* Display selected directory */}
       {baseDir && (
-        <div style={{ marginTop: 8 }}>
-          <h4 style={{ margin: 0 }}>Selected directory:</h4>
-          <pre style={{ margin: 0, background: '#f8f9fa', padding: '4px', borderRadius: 4 }}>{baseDir}</pre>
+        <div className="mt-2">
+          <h4 className="text-sm font-semibold mb-1">Selected directory:</h4>
+          <pre className="bg-gray-100 p-2 rounded text-xs break-all">
+            {baseDir}
+          </pre>
         </div>
       )}
     </div>

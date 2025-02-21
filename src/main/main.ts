@@ -1,8 +1,14 @@
+/**
+ * File: main.ts
+ * Description: Electron main process entry. Creates the BrowserWindow and IPC handlers.
+ * Manages reading directory structures, parsing diffs, applying diffs, and config.
+ */
+
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import path from 'path'
 import fs from 'fs'
-import { getAllFilePaths, readFileContent } from '../common/fileSystem'
 import { parseDiffXml, applyDiffPatches } from '../common/diffParser'
+import { getRepoSettings, updateRepoSettings, getKnownLargeFiles, setKnownLargeFiles } from './configStore'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -11,15 +17,12 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
   
   async function traverse(currentPath: string) {
     const entries = await fs.promises.readdir(currentPath, { withFileTypes: true })
-    
     for (const entry of entries) {
       const fullPath = path.join(currentPath, entry.name)
       const relativePath = path.relative(dirPath, fullPath)
-      
       if (entry.isDirectory()) {
         await traverse(fullPath)
       } else {
-        // Exclude hidden, node_modules, .git
         if (
           !entry.name.startsWith('.') &&
           !relativePath.includes('node_modules') &&
@@ -53,7 +56,6 @@ async function createMainWindow() {
   if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || 5173
     const url = `http://localhost:${port}`
-    
     try {
       await mainWindow.loadURL(url)
       mainWindow.webContents.openDevTools()
@@ -75,12 +77,10 @@ async function createMainWindow() {
     await mainWindow.loadFile(indexPath)
   }
 
-  // Show once ready
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show()
   })
 
-  // Add Content-Security-Policy header to mitigate "Insecure Content-Security-Policy" warning
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
@@ -97,23 +97,19 @@ async function createMainWindow() {
   })
 }
 
+/** Setup IPC handlers for directory selection, reading, diff parse, and config. */
 function setupIpcHandlers() {
-  // Directory selection handler
   ipcMain.handle('dialog:selectDirectory', async () => {
     if (!mainWindow) return undefined
-    
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory']
     })
     return result.canceled ? undefined : result.filePaths[0]
   })
 
-  // Directory reading handler
   ipcMain.handle('fs:readDirectory', async (_, dirPath: string) => {
     try {
-      console.log('Reading directory:', dirPath)
       const files = await readDirRecursive(dirPath)
-      console.log('Found files:', files.length)
       return files
     } catch (error) {
       console.error('Error reading directory:', error)
@@ -121,7 +117,6 @@ function setupIpcHandlers() {
     }
   })
 
-  // File reading handler
   ipcMain.handle('fs:readFile', async (_, { baseDir, relativeFilePath }) => {
     try {
       const fullPath = path.join(baseDir, relativeFilePath)
@@ -133,7 +128,6 @@ function setupIpcHandlers() {
     }
   })
 
-  // XML diff parse handler
   ipcMain.handle('fs:parseXmlDiff', async (_, xmlString: string) => {
     try {
       const changes = parseDiffXml(xmlString)
@@ -144,7 +138,6 @@ function setupIpcHandlers() {
     }
   })
 
-  // XML diff application handler
   ipcMain.handle('fs:applyXmlDiff', async (_, { basePath, xmlString }) => {
     try {
       await applyDiffPatches(basePath, xmlString)
@@ -154,9 +147,45 @@ function setupIpcHandlers() {
       return { success: false, error: String(error) }
     }
   })
+
+  // Config-related
+  ipcMain.handle('config:loadRepoSettings', async (_, repoPath: string) => {
+    try {
+      const settings = getRepoSettings(repoPath)
+      return { success: true, settings }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
+  })
+
+  ipcMain.handle('config:updateRepoSettings', async (_, { repoPath, updates }) => {
+    try {
+      updateRepoSettings(repoPath, updates)
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
+  })
+
+  ipcMain.handle('config:getKnownLargeFiles', async () => {
+    try {
+      const list = getKnownLargeFiles()
+      return { success: true, list }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
+  })
+
+  ipcMain.handle('config:setKnownLargeFiles', async (_, newList: string[]) => {
+    try {
+      setKnownLargeFiles(newList)
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
+  })
 }
 
-// Minimal app configuration
 if (process.platform === 'darwin') {
   app.commandLine.appendSwitch('disable-features', 'UseSpellCheck')
 }
@@ -164,7 +193,6 @@ if (process.platform === 'darwin') {
 app.whenReady().then(async () => {
   await createMainWindow()
   setupIpcHandlers()
-
   app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       await createMainWindow()

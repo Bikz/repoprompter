@@ -1,3 +1,8 @@
+/**
+ * File: vite.config.ts
+ * Description: Vite configuration for the renderer, enabling React and Tailwind.
+ * Outputs to dist/renderer, sets base to './'.
+ */
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -31,5 +36,8 @@ export default defineConfig({
         global: 'globalThis'
       }
     }
-  }
+  },
+  css: {
+    postcss: './postcss.config.js',
+  },
 });
