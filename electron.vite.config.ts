@@ -8,7 +8,9 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
+  // Disable auto-start so we only see the window from main.ts
   main: {
+    start: false,
     build: {
       outDir: 'dist/main',
       rollupOptions: {
@@ -59,6 +61,7 @@ export default defineConfig({
     plugins: [react()],
     server: {
       port: 5173,
+      open: false,
       strictPort: true,
       hmr: {
         port: 5173

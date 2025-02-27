@@ -30,6 +30,10 @@ export default defineConfig({
     'process.env': {},
     'global': 'window'
   },
+  server: {
+    port: 5173,
+    open: false
+  },
   optimizeDeps: {
     esbuildOptions: {
       define: {
