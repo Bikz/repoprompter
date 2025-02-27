@@ -4,15 +4,16 @@
  */
 module.exports = {
   content: [
-    "./index.html",
+    "./src/renderer/index.html",
+    "./src/renderer/**/*.{js,ts,jsx,tsx}",
     "./src/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     extend: {
       colors: {
         'brand-blue': '#007bff'
-      },
-    },
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 }

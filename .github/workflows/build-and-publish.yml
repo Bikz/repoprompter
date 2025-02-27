@@ -1,0 +1,40 @@
+name: Build and Publish
+
+on:
+  push:
+    tags:
+      - 'v*'  # triggers when pushing a tag like v1.0.0
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Use Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Optionally run lint or tests here
+      # - name: Run lint
+      #   run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish
+        run: |
+          pnpm dist --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          # GH_TOKEN must be a personal access token with repo access
+          # for private repositories

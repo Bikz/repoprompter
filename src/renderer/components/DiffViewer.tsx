@@ -1,8 +1,3 @@
-/**
- * File: DiffViewer.tsx
- * Description: Textarea to paste AI's XML diff. Allows previewing parsed diff changes and optionally applying all changes at once.
- */
-
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
@@ -21,9 +16,8 @@ export function DiffViewer() {
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-lg font-semibold text-gray-700">Diff Viewer</h3>
       <textarea
-        className="w-full h-32 border border-gray-300 rounded p-2 text-sm"
+        className="w-full h-24 border border-gray-300 rounded p-2 text-sm"
         placeholder="Paste AI's XML diff here..."
         value={xmlDiff}
         onChange={e => setXmlDiff(e.target.value)}

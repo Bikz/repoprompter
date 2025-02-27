@@ -38,7 +38,7 @@ To get started with the Repoprompter app, follow these commands:
 
 3. **Build for Production**:
    ```bash
-   pnpm build
+   pnpm build && pnpm dist
    ```
 
 ## Troubleshooting Steps

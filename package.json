@@ -10,7 +10,8 @@
     "postinstall": "electron-builder install-app-deps",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "dist": "electron-builder"
   },
   "keywords": [
     "git",

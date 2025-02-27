@@ -15,6 +15,7 @@ Loads the main index.tsx script as type=module.
     <script>
       window.global = window
     </script>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Change from “/index.tsx” to “./index.tsx” so that the production build finds it. -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

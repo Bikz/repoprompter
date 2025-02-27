@@ -1,9 +1,3 @@
-/**
- * File: FileList.tsx
- * Description: Displays the user’s repo files in a tree structure with tri-state checkbox selection.
- * Allows toggling entire folder vs single file selection.
- */
-
 import React, { useState, useMemo } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
@@ -115,12 +109,15 @@ function FileTreeNode({
   return (
     <div className="ml-4">
       <div
-        className={"flex items-center " + (isFolder ? "cursor-pointer" : "")}
+        className={
+          "flex items-center mb-1 " +
+          (isFolder ? "cursor-pointer select-none" : "select-none")
+        }
         onClick={isFolder ? handleToggleFolder : undefined}
       >
         <input
           type="checkbox"
-          className="mr-1"
+          className="mr-2 h-4 w-4"
           checked={checkboxState === 'checked'}
           ref={el => {
             if (el) {
@@ -137,11 +134,11 @@ function FileTreeNode({
         ) : (
           <span className="mr-2">📄</span>
         )}
-        <span className="text-sm text-gray-700 select-none">{node.name}</span>
+        <span className="text-sm text-gray-700">{node.name}</span>
       </div>
 
       {isFolder && isExpanded && node.children && (
-        <div className="mt-1">
+        <div className="pl-2 border-l border-gray-300">
           {node.children.map(child => (
             <FileTreeNode
               key={child.path}
@@ -171,7 +168,6 @@ export function FileList() {
       return
     }
 
-    let folderNode: FileNode | null = null
     function findNode(list: FileNode[]): FileNode | null {
       for (const item of list) {
         if (item.path === pathStr) return item
@@ -182,7 +178,7 @@ export function FileList() {
       }
       return null
     }
-    folderNode = findNode(fileTree)
+    const folderNode = findNode(fileTree)
     if (!folderNode) return
 
     function gatherAllDescendants(node: FileNode): string[] {
@@ -216,11 +212,12 @@ export function FileList() {
       }
     }
 
-    function setSelectedFilesDirect(newList: string[]) {
-      selectedFiles.forEach(sf => toggleSelectedFile(sf))
-      newList.forEach(nf => toggleSelectedFile(nf))
-    }
-    setSelectedFilesDirect(newSelected)
+    // We want to sync the final list
+    const toRemove = selectedFiles.filter(sf => !newSelected.includes(sf))
+    const toAdd = newSelected.filter(nf => !selectedFiles.includes(nf))
+
+    toRemove.forEach(sf => toggleSelectedFile(sf))
+    toAdd.forEach(nf => toggleSelectedFile(nf))
   }
 
   if (!fileList || fileList.length === 0) {
@@ -232,7 +229,7 @@ export function FileList() {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded p-2 text-sm overflow-auto">
+    <div className="overflow-auto text-sm">
       {fileTree.map(node => (
         <FileTreeNode
           key={node.path}

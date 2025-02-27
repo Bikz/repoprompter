@@ -1,7 +1,3 @@
-/**
- * File: electron-builder.json
- * Description: Config for packaging the Electron app, specifying output directory and product name.
- */
 {
   "appId": "com.repoprompter.app",
   "productName": "RepoPrompter",
@@ -14,5 +10,13 @@
   ],
   "mac": {
     "category": "public.app-category.developer-tools"
-  }
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "Bikz",
+      "repo": "repoprompter",
+      "private": true
+    }
+  ]
 }

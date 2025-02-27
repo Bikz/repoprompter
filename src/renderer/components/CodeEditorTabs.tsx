@@ -1,9 +1,3 @@
-/**
- * File: CodeEditorTabs.tsx
- * Description: Displays a tab for each file in the AI diff.
- * Provides options to Accept or Reject each change, or Accept All at once.
- */
-
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
@@ -61,9 +55,6 @@ export function CodeEditorTabs() {
       <div className="flex-1 border border-gray-300 rounded p-2 overflow-auto">
         {currentFileChange ? (
           <>
-            <h4 className="font-semibold text-gray-700 mb-2">
-              {currentFileChange.fileName}
-            </h4>
             <pre className="bg-gray-50 rounded p-2 text-xs overflow-auto whitespace-pre-wrap">
               {currentFileChange.newContent}
             </pre>

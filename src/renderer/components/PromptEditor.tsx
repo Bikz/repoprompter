@@ -1,9 +1,3 @@
-/**
- * File: PromptEditor.tsx
- * Description: Allows the user to type instructions, builds the final prompt string
- * from file contents + instructions, and copies to clipboard.
- */
-
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
@@ -60,9 +54,8 @@ You are a code editing assistant. You can only reply with XML according to the i
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-lg font-semibold text-gray-700">Prompt Editor</h3>
       <textarea
-        className="w-full h-40 border border-gray-300 rounded p-2 text-sm"
+        className="w-full h-24 border border-gray-300 rounded p-2 text-sm"
         placeholder="Type your instructions here..."
         value={userInstructions}
         onChange={e => setUserInstructions(e.target.value)}
@@ -72,7 +65,7 @@ You are a code editing assistant. You can only reply with XML according to the i
           onClick={handleGenerateAndCopyPrompt}
           className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
         >
-          📋 Generate &amp; Copy Prompt
+          Generate &amp; Copy Prompt
         </button>
         <button
           onClick={handleViewCombinedPrompt}
@@ -84,7 +77,6 @@ You are a code editing assistant. You can only reply with XML according to the i
 
       {showCombinedPrompt && combinedPrompt && (
         <div className="mt-2 flex flex-col gap-2">
-          <h4 className="font-semibold text-gray-700">Combined Prompt</h4>
           <textarea
             className="w-full h-40 border border-gray-300 rounded p-2 text-sm"
             value={combinedPrompt}
