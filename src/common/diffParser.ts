@@ -1,19 +1,16 @@
-/**
- * File: diffParser.ts
- * Description: Parses the AI-generated XML diff and applies changes to local files.
- * Simplistic approach: looks for <file name="...">, <replace> content.
- */
-
-import { writeFileContent, readFileContent } from './fileSystem'
-import path from 'path'
+import { writeFileContent } from './fileSystem'
 import * as xmldoc from 'xmldoc'
+import path from 'path'
 
 interface DiffSegment {
   fileName: string
   newContent: string
 }
 
-/** Parse XML and return an array of file changes (fileName, newContent). */
+/**
+ * Parse the XML diff string and return an array of file changes.
+ * Looks for <file name="..."><replace>...</replace></file>.
+ */
 export function parseDiffXml(xmlString: string): DiffSegment[] {
   if (!xmlString?.trim()) {
     console.warn('parseDiffXml called with empty XML string.')
@@ -36,16 +33,19 @@ export function parseDiffXml(xmlString: string): DiffSegment[] {
   return changes
 }
 
-/** Overwrite local files with new content for each DiffSegment. */
+/**
+ * Overwrite local files with new content for each DiffSegment, asynchronously,
+ * validating the file path to prevent path traversal attacks.
+ */
 export async function applyDiffPatches(basePath: string, xmlString: string) {
   const changes = parseDiffXml(xmlString)
-  changes.forEach(change => {
-    const currentContent = readFileContent(basePath, change.fileName)
-    const updatedContent = change.newContent
-    writeFileContent(basePath, change.fileName, updatedContent)
-
+  const baseResolved = path.resolve(basePath)
+  for (const change of changes) {
+    const fullPath = path.resolve(baseResolved, change.fileName)
+    if (!fullPath.startsWith(baseResolved)) {
+      throw new Error(`Invalid file path outside of base directory: ${change.fileName}`)
+    }
+    await writeFileContent(basePath, change.fileName, change.newContent)
     console.log(`Applied patch to ${change.fileName}`)
-    console.log('Old content length:', currentContent.length)
-    console.log('New content length:', updatedContent.length)
-  })
+  }
 }

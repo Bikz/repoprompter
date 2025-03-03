@@ -15,6 +15,9 @@ export interface FileSystemApi {
   readFileContents: (baseDir: string, relativeFilePath: string) => Promise<string>
   parseXmlDiff?: (xmlString: string) => Promise<FileChange[]>
   applyXmlDiff: (basePath: string, xmlString: string) => Promise<{ success: boolean; error?: string }>
+
+  /** New method to batch read multiple files at once. */
+  readMultipleFileContents: (baseDir: string, files: string[]) => Promise<Record<string, string>>
 }
 
 declare global {

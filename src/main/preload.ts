@@ -71,6 +71,19 @@ const api: FileSystemApi = {
       console.error('Failed to apply XML diff:', error)
       return { success: false, error: String(error) }
     }
+  },
+
+  /** Batch read multiple files at once. */
+  readMultipleFileContents: async (baseDir: string, files: string[]) => {
+    if (!baseDir || !files?.length) {
+      return {}
+    }
+    try {
+      return await ipcRenderer.invoke('fs:readMultipleFiles', { baseDir, files })
+    } catch (error) {
+      console.error('Failed to read multiple files:', error)
+      throw error
+    }
   }
 }
 

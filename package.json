@@ -4,7 +4,7 @@
   "description": "Git repository viewer with AI assistance",
   "main": "dist/main/index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development electron-vite dev",
+    "dev": "concurrently -k \"pnpm dev:renderer\" \"wait-on http://localhost:5173 && pnpm dev:main\"",
     "dev:renderer": "vite --port 5173",
     "dev:main": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron-vite dev",
     "build": "electron-vite build",
@@ -51,7 +51,9 @@
     "postcss": "^8.4.0",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.7.3",
-    "vite": "^6.1.0"
+    "vite": "^6.1.0",
+    "concurrently": "^7.6.0",
+    "wait-on": "^7.0.1"
   },
   "build": {
     "appId": "com.repoprompter.app",

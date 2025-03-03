@@ -121,6 +121,20 @@ function setupIpcHandlers() {
     return fs.promises.readFile(path.join(baseDir, relativeFilePath), 'utf-8')
   })
 
+  ipcMain.handle('fs:readMultipleFiles', async (_, { baseDir, files }) => {
+    const contents: Record<string, string> = {}
+    await Promise.all(files.map(async (file: string) => {
+      try {
+        const data = await fs.promises.readFile(path.join(baseDir, file), 'utf-8')
+        contents[file] = data
+      } catch (err) {
+        console.error(`Failed to read file ${file}:`, err)
+        contents[file] = ''
+      }
+    }))
+    return contents
+  })
+
   ipcMain.handle('fs:parseXmlDiff', (_, xmlString: string) => ({
     success: true,
     changes: parseDiffXml(xmlString)

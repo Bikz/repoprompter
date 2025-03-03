@@ -1,41 +1,37 @@
-/**
- * File: fileSystem.ts
- * Description: Helper functions for reading and writing file contents synchronously.
- * Also includes a simple recursive function to gather all file paths.
- */
-
 import fs from 'fs'
 import path from 'path'
 
 /**
  * Recursively scans a directory, collecting file paths relative to basePath.
- * Returns an array of string file paths.
+ * Returns an array of string file paths asynchronously.
  */
-export function getAllFilePaths(basePath: string): string[] {
+export async function getAllFilePaths(basePath: string): Promise<string[]> {
   const filePaths: string[] = []
-  function readDirRecursive(currentPath: string) {
-    const entries = fs.readdirSync(currentPath, { withFileTypes: true })
+
+  async function readDirRecursive(currentPath: string) {
+    const entries = await fs.promises.readdir(currentPath, { withFileTypes: true })
     for (const entry of entries) {
       const full = path.join(currentPath, entry.name)
       if (entry.isDirectory()) {
-        readDirRecursive(full)
+        await readDirRecursive(full)
       } else {
         filePaths.push(path.relative(basePath, full))
       }
     }
   }
-  readDirRecursive(basePath)
+
+  await readDirRecursive(basePath)
   return filePaths
 }
 
-/** Read file content (UTF-8) given base path + relative path. */
-export function readFileContent(basePath: string, relativeFile: string): string {
+/** Read file content (UTF-8) given base path + relative path, asynchronously. */
+export async function readFileContent(basePath: string, relativeFile: string): Promise<string> {
   const full = path.join(basePath, relativeFile)
-  return fs.readFileSync(full, 'utf-8')
+  return fs.promises.readFile(full, 'utf-8')
 }
 
-/** Write new content (UTF-8) to a file. Creates or overwrites the file. */
-export function writeFileContent(basePath: string, relativeFile: string, newContent: string) {
+/** Write new content (UTF-8) to a file asynchronously. Creates or overwrites the file. */
+export async function writeFileContent(basePath: string, relativeFile: string, newContent: string): Promise<void> {
   const full = path.join(basePath, relativeFile)
-  fs.writeFileSync(full, newContent, 'utf-8')
+  await fs.promises.writeFile(full, newContent, 'utf-8')
 }

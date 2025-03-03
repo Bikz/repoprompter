@@ -16,11 +16,8 @@ You are a code editing assistant. You can only reply with XML according to the i
 `
 
   async function buildFullPrompt() {
-    const fileContentMap: Record<string, string> = {}
-    for (const file of selectedFiles) {
-      const content = await window.api.readFileContents(baseDir, file)
-      fileContentMap[file] = content
-    }
+    // Batch read file contents with new method
+    const fileContentMap = await window.api.readMultipleFileContents(baseDir, selectedFiles)
 
     let result = '<system_instructions>\n' + systemPrompt.trim() + '\n</system_instructions>\n\n'
     result += '<file_map>\n'
