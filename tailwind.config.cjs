@@ -5,8 +5,7 @@
 module.exports = {
   content: [
     "./src/renderer/index.html",
-    "./src/renderer/**/*.{js,ts,jsx,tsx}",
-    "./src/**/*.{js,ts,jsx,tsx}"
+    "./src/renderer/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     extend: {
@@ -15,5 +14,8 @@ module.exports = {
       }
     }
   },
-  plugins: []
+  plugins: [],
+  future: {
+    hoverOnlyWhenSupported: true,
+  }
 }

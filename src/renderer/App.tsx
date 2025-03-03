@@ -18,7 +18,7 @@ function App() {
     <RepoProvider>
       <div className="min-h-screen flex flex-col font-sans text-gray-800">
         {/* Top Header */}
-        <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 shadow">
+        <header className="bg-brand-blue text-white p-4 shadow">
           <h1 className="text-2xl font-bold">RepoPrompter</h1>
           <p className="text-sm text-gray-200 mt-1">
             Select a directory, choose files, build a prompt, then paste AI diffs for quick code updates.

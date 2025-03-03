@@ -64,7 +64,7 @@ export function CodeEditorTabs() {
                 onClick={() =>
                   acceptSingleDiff(currentFileChange.fileName, currentFileChange.newContent)
                 }
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+                className="px-3 py-1 bg-brand-blue hover:bg-brand-blue/90 text-white rounded text-sm"
               >
                 Accept
               </button>

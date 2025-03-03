@@ -5,3 +5,91 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles */
+.bg-brand-blue {
+  background-color: #007bff;
+}
+
+.hover\:bg-brand-blue\/90:hover {
+  background-color: rgba(0, 123, 255, 0.9);
+}
+
+.text-white {
+  color: white;
+}
+
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-gray-200 {
+  color: #e5e7eb;
+}
+
+.text-gray-700 {
+  color: #374151;
+}
+
+.text-gray-800 {
+  color: #1f2937;
+}
+
+.font-sans {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.w-64 {
+  width: 16rem;
+}
+
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.border-gray-200 {
+  border-color: #e5e7eb;
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}

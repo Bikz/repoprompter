@@ -43,7 +43,7 @@ export function DirectorySelector() {
       <div className="flex gap-2">
         <button
           onClick={handleSelectDirectory}
-          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow text-sm"
+          className="flex-1 px-3 py-2 bg-brand-blue hover:bg-brand-blue/90 text-white rounded shadow text-sm"
           title="Select repository folder"
         >
           Select Repo
