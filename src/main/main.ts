@@ -83,8 +83,10 @@ async function createMainWindow() {
 
   if (process.env.NODE_ENV === 'development' && devServerUrl) {
     try {
+      console.log(`Attempting to load URL: ${devServerUrl}`);
       await mainWindow.loadURL(devServerUrl)
       mainWindow.webContents.openDevTools()
+      mainWindow.show()
     } catch (error) {
       console.error('Failed to load dev server URL:', devServerUrl, error)
       dialog.showErrorBox('Dev Server Load Error', `Cannot load dev server at ${devServerUrl}\n${error}`)
@@ -92,9 +94,11 @@ async function createMainWindow() {
   } else {
     const indexPath = path.join(__dirname, '..', 'renderer', 'index.html')
     await mainWindow.loadFile(indexPath)
+    mainWindow.show()
   }
 
   mainWindow.once('ready-to-show', () => {
+    console.log('Window is ready to show')
     mainWindow?.show()
     mainWindow?.focus()
   })

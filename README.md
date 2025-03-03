@@ -89,6 +89,15 @@ If you encounter issues with the Electron installation when trying to run your V
 8. **Consult Documentation**:
    - If the problem continues, refer to the documentation for `electron-vite` and `electron-builder` for specific setup instructions or troubleshooting tips.
 
+9. **Tailwind Error**:
+   -  ensure File: postcss.config.cjs has:
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+    autoprefixer: {},
+  }
+}
+
 ### Example Command to Reinstall Electron:
 
 ```bash
@@ -113,3 +122,6 @@ rm -rf node_modules/.cache
 pnpm install
 pnpm dev
 '''
+
+
+
