@@ -1,10 +1,3 @@
-/**
- * File: useRepoContext.tsx
- * Description: Provides a global React context for repository state:
- * - baseDir, fileList, selectedFiles, diffChanges, groups, userInstructions
- * - methods to parse and apply diffs, manage groups, unselect large files, etc.
- */
-
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import type { FileChange } from '../../common/types'
 
@@ -31,6 +24,7 @@ interface RepoContextType {
   groups: GroupItem[]
   createGroupFromSelection: () => void
   selectGroup: (name: string) => void
+  removeGroup: (name: string) => void
 
   userInstructions: string
   setUserInstructions: (val: string) => void
@@ -176,6 +170,21 @@ export function RepoProvider({ children }: RepoProviderProps) {
     setSelectedFiles(found.files)
   }
 
+  const removeGroup = async (name: string) => {
+    const newGroups = groups.filter(g => g.name !== name)
+    setGroups(newGroups)
+
+    // Persist
+    try {
+      await window.api.invoke('config:updateRepoSettings', {
+        repoPath: baseDir,
+        updates: { userInstructions, groups: newGroups }
+      })
+    } catch (err) {
+      console.error('Failed to remove group:', err)
+    }
+  }
+
   const setUserInstructions = async (val: string) => {
     setUserInstructionsState(val)
     try {
@@ -220,6 +229,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     groups,
     createGroupFromSelection,
     selectGroup,
+    removeGroup,
 
     userInstructions,
     setUserInstructions,

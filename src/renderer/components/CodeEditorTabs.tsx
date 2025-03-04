@@ -45,7 +45,7 @@ export function CodeEditorTabs() {
       <div className="mb-2">
         <button
           onClick={() => acceptAllDiffs()}
-          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
+          className="btn btn-success"
         >
           Accept All
         </button>
@@ -64,13 +64,13 @@ export function CodeEditorTabs() {
                 onClick={() =>
                   acceptSingleDiff(currentFileChange.fileName, currentFileChange.newContent)
                 }
-                className="px-3 py-1 bg-brand-blue hover:bg-brand-blue/90 text-white rounded text-sm"
+                className="btn btn-success"
               >
                 Accept
               </button>
               <button
                 onClick={() => rejectSingleDiff(currentFileChange.fileName)}
-                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                className="btn btn-danger"
               >
                 Reject
               </button>

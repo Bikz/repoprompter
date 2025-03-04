@@ -9,9 +9,26 @@ interface FileNode {
 }
 
 /**
- * Build a file tree from a flat array of file paths.
+ * Convert an object-based tree into an array-based tree.
  */
-function buildFileTree(files: string[]): FileNode[] {
+function convertToArray(obj: Record<string, FileNode>): FileNode[] {
+  return Object.values(obj).map(node => {
+    if (node.children) {
+      return {
+        name: node.name,
+        path: node.path,
+        children: convertToArray(node.children as Record<string, FileNode>)
+      }
+    } else {
+      return { name: node.name, path: node.path }
+    }
+  })
+}
+
+/**
+ * Build a file tree from a flat array of file paths, optionally wrapping them under a root node.
+ */
+function buildFileTree(files: string[], rootName?: string): FileNode[] {
   const root: Record<string, FileNode> = {}
 
   for (const file of files) {
@@ -39,29 +56,32 @@ function buildFileTree(files: string[]): FileNode[] {
     }
   }
 
-  function convertToArray(obj: Record<string, FileNode>): FileNode[] {
-    return Object.values(obj).map(node => {
-      if (node.children) {
-        return {
-          name: node.name,
-          path: node.path,
-          children: convertToArray(node.children as Record<string, FileNode>)
-        }
-      } else {
-        return { name: node.name, path: node.path }
+  const fileTree = convertToArray(root)
+  if (rootName && fileTree.length > 0) {
+    return [
+      {
+        name: rootName,
+        path: rootName,
+        children: fileTree
       }
-    })
+    ]
   }
-
-  return convertToArray(root)
+  // If no rootName or no files, just return fileTree as-is
+  return fileTree
 }
 
 export function FileList() {
-  const { fileList, selectedFiles, toggleSelectedFile } = useRepoContext()
+  const { fileList, selectedFiles, toggleSelectedFile, baseDir } = useRepoContext()
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({})
 
   const selectedSet = useMemo(() => new Set(selectedFiles), [selectedFiles])
-  const fileTree = useMemo(() => buildFileTree(fileList || []), [fileList])
+  const baseDirName = useMemo(() => {
+    if (!baseDir) return ''
+    const segments = baseDir.split(/[\\/]/)
+    return segments[segments.length - 1] || baseDir
+  }, [baseDir])
+
+  const fileTree = useMemo(() => buildFileTree(fileList || [], baseDirName), [fileList, baseDirName])
 
   /**
    * Toggles selection for a folder or a single file.
@@ -119,7 +139,8 @@ export function FileList() {
       }
     }
 
-    // Toggle them all in the context
+    // We need to figure out how to apply these changes properly:
+    // We'll build two lists: toRemove, toAdd, and call toggleSelectedFile on each.
     const toRemove = selectedFiles.filter(sf => !newSelected.includes(sf))
     const toAdd = newSelected.filter(nf => !selectedFiles.includes(nf))
 

@@ -264,3 +264,64 @@
   min-width: 16px;
   height: 16px;
 }
+
+/* New consistent button classes */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: rgba(0, 123, 255, 0.9);
+}
+
+.dark .btn-primary {
+  background-color: #007bff;
+}
+
+.dark .btn-primary:hover {
+  background-color: rgba(0, 123, 255, 0.9);
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background-color: #9ca3af;
+}
+
+.dark .btn-secondary {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+.dark .btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+.btn-success {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #f59e0b;
+  color: black;
+}

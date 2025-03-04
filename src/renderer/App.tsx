@@ -20,9 +20,9 @@ function App() {
 
   return (
     <RepoProvider>
-      <div className="min-h-screen flex flex-col font-sans bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+      <div className="min-h-screen flex flex-col font-sans bg-white dark:bg-off-black text-gray-800 dark:text-gray-100">
         {/* Top Header */}
-        <header className="flex items-center justify-between bg-brand-blue text-white p-4 shadow">
+        <header className="flex items-center justify-between bg-brand-blue dark:bg-blue-900 text-white p-4 shadow">
           <div>
             <h1 className="text-2xl font-bold">RepoPrompter</h1>
             <p className="text-sm text-gray-200 mt-1">
@@ -31,7 +31,7 @@ function App() {
           </div>
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="px-4 py-2 bg-white text-brand-blue rounded shadow text-sm hover:opacity-90"
+            className="btn btn-secondary"
           >
             {isDarkMode ? 'Light Mode' : 'Dark Mode'}
           </button>
@@ -48,7 +48,7 @@ function App() {
           </div>
 
           {/* MIDDLE COLUMN: Prompt & Diff Tools */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 p-4 overflow-auto border-r border-gray-200 dark:border-gray-700">
+          <div className="flex-1 flex flex-col bg-white dark:bg-off-black p-4 overflow-auto border-r border-gray-200 dark:border-gray-700">
             <section className="flex-shrink-0 mb-6">
               <h2 className="text-xl font-semibold mb-2">Prompt Editor</h2>
               <PromptEditor />
@@ -60,7 +60,7 @@ function App() {
           </div>
 
           {/* RIGHT COLUMN: Code Diff Preview */}
-          <div className="w-1/3 bg-white dark:bg-gray-900 p-4 overflow-auto">
+          <div className="w-1/3 bg-white dark:bg-off-black p-4 overflow-auto">
             <h2 className="text-xl font-semibold mb-2">Code Diff Preview</h2>
             <CodeEditorTabs />
           </div>

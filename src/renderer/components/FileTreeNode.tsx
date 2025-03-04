@@ -51,12 +51,12 @@ const FileIcon = ({ fileName }: { fileName: string }) => {
     switch (extension) {
       case 'ts':
       case 'tsx':
-        return "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" // TS
+        return "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       case 'js':
       case 'jsx':
-        return "M12 18.75a6.75 6.75 0 110-13.5 6.75 6.75 0 010 13.5z"       // JS
+        return "M12 18.75a6.75 6.75 0 110-13.5 6.75 6.75 0 010 13.5z"
       case 'json':
-        return "M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" // JSON
+        return "M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
       case 'md':
         return "M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z"
       case 'html':
@@ -198,7 +198,7 @@ export function FileTreeNode({
       </div>
 
       {isFolder && isExpanded && node.children && (
-        <div className="pl-1 border-l border-gray-200 dark:border-gray-700 ml-1">
+        <div className="pl-6 ml-4 border-l-4 border-gray-200 dark:border-gray-700 mt-1">
           {node.children.map(child => (
             <FileTreeNode
               key={child.path}

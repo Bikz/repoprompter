@@ -58,13 +58,13 @@ You are a code editing assistant. You can only reply with XML according to the i
       <div className="flex gap-2">
         <button
           onClick={handleGenerateAndCopyPrompt}
-          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm"
+          className="btn btn-success"
         >
           Generate &amp; Copy Prompt
         </button>
         <button
           onClick={handleViewCombinedPrompt}
-          className="px-3 py-1 bg-gray-600 dark:bg-gray-700 text-white hover:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm"
+          className="btn btn-secondary"
         >
           {showCombinedPrompt ? 'Hide' : 'View'} combined prompt
         </button>

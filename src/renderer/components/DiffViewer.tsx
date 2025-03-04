@@ -25,13 +25,13 @@ export function DiffViewer() {
       <div className="flex gap-2">
         <button
           onClick={handlePreviewDiff}
-          className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-black rounded text-sm"
+          className="btn btn-warning"
         >
           Preview Diff
         </button>
         <button
           onClick={handleApplyDiff}
-          className="px-3 py-1 bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded text-sm"
+          className="btn btn-danger"
         >
           Apply Diff
         </button>

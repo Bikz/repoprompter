@@ -11,7 +11,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'brand-blue': '#007bff'
+        'brand-blue': '#007bff',
+        'off-black': '#121212'
       }
     }
   },
