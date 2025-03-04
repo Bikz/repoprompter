@@ -71,6 +71,8 @@ async function createMainWindow() {
     width: 1200,
     height: 800,
     show: false,
+    // Let macOS handle background in dark/light mode
+    titleBarStyle: 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -83,13 +85,16 @@ async function createMainWindow() {
 
   if (process.env.NODE_ENV === 'development' && devServerUrl) {
     try {
-      console.log(`Attempting to load URL: ${devServerUrl}`);
+      console.log(`Attempting to load URL: ${devServerUrl}`)
       await mainWindow.loadURL(devServerUrl)
       mainWindow.webContents.openDevTools()
       mainWindow.show()
     } catch (error) {
       console.error('Failed to load dev server URL:', devServerUrl, error)
-      dialog.showErrorBox('Dev Server Load Error', `Cannot load dev server at ${devServerUrl}\n${error}`)
+      dialog.showErrorBox(
+        'Dev Server Load Error',
+        `Cannot load dev server at ${devServerUrl}\n${error}`
+      )
     }
   } else {
     const indexPath = path.join(__dirname, '..', 'renderer', 'index.html')

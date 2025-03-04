@@ -6,7 +6,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
+/*
+  Custom styles
+  For brand color and general classes
+*/
 .bg-brand-blue {
   background-color: #007bff;
 }
@@ -34,17 +37,14 @@
 .p-4 {
   padding: 1rem;
 }
-
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
 }
-
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
 }
-
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -53,20 +53,18 @@
 .text-sm {
   font-size: 0.875rem;
 }
-
 .text-gray-200 {
   color: #e5e7eb;
 }
 
-/* Light mode text gray-700 / gray-800 */
+/* Light mode text grays */
 .text-gray-700 {
   color: #374151;
 }
 .text-gray-800 {
   color: #1f2937;
 }
-
-/* Dark mode overrides for text-gray-700, text-gray-800 to become white */
+/* Dark mode override => become white */
 .dark .text-gray-700 {
   color: #fff;
 }
@@ -77,11 +75,9 @@
 .font-sans {
   font-family: ui-sans-serif, system-ui, sans-serif;
 }
-
 .text-2xl {
   font-size: 1.5rem;
 }
-
 .font-bold {
   font-weight: 700;
 }
@@ -95,9 +91,9 @@
   background-color: #f9fafb;
 }
 .bg-white {
-  background-color: white;
+  background-color: #fff;
 }
-/* Dark mode override these backgrounds to near-black */
+/* Dark overrides => near black */
 .dark .bg-gray-50 {
   background-color: #1e1e1e;
 }
@@ -105,13 +101,18 @@
   background-color: #121212;
 }
 
-/* Default border colors */
+/* Border colors */
 .border-gray-200 {
   border-color: #e5e7eb;
 }
-/* Dark override */
 .dark .border-gray-200 {
   border-color: #333;
+}
+.border-gray-800 {
+  border-color: #1f2937;
+}
+.dark .border-gray-800 {
+  border-color: #444;
 }
 
 .mt-1 {
@@ -125,18 +126,15 @@
   scrollbar-width: thin;
   scrollbar-color: #007bff rgba(0, 0, 0, 0.1);
   scroll-behavior: smooth;
-  font-size: 0.75rem; /* Smaller font size */
+  font-size: 0.75rem; /* Smaller font */
 }
-
 .file-tree::-webkit-scrollbar {
-  width: 6px; /* Thinner scrollbar */
+  width: 6px;
 }
-
 .file-tree::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
 }
-
 .file-tree::-webkit-scrollbar-thumb {
   background-color: #007bff;
   border-radius: 3px;
@@ -191,7 +189,7 @@
   transform: rotate(90deg);
 }
 
-/* file-group styles */
+/* File-group styles */
 .file-group-button {
   padding: 8px 16px;
   background-color: #007bff;
@@ -199,19 +197,19 @@
   border-radius: 6px;
   font-weight: 500;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .file-group-button:hover {
   background-color: #0069d9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   transform: translateY(-1px);
 }
 .file-group-button:active {
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .file-group-container {
@@ -222,7 +220,7 @@
   padding: 10px;
   border-radius: 6px;
   background-color: #f9fafb;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 .file-group-heading {
   width: 100%;
@@ -255,15 +253,6 @@
   border-color: #93c5fd;
   color: #1e40af;
 }
-.file-group-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  color: #4b5563;
-}
 .file-group-count {
   display: inline-flex;
   align-items: center;
@@ -284,10 +273,11 @@
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: inline-flex;
 }
 
+/* Primary button in light mode => brand color. In dark => tinted brand or near dark. */
 .btn-primary {
   background-color: #007bff;
   color: white;
@@ -295,7 +285,6 @@
 .btn-primary:hover {
   background-color: rgba(0, 123, 255, 0.9);
 }
-/* Dark tinted version for the brand color */
 .dark .btn-primary {
   background-color: #0e1111;
   color: #fff;
@@ -364,7 +353,15 @@
   background-color: #5e4100;
 }
 
-/* Dark mode for file tree */
+/* Draggable region classes */
+.draggable {
+  -webkit-app-region: drag;
+}
+.draggable .no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Dark mode for file tree item text */
 .dark .file-tree-item {
   color: #fff;
 }
@@ -379,7 +376,7 @@
   border-color: #fff;
 }
 
-/* Dark mode file-group button */
+/* file-group button in dark */
 .dark .file-group-button {
   background-color: #0f0f0f;
   color: #f3f4f6;
@@ -389,7 +386,7 @@
   background-color: #222;
 }
 
-/* Adjust container border in dark mode */
+/* container border in dark */
 .dark .file-group-container {
   border-color: #333;
 }
@@ -411,7 +408,7 @@
   color: #ccc;
 }
 
-/* Enhanced dark mode scrollbars */
+/* Enhanced dark scrollbars */
 .dark .file-tree::-webkit-scrollbar {
   width: 8px;
 }
