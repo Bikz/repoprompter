@@ -119,6 +119,14 @@
   margin-top: 0.25rem;
 }
 
+/* Remove overall scroll by ensuring html/body/#root fill 100% and no overflow */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 /* File Tree styling */
 .file-tree {
   max-height: 70vh;

@@ -16,9 +16,7 @@ function createAppMenu() {
   const template = [
     {
       label: 'File',
-      submenu: [
-        { role: 'quit' }
-      ]
+      submenu: [{ role: 'quit' }]
     },
     {
       label: 'View',
@@ -71,8 +69,10 @@ async function createMainWindow() {
     width: 1200,
     height: 800,
     show: false,
-    // Let macOS handle background in dark/light mode
     titleBarStyle: 'hiddenInset',
+    // Provide a normal background and enable mac's slight corner rounding
+    backgroundColor: '#FFFFFF',
+    roundedCorners: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -118,7 +118,9 @@ async function createMainWindow() {
 function setupIpcHandlers() {
   ipcMain.handle('dialog:selectDirectory', async () => {
     if (!mainWindow) return undefined
-    const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] })
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory']
+    })
     return result.canceled ? undefined : result.filePaths[0]
   })
 
@@ -132,15 +134,20 @@ function setupIpcHandlers() {
 
   ipcMain.handle('fs:readMultipleFiles', async (_, { baseDir, files }) => {
     const contents: Record<string, string> = {}
-    await Promise.all(files.map(async (file: string) => {
-      try {
-        const data = await fs.promises.readFile(path.join(baseDir, file), 'utf-8')
-        contents[file] = data
-      } catch (err) {
-        console.error(`Failed to read file ${file}:`, err)
-        contents[file] = ''
-      }
-    }))
+    await Promise.all(
+      files.map(async (file: string) => {
+        try {
+          const data = await fs.promises.readFile(
+            path.join(baseDir, file),
+            'utf-8'
+          )
+          contents[file] = data
+        } catch (err) {
+          console.error(`Failed to read file '${file}':`, err)
+          contents[file] = ''
+        }
+      })
+    )
     return contents
   })
 
