@@ -1,6 +1,7 @@
 import React from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 import { FileList } from './FileList'
+import { PromptModal } from './PromptModal'
 
 export function DirectorySelector() {
   const {
@@ -12,7 +13,12 @@ export function DirectorySelector() {
     selectGroup,
     removeGroup,
     activeGroupName,
-    unselectLargeFiles
+    unselectLargeFiles,
+    isPromptModalOpen,
+    closePromptModal,
+    modalDefaultValue,
+    handlePromptConfirm,
+    modalButtonRef
   } = useRepoContext()
 
   const handleSelectDirectory = async () => {
@@ -38,8 +44,11 @@ export function DirectorySelector() {
     }
   }
 
+  // Store button reference for positioning the modal
+  const groupButtonRef = React.useRef<HTMLButtonElement>(null)
+  
   const handleCreateGroup = () => {
-    createGroupFromSelection()
+    createGroupFromSelection(groupButtonRef.current)
   }
 
   const handleUnselectLargeFiles = () => {
@@ -65,6 +74,16 @@ export function DirectorySelector() {
           Refresh
         </button>
       </div>
+      
+      {/* Prompt Modal */}
+      <PromptModal
+        isOpen={isPromptModalOpen}
+        onClose={closePromptModal}
+        onConfirm={handlePromptConfirm}
+        title="Create Group"
+        defaultValue={modalDefaultValue}
+        anchorElement={modalButtonRef}
+      />
 
       {/* File Groups */}
       {groups.length > 0 && (
@@ -119,6 +138,7 @@ export function DirectorySelector() {
       )}
 
       <button
+        ref={groupButtonRef}
         onClick={handleCreateGroup}
         className="btn btn-primary"
         title="Create group from selected files"

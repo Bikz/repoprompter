@@ -23,7 +23,7 @@ interface RepoContextType {
   rejectSingleDiff: (fileName: string) => void
 
   groups: RepoGroup[]
-  createGroupFromSelection: () => void
+  createGroupFromSelection: (buttonElement?: HTMLElement | null) => void
   selectGroup: (name: string) => void
   removeGroup: (name: string) => void
   activeGroupName: string | null
@@ -32,6 +32,13 @@ interface RepoContextType {
   setUserInstructions: (val: string) => void
 
   unselectLargeFiles: () => Promise<void>
+  
+  // Modal state for group creation
+  isPromptModalOpen: boolean
+  closePromptModal: () => void
+  modalDefaultValue: string
+  handlePromptConfirm: (value: string) => void
+  modalButtonRef: HTMLElement | null
 }
 
 const RepoContext = createContext<RepoContextType | undefined>(undefined)
@@ -48,6 +55,11 @@ export function RepoProvider({ children }: RepoProviderProps) {
   const [groups, setGroups] = useState<RepoGroup[]>([])
   const [activeGroupName, setActiveGroupName] = useState<string | null>(null)
   const [userInstructions, setUserInstructionsState] = useState('')
+  
+  // State for prompt modal
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
+  const [modalDefaultValue, setModalDefaultValue] = useState('')
+  const [modalButtonRef, setModalButtonRef] = useState<HTMLElement | null>(null)
 
   const toggleSelectedFile = React.useCallback((file: string) => {
     setSelectedFiles(prev =>
@@ -148,21 +160,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     setDiffChanges(prev => prev.filter(fc => fc.fileName !== fileName))
   }
 
-  const createGroupFromSelection = async () => {
-    if (selectedFiles.length === 0) {
-      alert('No files/folders selected. Please select something first.')
-      return
-    }
-    
-    // Check if there are actually files to include (not just directories)
-    const hasFiles = selectedFiles.some(path => !path.endsWith('/'))
-    if (!hasFiles) {
-      alert('Please select at least one file (not just folders) to create a group.')
-      return
-    }
-    
-    const defaultName = `Group ${groups.length + 1}`
-    const groupName = window.prompt('Enter a name for this group:', defaultName)
+  const handlePromptConfirm = async (groupName: string) => {
     if (!groupName) return
     
     // Check for duplicate names
@@ -175,6 +173,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     const newGroups = [...groups, newGroup]
     setGroups(newGroups)
     setActiveGroupName(groupName) // Set this group as active
+    setIsPromptModalOpen(false) // Close modal
 
     // Persist the updated repo settings
     const res = await window.api.updateRepoSettings(baseDir, {
@@ -189,6 +188,27 @@ export function RepoProvider({ children }: RepoProviderProps) {
     } else {
       alert(`Group "${groupName}" created successfully with ${selectedFiles.length} files.`)
     }
+  }
+  
+  const closePromptModal = () => setIsPromptModalOpen(false)
+  
+  const createGroupFromSelection = (buttonElement?: HTMLElement | null) => {
+    if (selectedFiles.length === 0) {
+      alert('No files/folders selected. Please select something first.')
+      return
+    }
+    
+    // Check if there are actually files to include (not just directories)
+    const hasFiles = selectedFiles.some(path => !path.endsWith('/'))
+    if (!hasFiles) {
+      alert('Please select at least one file (not just folders) to create a group.')
+      return
+    }
+    
+    const defaultName = `Group ${groups.length + 1}`
+    setModalDefaultValue(defaultName)
+    setModalButtonRef(buttonElement || null)
+    setIsPromptModalOpen(true)
   }
 
   const selectGroup = (name: string) => {
@@ -270,7 +290,14 @@ export function RepoProvider({ children }: RepoProviderProps) {
     userInstructions,
     setUserInstructions,
 
-    unselectLargeFiles
+    unselectLargeFiles,
+    
+    // Modal state
+    isPromptModalOpen,
+    closePromptModal,
+    modalDefaultValue,
+    handlePromptConfirm,
+    modalButtonRef
   }
 
   return (
