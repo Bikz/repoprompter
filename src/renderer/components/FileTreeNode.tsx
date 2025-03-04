@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 
 interface FileNode {
   name: string
@@ -12,7 +12,8 @@ interface FileTreeNodeProps {
   toggleSelected: (pathStr: string, isFolder: boolean) => void
   expandedMap: Record<string, boolean>
   setExpandedMap: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
-  level: number  // new: track recursion depth for indentation
+  level: number  // track recursion depth for indentation
+  isLastChild?: boolean // whether this is the last child in its parent list
 }
 
 /** Return 'checked', 'partial', or 'unchecked' for the node’s checkbox state */
@@ -56,9 +57,35 @@ function getIconPath(node: FileNode, isExpanded: boolean, isFolder: boolean): st
     case 'html':
       return "M5 4.5c0-.53-.21-1.04-.586-1.414S3.53 2.5 3 2.5l.9 8.1 1.1-8.1-1 8 1-8zM17.414 3.086C17.79 3.46 18 3.97 18 4.5l-.9 8.1-1.1-8.1 1 8-1-8z"
     case 'css':
+    case 'scss':
       return "M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.88 2.88"
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+    case 'svg':
+      return "M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
     default:
       return "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+  }
+}
+
+/** Get the icon CSS class based on file extension */
+function getIconClass(node: FileNode, isFolder: boolean): string {
+  if (isFolder) return 'folder-icon'
+  
+  const ext = node.name.split('.').pop()?.toLowerCase() || ''
+  switch (ext) {
+    case 'ts': return 'ts-icon'
+    case 'tsx': return 'tsx-icon'
+    case 'js': return 'js-icon'
+    case 'jsx': return 'jsx-icon'
+    case 'json': return 'json-icon'
+    case 'md': return 'md-icon'
+    case 'css': return 'css-icon'
+    case 'scss': return 'scss-icon'
+    case 'html': return 'html-icon'
+    default: return ''
   }
 }
 
@@ -68,11 +95,16 @@ export function FileTreeNode({
   toggleSelected,
   expandedMap,
   setExpandedMap,
-  level
+  level,
+  isLastChild = false
 }: FileTreeNodeProps) {
   const isFolder = !!node.children
   const isExpanded = expandedMap[node.path] || false
   const checkboxState = getCheckboxState(node, selectedSet)
+  const isSelected = checkboxState === 'checked' || checkboxState === 'partial'
+  
+  // Get the correct icon CSS class for colorization
+  const iconClass = useMemo(() => getIconClass(node, isFolder), [node, isFolder])
 
   const handleToggleFolder = () => {
     if (!isFolder) return
@@ -90,15 +122,16 @@ export function FileTreeNode({
   // Build icon path
   const iconPath = getIconPath(node, isExpanded, isFolder)
 
-  // Indentation style: left padding grows with "level"
-  // We'll show a subtle vertical connector for child nodes with tailwind borders
+  // Determine if we need connector lines (level > 0)
+  const needsConnector = level > 0
+  
   return (
-    <div className="file-tree-node">
+    <div className={`file-tree-node ${level > 0 ? 'file-tree-node-child' : ''} ${needsConnector ? 'file-tree-node-with-connector' : ''}`}>
       {/* The row containing the checkbox and icon + name */}
       <div
-        className={`flex items-center py-1 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors`}
-        style={{ paddingLeft: `${1.5 + level * 1.5}rem` }}
-        onClick={isFolder ? handleToggleFolder : undefined}
+        className={`flex items-center py-1 cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 transition-colors rounded ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+        style={{ paddingLeft: level > 0 ? `${1.5 + level}rem` : '1rem' }}
+        onClick={isFolder ? handleToggleFolder : () => toggleSelected(node.path, isFolder)}
       >
         {/* Checkbox */}
         <input
@@ -117,11 +150,11 @@ export function FileTreeNode({
         {/* Expand/collapse arrow for folders */}
         {isFolder && (
           <svg
-            width="10"
-            height="10"
+            width="12"
+            height="12"
             viewBox="0 0 10 10"
             fill="none"
-            className={`mr-1 transition-transform ${
+            className={`mr-1 transition-transform file-tree-folder-arrow ${
               isExpanded ? 'rotate-90' : ''
             }`}
           >
@@ -137,11 +170,11 @@ export function FileTreeNode({
 
         {/* Icon */}
         <svg
-          width="14"
-          height="14"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
-          className="mr-2 text-gray-600 dark:text-gray-300"
+          className={`mr-2 file-icon ${iconClass}`}
         >
           <path
             d={iconPath}
@@ -153,13 +186,13 @@ export function FileTreeNode({
         </svg>
 
         {/* Name */}
-        <span className="text-gray-700 dark:text-gray-200 text-sm">{node.name}</span>
+        <span className="text-gray-700 dark:text-gray-200 text-sm truncate">{node.name}</span>
       </div>
 
       {/* If expanded, render children recursively */}
       {isFolder && isExpanded && node.children && (
-        <>
-          {node.children.map(child => (
+        <div className="file-tree-children">
+          {node.children.map((child, i) => (
             <FileTreeNode
               key={child.path}
               node={child}
@@ -168,9 +201,10 @@ export function FileTreeNode({
               expandedMap={expandedMap}
               setExpandedMap={setExpandedMap}
               level={level + 1}
+              isLastChild={i === node.children!.length - 1}
             />
           ))}
-        </>
+        </div>
       )}
     </div>
   )
