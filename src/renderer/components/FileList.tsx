@@ -83,9 +83,6 @@ export function FileList() {
 
   const fileTree = useMemo(() => buildFileTree(fileList || [], baseDirName), [fileList, baseDirName])
 
-  /**
-   * Toggles selection for a folder or a single file.
-   */
   const handleToggleSelected = (pathStr: string, isFolder: boolean) => {
     if (!isFolder) {
       toggleSelectedFile(pathStr)
@@ -118,6 +115,7 @@ export function FileList() {
       }
       return result
     }
+
     const allDesc = gatherAllDescendants(folderNode)
     const allSelected = allDesc.every(d => selectedSet.has(d))
 
@@ -139,8 +137,7 @@ export function FileList() {
       }
     }
 
-    // We need to figure out how to apply these changes properly:
-    // We'll build two lists: toRemove, toAdd, and call toggleSelectedFile on each.
+    // toRemove, toAdd
     const toRemove = selectedFiles.filter(sf => !newSelected.includes(sf))
     const toAdd = newSelected.filter(nf => !selectedFiles.includes(nf))
 
@@ -150,7 +147,7 @@ export function FileList() {
 
   if (!fileList || fileList.length === 0) {
     return (
-      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-500 dark:text-gray-300">
+      <div className="p-4 bg-gray-100 dark:bg-off-black rounded text-sm text-gray-500 dark:text-white">
         No files. Please select a directory.
       </div>
     )

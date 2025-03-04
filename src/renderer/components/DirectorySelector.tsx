@@ -44,8 +44,15 @@ export function DirectorySelector() {
     unselectLargeFiles()
   }
 
+  const getRepoName = () => {
+    if (!baseDir) return ''
+    const parts = baseDir.split(/[\\/]/)
+    return parts[parts.length - 1] || baseDir
+  }
+
   return (
-    <div className="flex flex-col gap-3 text-sm text-gray-800 dark:text-gray-100">
+    // Use dark:text-white, etc.
+    <div className="flex flex-col gap-3 text-sm text-gray-800 dark:text-white">
       <div className="flex gap-2">
         <button
           onClick={handleSelectDirectory}
@@ -134,18 +141,18 @@ export function DirectorySelector() {
         Unselect Large Files
       </button>
 
-      {/* Current Repository Info */}
+      {/* Current Repository */}
       {baseDir && (
         <div className="mt-2">
           <h4 className="text-sm font-semibold">Current Repository:</h4>
-          <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs mt-1 border border-gray-200 dark:border-gray-700 flex items-center">
+          <div className="bg-gray-100 dark:bg-off-black p-2 rounded text-xs mt-1 border border-gray-200 dark:border-gray-800 flex items-center">
             <svg
               width="14"
               height="14"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="mr-1 text-gray-600 dark:text-gray-200"
+              className="mr-1 text-gray-600 dark:text-white"
             >
               <path
                 d="M15 4.5C14.6022 4.5 14.2206 4.34196 13.9393 4.06066C13.658 3.77936 13.5 3.39782 13.5 3C13.5 2.60218 13.658 2.22064 13.9393 1.93934C14.2206 1.65804 14.6022 1.5 15 1.5C15.3978 1.5 15.7794 1.65804 16.0607 1.93934C16.342 2.22064 16.5 2.60218 16.5 3C16.5 3.39782 16.342 3.77936 16.0607 4.06066C15.7794 4.34196 15.3978 4.5 15 4.5ZM9 4.5C8.60218 4.5 8.22064 4.34196 7.93934 4.06066C7.65804 3.77936 7.5 3.39782 7.5 3C7.5 2.60218 7.65804 2.22064 7.93934 1.93934C8.22064 1.65804 8.60218 1.5 9 1.5C9.39782 1.5 9.77936 1.65804 10.0607 1.93934C10.342 2.22064 10.5 2.60218 10.5 3C10.5 3.39782 10.342 3.77936 10.0607 4.06066C9.77936 4.34196 9.39782 4.5 9 4.5ZM21 15V16.5C21 17.0304 20.7893 17.5391 20.4142 17.9142C20.0391 18.2893 19.5304 18.5 19 18.5H5C4.46957 18.5 3.96086 18.2893 3.58579 17.9142C3.21071 17.5391 3 17.0304 3 16.5V15H21ZM21 13.5H3V7.5C3 6.96957 3.21071 6.46086 3.58579 6.08579C3.96086 5.71071 4.46957 5.5 5 5.5H19C19.5304 5.5 20.0391 5.71071 20.4142 6.08579C20.7893 6.46086 21 6.96957 21 7.5V13.5ZM9 21.5C8.60218 21.5 8.22064 21.342 7.93934 21.0607C7.65804 20.7794 7.5 20.3978 7.5 20C7.5 19.6022 7.65804 19.2206 7.93934 18.9393C8.22064 18.658 8.60218 18.5 9 18.5C9.39782 18.5 9.77936 18.65804 10.0607 18.9393C10.342 19.2206 10.5 19.6022 10.5 20C10.5 20.3978 10.342 20.7794 10.0607 21.0607C9.77936 21.342 9.39782 21.5 9 21.5ZM15 21.5C14.6022 21.5 14.2206 21.342 13.9393 21.0607C13.658 20.7794 13.5 20.3978 13.5 20C13.5 19.6022 13.658 19.2206 13.9393 18.9393C14.2206 18.658 14.6022 18.5 15 18.5C15.3978 18.5 15.7794 18.65804 16.0607 18.9393C16.342 19.2206 16.5 19.6022 16.5 20C16.5 20.3978 16.342 20.7794 16.0607 21.0607C15.7794 21.342 15.3978 21.5 15 21.5Z"
@@ -155,13 +162,7 @@ export function DirectorySelector() {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="font-medium">{baseDir.split('/').pop()}</span>
-            <span
-              className="ml-1 text-gray-500 dark:text-gray-300 truncate"
-              title={baseDir}
-            >
-              ({baseDir})
-            </span>
+            <span className="font-medium">{getRepoName()}</span>
           </div>
         </div>
       )}

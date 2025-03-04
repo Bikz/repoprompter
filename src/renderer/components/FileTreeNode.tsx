@@ -43,7 +43,7 @@ function getCheckboxState(node: FileNode, selected: Set<string>): 'checked' | 'p
   return 'unchecked'
 }
 
-/** Renders file type icon based on extension */
+/** Renders file type icon based on extension, using Tailwind classes for dark mode */
 const FileIcon = ({ fileName }: { fileName: string }) => {
   const extension = fileName.split('.').pop()?.toLowerCase() || ''
 
@@ -74,30 +74,30 @@ const FileIcon = ({ fileName }: { fileName: string }) => {
     }
   }
 
-  const getIconColor = () => {
+  const getIconClass = () => {
     switch (extension) {
       case 'ts':
       case 'tsx':
-        return "#3178c6"
+        return "text-blue-500 dark:text-blue-300"
       case 'js':
       case 'jsx':
-        return "#f7df1e"
+        return "text-yellow-500 dark:text-yellow-300"
       case 'json':
-        return "#999999"
+        return "text-gray-500 dark:text-gray-400"
       case 'md':
-        return "#663399"
+        return "text-purple-500 dark:text-purple-300"
       case 'html':
-        return "#e34c26"
+        return "text-orange-500 dark:text-orange-300"
       case 'css':
-        return "#264de4"
+        return "text-blue-600 dark:text-blue-400"
       case 'png':
       case 'jpg':
       case 'jpeg':
       case 'gif':
       case 'svg':
-        return "#ff9800"
+        return "text-orange-500 dark:text-orange-300"
       default:
-        return "#6b7280"
+        return "text-gray-500 dark:text-gray-400"
     }
   }
 
@@ -108,15 +108,44 @@ const FileIcon = ({ fileName }: { fileName: string }) => {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="mr-1.5"
+      className={`mr-1.5 ${getIconClass()}`}
     >
       <path
         d={getIconPath()}
-        stroke={getIconColor()}
+        stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  )
+}
+
+function FolderIcon({ isOpen }: { isOpen: boolean }) {
+  if (isOpen) {
+    // "Open" folder
+    return (
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="mr-2 text-gray-600 dark:text-gray-300"
+      >
+        <path d="M2 6C2 4.89543 2.89543 4 4 4H10L12 6H20C21.1046 6 22 6.89543 22 8V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6Z" />
+      </svg>
+    )
+  }
+  // "Closed" folder
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className="mr-2 text-gray-600 dark:text-gray-300"
+    >
+      <path d="M10 4H4C2.89543 4 2 4.89543 2 6V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V8C22 6.89543 21.1046 6 20 6H12L10 4Z" />
     </svg>
   )
 }
@@ -142,7 +171,6 @@ export function FileTreeNode({
     setExpandedMap(prev => ({ ...prev, [node.path]: !prev[node.path] }))
   }
 
-  // Extra class if fully 'checked' -> highlight
   const itemClasses = [
     'file-tree-item',
     checkboxState === 'checked' ? 'bg-black/5 dark:bg-white/5' : ''
@@ -186,19 +214,21 @@ export function FileTreeNode({
                 />
               </svg>
             </div>
-            <span className="mr-2">
-              {isExpanded ? '📂' : '📁'}
+            <FolderIcon isOpen={isExpanded} />
+            <span className="text-gray-700 dark:text-gray-200">
+              {node.name}
             </span>
           </>
         ) : (
-          <FileIcon fileName={node.name} />
+          <>
+            <FileIcon fileName={node.name} />
+            <span className="text-gray-700 dark:text-gray-200">{node.name}</span>
+          </>
         )}
-
-        <span className="text-gray-700 dark:text-gray-200">{node.name}</span>
       </div>
 
       {isFolder && isExpanded && node.children && (
-        <div className="pl-6 ml-4 border-l-4 border-gray-200 dark:border-gray-700 mt-1">
+        <div className="pl-8 ml-2 border-l border-gray-300 dark:border-gray-700 mt-1">
           {node.children.map(child => (
             <FileTreeNode
               key={child.path}

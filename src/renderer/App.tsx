@@ -20,9 +20,10 @@ function App() {
 
   return (
     <RepoProvider>
-      <div className="min-h-screen flex flex-col font-sans bg-white dark:bg-off-black text-gray-800 dark:text-gray-100">
-        {/* Top Header */}
-        <header className="flex items-center justify-between bg-brand-blue dark:bg-blue-900 text-white p-4 shadow">
+      {/* Use dark:bg-off-black for the page background and dark:text-white */}
+      <div className="min-h-screen flex flex-col font-sans bg-white dark:bg-off-black text-gray-800 dark:text-white">
+        {/* Top Header: remove dark:bg-blue-900, use dark:bg-off-black */}
+        <header className="flex items-center justify-between bg-brand-blue dark:bg-off-black text-white p-4 shadow">
           <div>
             <h1 className="text-2xl font-bold">RepoPrompter</h1>
             <p className="text-sm text-gray-200 mt-1">
@@ -39,16 +40,18 @@ function App() {
 
         {/* Main Content */}
         <main className="flex flex-1 overflow-hidden">
-          {/* LEFT COLUMN: Directory + FileList */}
-          <div className="w-64 flex flex-col bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
+          {/* LEFT COLUMN */}
+          {/* Use dark:bg-off-black for the left sidebar */}
+          <div className="w-64 flex flex-col bg-gray-50 dark:bg-off-black border-r border-gray-200 dark:border-gray-800 p-4">
             <DirectorySelector />
             <div className="mt-4 flex-1 overflow-auto">
               <FileList />
             </div>
           </div>
 
-          {/* MIDDLE COLUMN: Prompt & Diff Tools */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-off-black p-4 overflow-auto border-r border-gray-200 dark:border-gray-700">
+          {/* MIDDLE COLUMN */}
+          {/* Replace any references to dark:bg-gray-* or dark:text-gray-* */}
+          <div className="flex-1 flex flex-col bg-white dark:bg-off-black p-4 overflow-auto border-r border-gray-200 dark:border-gray-800">
             <section className="flex-shrink-0 mb-6">
               <h2 className="text-xl font-semibold mb-2">Prompt Editor</h2>
               <PromptEditor />
@@ -59,7 +62,7 @@ function App() {
             </section>
           </div>
 
-          {/* RIGHT COLUMN: Code Diff Preview */}
+          {/* RIGHT COLUMN */}
           <div className="w-1/3 bg-white dark:bg-off-black p-4 overflow-auto">
             <h2 className="text-xl font-semibold mb-2">Code Diff Preview</h2>
             <CodeEditorTabs />

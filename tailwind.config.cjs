@@ -6,13 +6,14 @@ module.exports = {
   darkMode: 'class',
   content: [
     "./src/renderer/index.html",
-    "./src/renderer/**/*.{js,ts,jsx,tsx}"
+    "./src/renderer/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
         'brand-blue': '#007bff',
-        'off-black': '#121212'
+        // Change off-black to pure black
+        'off-black': '#000000'
       }
     }
   },

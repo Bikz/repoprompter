@@ -9,7 +9,7 @@ export function CodeEditorTabs() {
 
   if (diffChanges.length === 0) {
     return (
-      <div className="p-2 text-gray-500 dark:text-gray-400">
+      <div className="p-2 text-gray-500 dark:text-white">
         <p>No changes to display. Paste AI diff to see updates here.</p>
       </div>
     )
@@ -22,18 +22,18 @@ export function CodeEditorTabs() {
   const currentFileChange = diffChanges.find(ch => ch.fileName === activeTab)
 
   return (
-    <div className="flex flex-col h-full text-sm text-gray-800 dark:text-gray-100">
+    <div className="flex flex-col h-full text-sm text-gray-800 dark:text-white">
       {/* Tabs */}
-      <div className="flex border-b border-gray-300 dark:border-gray-700 mb-2">
+      <div className="flex border-b border-gray-300 dark:border-gray-800 mb-2">
         {diffChanges.map(change => (
           <div
             key={change.fileName}
             onClick={() => handleTabClick(change.fileName)}
             className={
-              "px-3 py-2 cursor-pointer border-r border-gray-300 dark:border-gray-700 " +
+              "px-3 py-2 cursor-pointer border-r border-gray-300 dark:border-gray-800 " +
               (change.fileName === activeTab
-                ? "bg-gray-200 dark:bg-gray-700"
-                : "hover:bg-gray-100 dark:hover:bg-gray-600")
+                ? "bg-gray-200 dark:bg-off-black"
+                : "hover:bg-gray-100 dark:hover:bg-off-black/80")
             }
           >
             {change.fileName}
@@ -52,10 +52,10 @@ export function CodeEditorTabs() {
       </div>
 
       {/* Editor area */}
-      <div className="flex-1 border border-gray-300 dark:border-gray-700 rounded p-2 overflow-auto">
+      <div className="flex-1 border border-gray-300 dark:border-gray-800 rounded p-2 overflow-auto">
         {currentFileChange ? (
           <>
-            <pre className="bg-gray-50 dark:bg-gray-800 rounded p-2 text-xs overflow-auto whitespace-pre-wrap">
+            <pre className="bg-gray-50 dark:bg-off-black rounded p-2 text-xs text-gray-800 dark:text-white overflow-auto whitespace-pre-wrap">
               {currentFileChange.newContent}
             </pre>
 
@@ -77,7 +77,7 @@ export function CodeEditorTabs() {
             </div>
           </>
         ) : (
-          <p className="text-gray-500 dark:text-gray-400">Select a file tab to see changes.</p>
+          <p className="text-gray-500 dark:text-white">Select a file tab to see changes.</p>
         )}
       </div>
     </div>
