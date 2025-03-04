@@ -25,8 +25,7 @@ function convertToArray(obj: Record<string, FileNode>): FileNode[] {
 }
 
 /**
- * Build a file tree from a flat array of relative paths, ignoring any single
- * “root” folder name. That way we don't show e.g. “aiapply” at top.
+ * Build a file tree from a flat array of relative paths.
  */
 function buildFileTree(files: string[]): FileNode[] {
   const root: Record<string, FileNode> = {}
@@ -67,35 +66,46 @@ export function FileList() {
   const { baseDir, fileList, selectedFiles, toggleSelectedFile } = useRepoContext()
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({})
 
-  // Build a nested tree from the array of paths - MOVED BEFORE CONDITIONAL RETURN
-  const treeNodes = useMemo(() => 
-    fileList.length > 0 ? buildFileTree(fileList) : [], 
+  // Build a nested tree from the array of paths
+  const treeNodes = useMemo(
+    () => (fileList.length > 0 ? buildFileTree(fileList) : []),
     [fileList]
   )
 
-  // Use a set for quick membership checks - MOVED BEFORE CONDITIONAL RETURN
+  // Use a set for quick membership checks
   const selectedSet = useMemo(() => new Set(selectedFiles), [selectedFiles])
-  
-  // Auto-expand first level folders for better UX
+
+  // Auto-expand first-level folders for better UX
   useMemo(() => {
     if (treeNodes.length > 0) {
-      const initialExpanded: Record<string, boolean> = {};
+      const initialExpanded: Record<string, boolean> = {}
       treeNodes.forEach(node => {
         if (node.children) {
-          initialExpanded[node.path] = true;
+          initialExpanded[node.path] = true
         }
-      });
-      setExpandedMap(prev => ({...prev, ...initialExpanded}));
+      })
+      setExpandedMap(prev => ({ ...prev, ...initialExpanded }))
     }
-  }, [treeNodes]);
-  
+  }, [treeNodes])
+
   // If user hasn't selected a dir or there's no files, show a message
   if (!baseDir || fileList.length === 0) {
     return (
-      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+      <div className="p-4 text-sm text-gray-500 dark:text-gray-300">
         <span className="flex items-center justify-center space-x-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M9 13h6m-3-3v6m-9-6h.01M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4m-5-4v-8a2 2 0 012-2h2.5M15 3H9m6 0v2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              d="M9 13h6m-3-3v6m-9-6h.01M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4m-5-4v-8a2 2 0 012-2h2.5M15 3H9m6 0v2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <span>No files. Please select a directory.</span>
         </span>
@@ -155,7 +165,7 @@ export function FileList() {
       }
     }
 
-    // Compare old vs new
+    // Update
     const toRemove = selectedFiles.filter(sf => !newSel.includes(sf))
     const toAdd = newSel.filter(nf => !selectedFiles.includes(nf))
 
@@ -164,7 +174,7 @@ export function FileList() {
   }
 
   return (
-    <div className="file-tree overflow-y-auto text-sm p-1">
+    <div className="file-tree overflow-y-auto text-sm p-1 h-full">
       {treeNodes.map((node, i) => (
         <FileTreeNode
           key={node.path}

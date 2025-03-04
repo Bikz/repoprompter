@@ -129,7 +129,7 @@ html, body, #root {
 
 /* File Tree styling - IDE-like appearance */
 .file-tree {
-  max-height: 70vh;
+  height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #007bff rgba(0, 0, 0, 0.1);

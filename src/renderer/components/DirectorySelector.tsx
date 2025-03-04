@@ -44,7 +44,6 @@ export function DirectorySelector() {
     }
   }
 
-  // Store button reference for positioning the modal
   const groupButtonRef = React.useRef<HTMLButtonElement>(null)
   
   const handleCreateGroup = () => {
@@ -56,7 +55,7 @@ export function DirectorySelector() {
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm text-gray-800 dark:text-white">
+    <div className="flex flex-col gap-3 text-sm text-gray-800 dark:text-white h-full overflow-hidden">
       {/* Top row of buttons */}
       <div className="flex gap-2">
         <button
@@ -107,7 +106,7 @@ export function DirectorySelector() {
             </svg>
             File Groups
           </div>
-          {groups.map((group) => (
+          {groups.map(group => (
             <div
               key={group.name}
               className={`file-group-item ${activeGroupName === group.name ? 'active' : ''}`}
@@ -121,7 +120,7 @@ export function DirectorySelector() {
                 <span className="file-group-count">{group.files.length}</span>
               </span>
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation()
                   if (confirm(`Are you sure you want to remove group "${group.name}"?`)) {
                     removeGroup(group.name)
@@ -143,10 +142,21 @@ export function DirectorySelector() {
         className="btn btn-primary"
         title="Create group from selected files"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-          xmlns="http://www.w3.org/2000/svg" className="mr-2">
-          <path d="M12 4V20M4 12H20" stroke="currentColor" strokeWidth="2"
-            strokeLinecap="round" strokeLinejoin="round"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="mr-2"
+        >
+          <path
+            d="M12 4V20M4 12H20"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         Group Selected Files
       </button>
@@ -160,9 +170,11 @@ export function DirectorySelector() {
       </button>
 
       {/* Always show “Current Repository” heading + FileList */}
-      <div className="mt-4">
-        <h4 className="text-sm font-semibold mb-2">Current Repository:</h4>
-        <FileList />
+      <div className="mt-4 flex-1 min-h-0 flex flex-col overflow-y-auto">
+        <h4 className="text-sm font-semibold mb-2 flex-shrink-0">Current Repository:</h4>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <FileList />
+        </div>
       </div>
     </div>
   )

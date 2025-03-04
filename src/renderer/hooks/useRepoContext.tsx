@@ -185,8 +185,6 @@ export function RepoProvider({ children }: RepoProviderProps) {
       // Revert the group creation if save failed
       setGroups(groups)
       setActiveGroupName(null)
-    } else {
-      alert(`Group "${groupName}" created successfully with ${selectedFiles.length} files.`)
     }
   }
   
@@ -236,8 +234,6 @@ export function RepoProvider({ children }: RepoProviderProps) {
       alert(`Failed to remove group: ${res.error || 'Unknown error'}`)
       // Restore the removed group if delete failed
       setGroups(groups)
-    } else {
-      alert(`Group "${name}" removed successfully.`)
     }
   }
 
