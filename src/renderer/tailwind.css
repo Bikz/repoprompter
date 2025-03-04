@@ -260,6 +260,8 @@ html, body, #root {
   background-color: #dbeafe;
   border-color: #93c5fd;
   color: #1e40af;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .file-group-count {
   display: inline-flex;
@@ -409,7 +411,11 @@ html, body, #root {
   background-color: #222;
 }
 .dark .file-group-item.active {
-  background-color: #111;
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 .dark .file-group-count {
   background-color: #222;

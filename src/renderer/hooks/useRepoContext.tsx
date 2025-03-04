@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import type { FileChange } from '../../common/types'
+import type { FileChange, RepoSettings, RepoGroup } from '../../common/types'
 
-interface GroupItem {
-  name: string
-  files: string[]
-}
+// Use RepoGroup from types.ts instead of duplicating the type
+// interface GroupItem {
+//   name: string
+//   files: string[]
+// }
 
 interface RepoContextType {
   baseDir: string
@@ -21,11 +22,12 @@ interface RepoContextType {
   acceptSingleDiff: (fileName: string, newContent: string) => Promise<void>
   rejectSingleDiff: (fileName: string) => void
 
-  groups: GroupItem[]
+  groups: RepoGroup[]
   createGroupFromSelection: () => void
   selectGroup: (name: string) => void
   removeGroup: (name: string) => void
-
+  activeGroupName: string | null
+  
   userInstructions: string
   setUserInstructions: (val: string) => void
 
@@ -43,7 +45,8 @@ export function RepoProvider({ children }: RepoProviderProps) {
   const [fileList, setFileListState] = useState<string[]>([])
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [diffChanges, setDiffChanges] = useState<FileChange[]>([])
-  const [groups, setGroups] = useState<GroupItem[]>([])
+  const [groups, setGroups] = useState<RepoGroup[]>([])
+  const [activeGroupName, setActiveGroupName] = useState<string | null>(null)
   const [userInstructions, setUserInstructionsState] = useState('')
 
   const toggleSelectedFile = React.useCallback((file: string) => {
@@ -56,11 +59,11 @@ export function RepoProvider({ children }: RepoProviderProps) {
     setFileListState(Array.isArray(files) ? files : [])
   }
 
+  // Load per-repo settings (userInstructions, groups) whenever baseDir changes
   useEffect(() => {
     if (!baseDir) return
-    // Attempt to load per-repo settings
-    window.api?.invoke?.('config:loadRepoSettings', baseDir)
-      .then((res: any) => {
+    window.api.loadRepoSettings(baseDir)
+      .then(res => {
         if (res.success && res.settings) {
           const { userInstructions, groups } = res.settings
           setUserInstructionsState(userInstructions || '')
@@ -74,6 +77,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
       })
   }, [baseDir])
 
+  // Called externally by DirectorySelector on a new directory selection
   const setBaseDir = async (dir: string) => {
     setBaseDirState(dir)
     try {
@@ -149,62 +153,93 @@ export function RepoProvider({ children }: RepoProviderProps) {
       alert('No files/folders selected. Please select something first.')
       return
     }
+    
+    // Check if there are actually files to include (not just directories)
+    const hasFiles = selectedFiles.some(path => !path.endsWith('/'))
+    if (!hasFiles) {
+      alert('Please select at least one file (not just folders) to create a group.')
+      return
+    }
+    
     const defaultName = `Group ${groups.length + 1}`
     const groupName = window.prompt('Enter a name for this group:', defaultName)
     if (!groupName) return
+    
+    // Check for duplicate names
+    if (groups.some(g => g.name === groupName)) {
+      alert(`A group named "${groupName}" already exists. Please choose a different name.`)
+      return
+    }
 
-    const newGroup: GroupItem = { name: groupName, files: [...selectedFiles] }
+    const newGroup: RepoGroup = { name: groupName, files: [...selectedFiles] }
     const newGroups = [...groups, newGroup]
     setGroups(newGroups)
+    setActiveGroupName(groupName) // Set this group as active
 
-    // Persist
-    await window.api.invoke('config:updateRepoSettings', {
-      repoPath: baseDir,
-      updates: { userInstructions, groups: newGroups }
+    // Persist the updated repo settings
+    const res = await window.api.updateRepoSettings(baseDir, {
+      userInstructions,
+      groups: newGroups
     })
+    if (!res.success) {
+      alert(`Failed to save group: ${res.error || 'Unknown error'}`)
+      // Revert the group creation if save failed
+      setGroups(groups)
+      setActiveGroupName(null)
+    } else {
+      alert(`Group "${groupName}" created successfully with ${selectedFiles.length} files.`)
+    }
   }
 
   const selectGroup = (name: string) => {
     const found = groups.find(g => g.name === name)
     if (!found) return
     setSelectedFiles(found.files)
+    setActiveGroupName(name) // Track which group is active
   }
 
   const removeGroup = async (name: string) => {
+    // Reset active group if removing the active one
+    if (activeGroupName === name) {
+      setActiveGroupName(null)
+    }
+    
     const newGroups = groups.filter(g => g.name !== name)
     setGroups(newGroups)
 
-    // Persist
-    try {
-      await window.api.invoke('config:updateRepoSettings', {
-        repoPath: baseDir,
-        updates: { userInstructions, groups: newGroups }
-      })
-    } catch (err) {
-      console.error('Failed to remove group:', err)
+    // Persist the updated repo settings
+    const res = await window.api.updateRepoSettings(baseDir, {
+      userInstructions,
+      groups: newGroups
+    })
+    if (!res.success) {
+      alert(`Failed to remove group: ${res.error || 'Unknown error'}`)
+      // Restore the removed group if delete failed
+      setGroups(groups)
+    } else {
+      alert(`Group "${name}" removed successfully.`)
     }
   }
 
   const setUserInstructions = async (val: string) => {
     setUserInstructionsState(val)
-    try {
-      await window.api.invoke('config:updateRepoSettings', {
-        repoPath: baseDir,
-        updates: { userInstructions: val, groups }
-      })
-    } catch (err) {
-      console.error('Failed to save user instructions:', err)
+    const res = await window.api.updateRepoSettings(baseDir, {
+      userInstructions: val,
+      groups
+    })
+    if (!res.success) {
+      console.error('Failed to save user instructions:', res.error)
     }
   }
 
   const unselectLargeFiles = async () => {
     try {
-      const res = await window.api.invoke('config:getKnownLargeFiles')
-      if (!res.success) {
-        alert('Failed to retrieve large file list: ' + res.error)
+      const res = await window.api.getKnownLargeFiles()
+      if (!res.success || !res.list) {
+        alert('Failed to retrieve large file list: ' + (res.error || 'unknown error'))
         return
       }
-      const largeFiles: string[] = res.list || []
+      const largeFiles = res.list
       setSelectedFiles(prev => prev.filter(f => !largeFiles.includes(f)))
     } catch (err) {
       console.error('unselectLargeFiles error:', err)
@@ -230,6 +265,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     createGroupFromSelection,
     selectGroup,
     removeGroup,
+    activeGroupName,
 
     userInstructions,
     setUserInstructions,

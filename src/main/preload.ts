@@ -5,7 +5,14 @@
  */
 
 import { contextBridge, ipcRenderer } from 'electron'
-import type { FileSystemApi } from '../common/types'
+import type {
+  FileSystemApi,
+  FileChange,
+  LoadRepoSettingsResponse,
+  UpdateRepoSettingsResponse,
+  KnownLargeFilesResponse,
+  RepoSettings
+} from '../common/types'
 
 const api: FileSystemApi = {
   sayHello: () => {
@@ -54,7 +61,7 @@ const api: FileSystemApi = {
       if (!res.success) {
         throw new Error(res.error || 'Failed to parse XML diff.')
       }
-      return res.changes
+      return res.changes as FileChange[]
     } catch (error) {
       console.error('Failed to parse XML diff:', error)
       throw error
@@ -83,6 +90,45 @@ const api: FileSystemApi = {
     } catch (error) {
       console.error('Failed to read multiple files:', error)
       throw error
+    }
+  },
+
+  /**
+   * Config-related methods for loading/updating repo settings or known large files.
+   */
+  loadRepoSettings: async (repoPath) => {
+    try {
+      return await ipcRenderer.invoke('config:loadRepoSettings', repoPath) as LoadRepoSettingsResponse
+    } catch (error) {
+      console.error('Failed to load repo settings:', error)
+      return { success: false, error: String(error) }
+    }
+  },
+
+  updateRepoSettings: async (repoPath, updates) => {
+    try {
+      return await ipcRenderer.invoke('config:updateRepoSettings', { repoPath, updates }) as UpdateRepoSettingsResponse
+    } catch (error) {
+      console.error('Failed to update repo settings:', error)
+      return { success: false, error: String(error) }
+    }
+  },
+
+  getKnownLargeFiles: async () => {
+    try {
+      return await ipcRenderer.invoke('config:getKnownLargeFiles') as KnownLargeFilesResponse
+    } catch (error) {
+      console.error('Failed to get known large files:', error)
+      return { success: false, error: String(error) }
+    }
+  },
+
+  setKnownLargeFiles: async (newList) => {
+    try {
+      return await ipcRenderer.invoke('config:setKnownLargeFiles', newList) as KnownLargeFilesResponse
+    } catch (error) {
+      console.error('Failed to set known large files:', error)
+      return { success: false, error: String(error) }
     }
   }
 }

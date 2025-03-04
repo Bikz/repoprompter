@@ -9,7 +9,7 @@ interface FileNode {
 }
 
 /**
- * Convert an object-based tree into an array-based tree.
+ * Recursively convert an object-based tree to an array-based tree.
  */
 function convertToArray(obj: Record<string, FileNode>): FileNode[] {
   return Object.values(obj).map(node => {
@@ -19,90 +19,80 @@ function convertToArray(obj: Record<string, FileNode>): FileNode[] {
         path: node.path,
         children: convertToArray(node.children as Record<string, FileNode>)
       }
-    } else {
-      return { name: node.name, path: node.path }
     }
+    return { name: node.name, path: node.path }
   })
 }
 
 /**
- * Build a file tree from a flat array of file paths, optionally wrapping them under a root node.
+ * Build a file tree from a flat array of relative paths, ignoring any single
+ * “root” folder name. That way we don't show e.g. “aiapply” at top.
  */
-function buildFileTree(files: string[], rootName?: string): FileNode[] {
+function buildFileTree(files: string[]): FileNode[] {
   const root: Record<string, FileNode> = {}
 
   for (const file of files) {
-    const parts = file.split(/[/\\]/)
-    let currentLevel = root
-    let cumulativePath = ''
+    const parts = file.split(/[\\/]/)
+    let current = root
+    let currentPath = ''
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
-      cumulativePath = cumulativePath ? `${cumulativePath}/${part}` : part
+      currentPath = currentPath ? `${currentPath}/${part}` : part
 
-      if (!currentLevel[part]) {
-        currentLevel[part] = { name: part, path: cumulativePath, children: {} }
-      }
-      if (i === parts.length - 1) {
-        currentLevel[part].children = undefined
-      } else {
-        if (!currentLevel[part].children) {
-          currentLevel[part].children = {}
+      if (!current[part]) {
+        current[part] = {
+          name: part,
+          path: currentPath,
+          children: {}
         }
       }
-      if (currentLevel[part].children) {
-        currentLevel = currentLevel[part].children as Record<string, FileNode>
+
+      if (i === parts.length - 1) {
+        // no children at leaf
+        current[part].children = undefined
+      } else {
+        if (!current[part].children) {
+          current[part].children = {}
+        }
+        current = current[part].children as Record<string, FileNode>
       }
     }
   }
 
-  const fileTree = convertToArray(root)
-  if (rootName && fileTree.length > 0) {
-    return [
-      {
-        name: rootName,
-        path: rootName,
-        children: fileTree
-      }
-    ]
-  }
-  // If no rootName or no files, just return fileTree as-is
-  return fileTree
+  return convertToArray(root)
 }
 
 export function FileList() {
-  const { fileList, selectedFiles, toggleSelectedFile, baseDir } = useRepoContext()
+  const { baseDir, fileList, selectedFiles, toggleSelectedFile } = useRepoContext()
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({})
 
+  // Build a nested tree from the array of paths - MOVED BEFORE CONDITIONAL RETURN
+  const treeNodes = useMemo(() => 
+    fileList.length > 0 ? buildFileTree(fileList) : [], 
+    [fileList]
+  )
+
+  // Use a set for quick membership checks - MOVED BEFORE CONDITIONAL RETURN
   const selectedSet = useMemo(() => new Set(selectedFiles), [selectedFiles])
-  const baseDirName = useMemo(() => {
-    if (!baseDir) return ''
-    const segments = baseDir.split(/[\\/]/)
-    return segments[segments.length - 1] || baseDir
-  }, [baseDir])
+  
+  // If user hasn't selected a dir or there's no files, show a message
+  if (!baseDir || fileList.length === 0) {
+    return (
+      <div className="p-4 bg-gray-100 dark:bg-off-black rounded text-sm text-gray-500 dark:text-white">
+        No files. Please select a directory.
+      </div>
+    )
+  }
 
-  const fileTree = useMemo(() => buildFileTree(fileList || [], baseDirName), [fileList, baseDirName])
-
+  // Toggle folder => select or unselect all children
   const handleToggleSelected = (pathStr: string, isFolder: boolean) => {
     if (!isFolder) {
       toggleSelectedFile(pathStr)
       return
     }
 
-    // If it's a folder, gather all descendants and toggle them collectively
-    function findNode(list: FileNode[]): FileNode | null {
-      for (const item of list) {
-        if (item.path === pathStr) return item
-        if (item.children) {
-          const found = findNode(item.children)
-          if (found) return found
-        }
-      }
-      return null
-    }
-    const folderNode = findNode(fileTree)
-    if (!folderNode) return
-
+    // Recursively gather all children
     function gatherAllDescendants(node: FileNode): string[] {
       if (!node.children) return [node.path]
       let result: string[] = []
@@ -116,46 +106,48 @@ export function FileList() {
       return result
     }
 
-    const allDesc = gatherAllDescendants(folderNode)
-    const allSelected = allDesc.every(d => selectedSet.has(d))
-
-    const newSelected = [...selectedFiles]
-    if (allSelected) {
-      // Unselect all in this folder
-      for (const d of allDesc) {
-        const idx = newSelected.indexOf(d)
-        if (idx >= 0) {
-          newSelected.splice(idx, 1)
+    // Find the node by path
+    function findNode(list: FileNode[], p: string): FileNode | null {
+      for (const item of list) {
+        if (item.path === p) return item
+        if (item.children) {
+          const found = findNode(item.children, p)
+          if (found) return found
         }
       }
+      return null
+    }
+
+    const node = findNode(treeNodes, pathStr)
+    if (!node) return
+
+    const allDesc = gatherAllDescendants(node)
+    const allSelected = allDesc.every(d => selectedSet.has(d))
+    let newSel = [...selectedFiles]
+
+    if (allSelected) {
+      // unselect
+      newSel = newSel.filter(f => !allDesc.includes(f))
     } else {
-      // Select all in this folder
+      // select
       for (const d of allDesc) {
-        if (!newSelected.includes(d)) {
-          newSelected.push(d)
+        if (!newSel.includes(d)) {
+          newSel.push(d)
         }
       }
     }
 
-    // toRemove, toAdd
-    const toRemove = selectedFiles.filter(sf => !newSelected.includes(sf))
-    const toAdd = newSelected.filter(nf => !selectedFiles.includes(nf))
+    // Compare old vs new
+    const toRemove = selectedFiles.filter(sf => !newSel.includes(sf))
+    const toAdd = newSel.filter(nf => !selectedFiles.includes(nf))
 
     toRemove.forEach(sf => toggleSelectedFile(sf))
     toAdd.forEach(nf => toggleSelectedFile(nf))
   }
 
-  if (!fileList || fileList.length === 0) {
-    return (
-      <div className="p-4 bg-gray-100 dark:bg-off-black rounded text-sm text-gray-500 dark:text-white">
-        No files. Please select a directory.
-      </div>
-    )
-  }
-
   return (
-    <div className="file-tree max-h-[70vh] overflow-y-auto text-sm">
-      {fileTree.map(node => (
+    <div className="file-tree overflow-y-auto text-sm">
+      {treeNodes.map(node => (
         <FileTreeNode
           key={node.path}
           node={node}
@@ -163,6 +155,7 @@ export function FileList() {
           toggleSelected={handleToggleSelected}
           expandedMap={expandedMap}
           setExpandedMap={setExpandedMap}
+          level={0}
         />
       ))}
     </div>
