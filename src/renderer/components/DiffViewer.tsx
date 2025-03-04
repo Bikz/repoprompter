@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
 export function DiffViewer() {
-  const { baseDir, setDiffXmlAndParse, applyFullDiff } = useRepoContext()
+  const { applyFullDiff, setDiffXmlAndParse } = useRepoContext()
   const [xmlDiff, setXmlDiff] = useState('')
 
   const handlePreviewDiff = () => {
@@ -15,9 +15,9 @@ export function DiffViewer() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
       <textarea
-        className="w-full h-24 border border-gray-300 rounded p-2 text-sm"
+        className="w-full h-24 border border-gray-300 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-800"
         placeholder="Paste AI's XML diff here..."
         value={xmlDiff}
         onChange={e => setXmlDiff(e.target.value)}
@@ -31,7 +31,7 @@ export function DiffViewer() {
         </button>
         <button
           onClick={handleApplyDiff}
-          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+          className="px-3 py-1 bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded text-sm"
         >
           Apply Diff
         </button>

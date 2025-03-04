@@ -16,9 +16,7 @@ You are a code editing assistant. You can only reply with XML according to the i
 `
 
   async function buildFullPrompt() {
-    // Batch read file contents with new method
     const fileContentMap = await window.api.readMultipleFileContents(baseDir, selectedFiles)
-
     let result = '<system_instructions>\n' + systemPrompt.trim() + '\n</system_instructions>\n\n'
     result += '<file_map>\n'
     selectedFiles.forEach(file => {
@@ -50,9 +48,9 @@ You are a code editing assistant. You can only reply with XML according to the i
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-gray-100">
       <textarea
-        className="w-full h-24 border border-gray-300 rounded p-2 text-sm"
+        className="w-full h-24 border border-gray-300 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-800"
         placeholder="Type your instructions here..."
         value={userInstructions}
         onChange={e => setUserInstructions(e.target.value)}
@@ -66,7 +64,7 @@ You are a code editing assistant. You can only reply with XML according to the i
         </button>
         <button
           onClick={handleViewCombinedPrompt}
-          className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm"
+          className="px-3 py-1 bg-gray-600 dark:bg-gray-700 text-white hover:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm"
         >
           {showCombinedPrompt ? 'Hide' : 'View'} combined prompt
         </button>
@@ -75,11 +73,11 @@ You are a code editing assistant. You can only reply with XML according to the i
       {showCombinedPrompt && combinedPrompt && (
         <div className="mt-2 flex flex-col gap-2">
           <textarea
-            className="w-full h-40 border border-gray-300 rounded p-2 text-sm"
+            className="w-full h-40 border border-gray-300 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-800 text-sm"
             value={combinedPrompt}
             readOnly
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             This is the generated prompt. Use the "Generate &amp; Copy Prompt" button to copy it again if needed.
           </p>
         </div>

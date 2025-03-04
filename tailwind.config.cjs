@@ -3,6 +3,7 @@
  * Description: Basic Tailwind CSS configuration for the entire project.
  */
 module.exports = {
+  darkMode: 'class',
   content: [
     "./src/renderer/index.html",
     "./src/renderer/**/*.{js,ts,jsx,tsx}"
