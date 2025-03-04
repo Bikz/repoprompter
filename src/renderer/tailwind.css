@@ -286,11 +286,12 @@
 }
 
 .dark .btn-primary {
-  background-color: #007bff;
+  background-color: #1a76cf;
+  color: white;
 }
 
 .dark .btn-primary:hover {
-  background-color: rgba(0, 123, 255, 0.9);
+  background-color: #3389db;
 }
 
 .btn-secondary {
@@ -303,12 +304,12 @@
 }
 
 .dark .btn-secondary {
-  background-color: #374151;
+  background-color: #1f2937;
   color: #f3f4f6;
 }
 
 .dark .btn-secondary:hover {
-  background-color: #4b5563;
+  background-color: #374151;
 }
 
 .btn-success {
@@ -316,12 +317,111 @@
   color: white;
 }
 
+.dark .btn-success {
+  background-color: #059669;
+  color: white;
+}
+
+.dark .btn-success:hover {
+  background-color: #0ca678;
+}
+
 .btn-danger {
   background-color: #dc2626;
   color: white;
 }
 
+.dark .btn-danger {
+  background-color: #b91c1c;
+  color: white;
+}
+
+.dark .btn-danger:hover {
+  background-color: #dc2626;
+}
+
 .btn-warning {
   background-color: #f59e0b;
   color: black;
+}
+
+.dark .btn-warning {
+  background-color: #d97706;
+  color: white;
+}
+
+.dark .btn-warning:hover {
+  background-color: #eab308;
+}
+
+/* Dark mode styles for file tree components */
+.dark .file-tree-item {
+  color: #e5e7eb;
+}
+
+.dark .file-tree-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .file-tree-checkbox {
+  border-color: #4b5563;
+}
+
+.dark .file-tree-checkbox:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.dark .file-group-button {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+.dark .file-group-button:hover {
+  background-color: #374151;
+}
+
+.dark .file-group-container {
+  border-color: #374151;
+}
+
+.dark .file-group-heading {
+  color: #e5e7eb;
+}
+
+.dark .file-group-item {
+  color: #d1d5db;
+  border-color: #374151;
+}
+
+.dark .file-group-item:hover {
+  background-color: #1f2937;
+}
+
+.dark .file-group-item.active {
+  background-color: #2563eb;
+}
+
+.dark .file-group-count {
+  background-color: #1f2937;
+  color: #9ca3af;
+}
+
+/* Enhanced dark mode scrollbars */
+.dark .file-tree::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark .file-tree::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark .file-tree::-webkit-scrollbar-thumb {
+  background-color: #3b3b3b;
+  border-radius: 4px;
+}
+
+.dark .file-tree::-webkit-scrollbar-thumb:hover {
+  background-color: #4a4a4a;
 }
