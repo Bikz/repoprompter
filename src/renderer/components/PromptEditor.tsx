@@ -16,11 +16,16 @@ You are a code editing assistant. You can only reply with XML according to the i
 `
 
   async function buildFullPrompt() {
-    const fileContentMap = await window.api.readMultipleFileContents(baseDir, selectedFiles)
+    const { contents: fileContentMap, errors } = await window.api.readMultipleFileContents(baseDir, selectedFiles)
+    
+    if (errors.length > 0) {
+      alert(`Warning: Some files could not be loaded:\n${errors.join('\n')}`)
+    }
+    
     let result = '<system_instructions>\n' + systemPrompt.trim() + '\n</system_instructions>\n\n'
     result += '<file_map>\n'
     selectedFiles.forEach(file => {
-      result += `File: ${file}\n\`\`\`\n${fileContentMap[file]}\n\`\`\`\n\n`
+      result += `File: ${file}\n\`\`\`\n${fileContentMap[file] || '// File not available'}\n\`\`\`\n\n`
     })
     result += '</file_map>\n\n'
     result += `<user_instructions>\n${userInstructions}\n</user_instructions>\n`

@@ -83,7 +83,7 @@ const api: FileSystemApi = {
   /** Batch read multiple files at once. */
   readMultipleFileContents: async (baseDir: string, files: string[]) => {
     if (!baseDir || !files?.length) {
-      return {}
+      return { contents: {}, errors: [] }
     }
     try {
       return await ipcRenderer.invoke('fs:readMultipleFiles', { baseDir, files })

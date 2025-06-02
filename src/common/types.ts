@@ -67,8 +67,8 @@ export interface FileSystemApi {
    */
   applyXmlDiff: (basePath: string, xmlString: string) => Promise<{ success: boolean; error?: string }>
 
-  /** Batch read multiple files at once; returns an object mapping filenames -> contents. */
-  readMultipleFileContents: (baseDir: string, files: string[]) => Promise<Record<string, string>>
+  /** Batch read multiple files at once; returns an object mapping filenames -> contents and any errors. */
+  readMultipleFileContents: (baseDir: string, files: string[]) => Promise<{ contents: Record<string, string>; errors: string[] }>
 
   /**
    * Config-related IPC calls, for loading/updating per-repo settings and global large-file lists.

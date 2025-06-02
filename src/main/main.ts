@@ -129,26 +129,51 @@ function setupIpcHandlers() {
   })
 
   ipcMain.handle('fs:readFile', async (_, { baseDir, relativeFilePath }) => {
-    return fs.promises.readFile(path.join(baseDir, relativeFilePath), 'utf-8')
+    const fullPath = path.join(baseDir, relativeFilePath)
+    try {
+      const stats = await fs.promises.stat(fullPath)
+      const fileSizeInMB = stats.size / (1024 * 1024)
+      
+      if (fileSizeInMB > 5) {
+        throw new Error(`File ${relativeFilePath} is too large (${fileSizeInMB.toFixed(1)} MB). Files over 5MB are not supported.`)
+      }
+      
+      return fs.promises.readFile(fullPath, 'utf-8')
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('too large')) {
+        throw error
+      }
+      throw new Error(`Failed to read file ${relativeFilePath}: ${error}`)
+    }
   })
 
   ipcMain.handle('fs:readMultipleFiles', async (_, { baseDir, files }) => {
     const contents: Record<string, string> = {}
+    const errors: string[] = []
+    
     await Promise.all(
       files.map(async (file: string) => {
         try {
-          const data = await fs.promises.readFile(
-            path.join(baseDir, file),
-            'utf-8'
-          )
+          const fullPath = path.join(baseDir, file)
+          const stats = await fs.promises.stat(fullPath)
+          const fileSizeInMB = stats.size / (1024 * 1024)
+          
+          if (fileSizeInMB > 5) {
+            errors.push(`${file} (${fileSizeInMB.toFixed(1)} MB - too large)`)
+            contents[file] = `// File too large (${fileSizeInMB.toFixed(1)} MB) - content not loaded`
+            return
+          }
+          
+          const data = await fs.promises.readFile(fullPath, 'utf-8')
           contents[file] = data
         } catch (err) {
           console.error(`Failed to read file '${file}':`, err)
-          contents[file] = ''
+          contents[file] = `// Error reading file: ${err}`
         }
       })
     )
-    return contents
+    
+    return { contents, errors }
   })
 
   ipcMain.handle('fs:parseXmlDiff', (_, xmlString: string) => ({

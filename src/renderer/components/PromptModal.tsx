@@ -22,27 +22,50 @@ export function PromptModal({ isOpen, onClose, onConfirm, title, defaultValue, a
     
     // Position modal relative to the anchor element if provided
     if (isOpen && anchorElement && modalRef.current) {
-      const anchorRect = anchorElement.getBoundingClientRect()
-      const modalRect = modalRef.current.getBoundingClientRect()
-      
-      // Position to the right of the button with more spacing
-      const left = anchorRect.right + 16
-      // Align vertically centered with the button, but slightly higher
-      const top = anchorRect.top - (modalRect.height / 2) + (anchorRect.height / 2) - 20
-      
-      // Make sure the modal doesn't go off-screen on the top
-      const adjustedTop = Math.max(20, top)
-      // Make sure the modal doesn't go off-screen on the bottom
-      const maxBottom = window.innerHeight - 20
-      const adjustedBottom = adjustedTop + modalRect.height
-      const finalTop = adjustedBottom > maxBottom 
-        ? maxBottom - modalRect.height 
-        : adjustedTop
-      
-      modalRef.current.style.position = 'fixed'
-      modalRef.current.style.left = `${left}px`
-      modalRef.current.style.top = `${finalTop}px`
-      modalRef.current.style.transform = 'none'
+      try {
+        const anchorRect = anchorElement.getBoundingClientRect()
+        const modalRect = modalRef.current.getBoundingClientRect()
+        
+        // Validate that we have valid rects
+        if (anchorRect.width === 0 && anchorRect.height === 0) {
+          console.warn('Anchor element has no dimensions, falling back to centered modal')
+          return
+        }
+        
+        // Position to the right of the button with more spacing
+        const left = anchorRect.right + 16
+        // Align vertically centered with the button, but slightly higher
+        const top = anchorRect.top - (modalRect.height / 2) + (anchorRect.height / 2) - 20
+        
+        // Make sure the modal doesn't go off-screen on the right
+        const maxRight = window.innerWidth - 20
+        const adjustedLeft = left + modalRect.width > maxRight 
+          ? anchorRect.left - modalRect.width - 16  // Position to the left instead
+          : left
+        
+        // Make sure the modal doesn't go off-screen on the top
+        const adjustedTop = Math.max(20, top)
+        // Make sure the modal doesn't go off-screen on the bottom
+        const maxBottom = window.innerHeight - 20
+        const adjustedBottom = adjustedTop + modalRect.height
+        const finalTop = adjustedBottom > maxBottom 
+          ? maxBottom - modalRect.height 
+          : adjustedTop
+        
+        modalRef.current.style.position = 'fixed'
+        modalRef.current.style.left = `${Math.max(20, adjustedLeft)}px`
+        modalRef.current.style.top = `${finalTop}px`
+        modalRef.current.style.transform = 'none'
+      } catch (error) {
+        console.warn('Error positioning modal, falling back to centered:', error)
+        // Reset positioning to allow centered fallback
+        if (modalRef.current) {
+          modalRef.current.style.position = ''
+          modalRef.current.style.left = ''
+          modalRef.current.style.top = ''
+          modalRef.current.style.transform = ''
+        }
+      }
     }
   }, [isOpen, anchorElement])
 

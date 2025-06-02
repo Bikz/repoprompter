@@ -16,20 +16,54 @@ export function parseDiffXml(xmlString: string): DiffSegment[] {
     console.warn('parseDiffXml called with empty XML string.')
     return []
   }
-  const doc = new xmldoc.XmlDocument(xmlString)
+  
+  let doc: xmldoc.XmlDocument
+  try {
+    doc = new xmldoc.XmlDocument(xmlString)
+  } catch (error) {
+    throw new Error(`Invalid XML format: ${error}`)
+  }
+  
+  // Validate root element structure
+  if (!doc.name || (doc.name !== 'root' && doc.childrenNamed('file').length === 0)) {
+    throw new Error('Invalid XML structure: Expected root element with <file> children or direct <file> elements')
+  }
+  
   const fileNodes = doc.childrenNamed('file')
+  if (fileNodes.length === 0) {
+    throw new Error('No <file> elements found in XML diff')
+  }
+  
   const changes: DiffSegment[] = []
+  const seenFiles = new Set<string>()
 
-  fileNodes.forEach(fileNode => {
+  fileNodes.forEach((fileNode, index) => {
     const fileName = fileNode.attr.name
-    const replaceNode = fileNode.childNamed('replace')
-    if (fileName && replaceNode) {
-      changes.push({
-        fileName,
-        newContent: replaceNode.val || '',
-      })
+    if (!fileName) {
+      throw new Error(`File element at index ${index} is missing 'name' attribute`)
     }
+    
+    if (seenFiles.has(fileName)) {
+      throw new Error(`Duplicate file found in diff: ${fileName}`)
+    }
+    seenFiles.add(fileName)
+    
+    const replaceNode = fileNode.childNamed('replace')
+    if (!replaceNode) {
+      throw new Error(`File '${fileName}' is missing <replace> element`)
+    }
+    
+    // Validate file path
+    if (fileName.includes('..') || fileName.startsWith('/') || fileName.includes('\\..\\')) {
+      throw new Error(`Invalid file path (potential path traversal): ${fileName}`)
+    }
+    
+    changes.push({
+      fileName,
+      newContent: replaceNode.val || '',
+    })
   })
+  
   return changes
 }
 
