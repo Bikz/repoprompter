@@ -1,11 +1,20 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react'
 import type { FileChange, RepoSettings, RepoGroup } from '../../common/types'
+import { getTokenInfo, calculateTokenPercentage, getTokenColorClass, shouldShowTokenInfo, formatTokenCount } from '../../common/tokenUtils'
 
 // Use RepoGroup from types.ts instead of duplicating the type
 // interface GroupItem {
 //   name: string
 //   files: string[]
 // }
+
+interface TokenData {
+  tokens: number
+  percentage: number
+  formatted: string
+  colorClass: string
+  shouldShow: boolean
+}
 
 interface RepoContextType {
   baseDir: string
@@ -34,6 +43,13 @@ interface RepoContextType {
 
   unselectUnnecessaryFiles: () => void
   
+  // Token management
+  fileTokens: Record<string, number>
+  getTokenData: (filePath: string) => TokenData | null
+  updateFileTokens: (filePath: string, content: string) => void
+  calculateMissingTokens: () => Promise<void>
+  totalSelectedTokens: number
+  
   // Modal state for group creation
   isPromptModalOpen: boolean
   closePromptModal: () => void
@@ -57,6 +73,9 @@ export function RepoProvider({ children }: RepoProviderProps) {
   const [activeGroupName, setActiveGroupName] = useState<string | null>(null)
   const [userInstructions, setUserInstructionsState] = useState('')
   
+  // Token tracking state
+  const [fileTokens, setFileTokens] = useState<Record<string, number>>({})
+  
   // State for prompt modal
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false)
   const [modalDefaultValue, setModalDefaultValue] = useState('')
@@ -70,6 +89,8 @@ export function RepoProvider({ children }: RepoProviderProps) {
 
   const setFileList = (files: string[] | undefined | null) => {
     setFileListState(Array.isArray(files) ? files : [])
+    // Clear token cache when file list changes
+    setFileTokens({})
   }
 
   // Load per-repo settings (userInstructions, groups) whenever baseDir changes
@@ -90,6 +111,17 @@ export function RepoProvider({ children }: RepoProviderProps) {
       })
   }, [baseDir])
 
+  // Calculate tokens when selected files change
+  useEffect(() => {
+    if (selectedFiles.length > 0 && baseDir) {
+      // Debounce the calculation to avoid excessive API calls
+      const timer = setTimeout(() => {
+        calculateMissingTokens()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [selectedFiles, baseDir])
+
   // Called externally by DirectorySelector on a new directory selection
   const setBaseDir = async (dir: string) => {
     setBaseDirState(dir)
@@ -98,6 +130,62 @@ export function RepoProvider({ children }: RepoProviderProps) {
       setFileList(files)
     } catch (error) {
       console.error('Error reading directory:', error)
+    }
+  }
+
+  // Calculate total tokens for selected files
+  const totalSelectedTokens = useMemo(() => {
+    return selectedFiles.reduce((total, file) => {
+      return total + (fileTokens[file] || 0)
+    }, 0)
+  }, [selectedFiles, fileTokens])
+
+  // Get token data for a specific file
+  const getTokenData = (filePath: string): TokenData | null => {
+    const tokens = fileTokens[filePath]
+    if (!tokens) return null
+
+    const percentage = calculateTokenPercentage(tokens, totalSelectedTokens)
+    const colorClass = getTokenColorClass(percentage)
+    const shouldShow = shouldShowTokenInfo(percentage)
+
+    return {
+      tokens,
+      percentage,
+      formatted: formatTokenCount(tokens),
+      colorClass,
+      shouldShow
+    }
+  }
+
+  // Update file tokens when content is read
+  const updateFileTokens = (filePath: string, content: string) => {
+    const tokenInfo = getTokenInfo(content)
+    setFileTokens(prev => ({
+      ...prev,
+      [filePath]: tokenInfo.count
+    }))
+  }
+
+  // Calculate tokens for selected files that don't have them yet
+  const calculateMissingTokens = async () => {
+    const filesToCalculate = selectedFiles.filter(file => 
+      !fileTokens[file] && 
+      !file.endsWith('/') && // Exclude folders
+      file !== '__ROOT__' // Exclude root
+    )
+    
+    if (filesToCalculate.length === 0) return
+
+    try {
+      const { contents } = await window.api.readMultipleFileContents(baseDir, filesToCalculate)
+      Object.entries(contents).forEach(([filePath, content]) => {
+        if (content && !content.startsWith('// File too large') && !content.startsWith('// Error reading file')) {
+          updateFileTokens(filePath, content)
+        }
+      })
+    } catch (error) {
+      console.error('Error calculating tokens:', error)
     }
   }
 
@@ -413,6 +501,13 @@ export function RepoProvider({ children }: RepoProviderProps) {
     setUserInstructions,
 
     unselectUnnecessaryFiles,
+    
+    // Token management
+    fileTokens,
+    getTokenData,
+    updateFileTokens,
+    calculateMissingTokens,
+    totalSelectedTokens,
     
     // Modal state
     isPromptModalOpen,

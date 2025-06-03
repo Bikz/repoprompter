@@ -39,7 +39,7 @@ export function DirectorySelector() {
     if (!baseDir) return
     try {
       const files = await window.api.readDirectory(baseDir)
-      setFileList(files)
+      setFileList(files) // This will clear token cache via setFileList
     } catch (error) {
       console.error('Error refreshing directory:', error)
     }

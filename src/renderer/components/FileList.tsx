@@ -210,7 +210,7 @@ function getFileIcon(name: string | undefined, isFolder: boolean, isOpen?: boole
 }
 
 export function FileList() {
-  const { baseDir, fileList, selectedFiles, toggleSelectedFile } = useRepoContext()
+  const { baseDir, fileList, selectedFiles, toggleSelectedFile, getTokenData } = useRepoContext()
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerHeight, setContainerHeight] = useState(400)
 
@@ -264,6 +264,7 @@ export function FileList() {
     
     const selected = isSelected(nodeData)
     const icon = getFileIcon(nodeData.name, nodeData.isFolder, node.isOpen)
+    const tokenData = !nodeData.isFolder ? getTokenData(nodeData.path) : null
     
     const handleClick = () => {
       if (nodeData.isFolder) {
@@ -384,6 +385,13 @@ export function FileList() {
         >
           {nodeData.name || 'Unknown'}
         </span>
+        
+        {/* Token info for files (only show for medium/large files) */}
+        {tokenData && tokenData.shouldShow && (
+          <span className={`text-xs ml-2 font-mono ${tokenData.colorClass}`}>
+            ({tokenData.formatted} ⏺ {tokenData.percentage}%)
+          </span>
+        )}
       </div>
     )
   }
@@ -416,7 +424,7 @@ export function FileList() {
     <div ref={containerRef} className="h-full react-arborist-tree">
       <Tree
         data={treeData}
-        openByDefault={false}
+        openByDefault={(node) => node.data?.path === '__ROOT__'}
         width={containerRef.current?.clientWidth || 300}
         height={containerHeight}
         indent={16}

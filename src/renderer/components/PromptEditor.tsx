@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
+import { getTokenInfo } from '../../common/tokenUtils'
 
 export function PromptEditor() {
-  const { baseDir, selectedFiles } = useRepoContext()
+  const { baseDir, selectedFiles, updateFileTokens } = useRepoContext()
   const [userInstructions, setUserInstructions] = useState('')
   const [combinedPrompt, setCombinedPrompt] = useState('')
   const [showCombinedPrompt, setShowCombinedPrompt] = useState(false)
@@ -21,6 +22,13 @@ You are a code editing assistant. You can only reply with XML according to the i
     if (errors.length > 0) {
       alert(`Warning: Some files could not be loaded:\n${errors.join('\n')}`)
     }
+    
+    // Calculate and cache token counts for all loaded files
+    Object.entries(fileContentMap).forEach(([filePath, content]) => {
+      if (content && !content.startsWith('// File too large') && !content.startsWith('// Error reading file')) {
+        updateFileTokens(filePath, content)
+      }
+    })
     
     let result = '<system_instructions>\n' + systemPrompt.trim() + '\n</system_instructions>\n\n'
     result += '<file_map>\n'
