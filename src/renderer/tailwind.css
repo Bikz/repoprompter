@@ -175,13 +175,14 @@ html, body, #root {
   position: absolute;
   left: 0.75rem;
   top: 0;
-  width: 1px;
+  width: 2px;
   height: 100%;
-  background-color: #e5e7eb;
+  background-color: #111827;
   z-index: 1;
+  border-radius: 1px;
 }
 .dark .file-tree-node-child::before {
-  background-color: #444;
+  background-color: #e5e7eb;
 }
 
 /* Horizontal connector to items */
@@ -189,14 +190,15 @@ html, body, #root {
   content: "";
   position: absolute;
   left: 0.75rem;
-  top: 0.8rem;
-  width: 0.75rem;
-  height: 1px;
-  background-color: #e5e7eb;
+  top: 0.875rem;
+  width: 0.875rem;
+  height: 2px;
+  background-color: #111827;
   z-index: 1;
+  border-radius: 1px;
 }
 .dark .file-tree-node-with-connector::after {
-  background-color: #444;
+  background-color: #e5e7eb;
 }
 
 .file-tree-item {
@@ -278,6 +280,12 @@ html, body, #root {
 }
 .dark .folder-icon {
   color: #ca8a04;
+}
+.project-icon {
+  color: #3b82f6;
+}
+.dark .project-icon {
+  color: #60a5fa;
 }
 .ts-icon, .tsx-icon {
   color: #007acc;
@@ -516,7 +524,7 @@ html, body, #root {
 }
 .dark .file-tree-node-child::before,
 .dark .file-tree-node-with-connector::after {
-  background-color: #444;
+  background-color: #e5e7eb;
 }
 
 /* file-group button in dark */
@@ -569,6 +577,93 @@ html, body, #root {
 }
 .dark .file-tree::-webkit-scrollbar-thumb:hover {
   background-color: #666;
+}
+
+/* React Arborist Tree Styling */
+.react-arborist-tree {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+}
+
+.dark .react-arborist-tree {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+/* Tree row styling */
+.react-arborist-row {
+  border-radius: 3px;
+  transition: background-color 0.1s ease;
+}
+
+.react-arborist-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.dark .react-arborist-row:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.react-arborist-row-selected {
+  background-color: #e3f2fd !important;
+  border-left: 3px solid #2196f3;
+}
+
+.dark .react-arborist-row-selected {
+  background-color: rgba(30, 58, 138, 0.3) !important;
+  border-left: 3px solid #60a5fa;
+}
+
+/* Tree lines - clean IDE style */
+.react-arborist-tree .react-arborist-tree-container::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #e0e0e0;
+  z-index: 1;
+}
+
+.dark .react-arborist-tree .react-arborist-tree-container::before {
+  background: #404040;
+}
+
+/* Indent guides */
+.react-arborist-indent-line {
+  border-left: 1px solid #e0e0e0;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.dark .react-arborist-indent-line {
+  border-color: #404040;
+}
+
+/* Arrow styling */
+.react-arborist-arrow {
+  color: #6b7280;
+  transition: transform 0.2s ease;
+  font-size: 10px;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .react-arborist-arrow {
+  color: #9ca3af;
+}
+
+.react-arborist-arrow-expanded {
+  transform: rotate(90deg);
 }
 
 /* Modal styles */

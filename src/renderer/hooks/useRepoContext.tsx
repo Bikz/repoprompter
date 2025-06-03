@@ -25,6 +25,7 @@ interface RepoContextType {
   groups: RepoGroup[]
   createGroupFromSelection: (buttonElement?: HTMLElement | null) => void
   selectGroup: (name: string) => void
+  toggleGroup: (name: string) => void
   removeGroup: (name: string) => void
   activeGroupName: string | null
   
@@ -216,6 +217,34 @@ export function RepoProvider({ children }: RepoProviderProps) {
     setActiveGroupName(name) // Track which group is active
   }
 
+  const toggleGroup = (name: string) => {
+    const found = groups.find(g => g.name === name)
+    if (!found) return
+    
+    // Check if all files in the group are currently selected
+    const allGroupFilesSelected = found.files.every(file => selectedFiles.includes(file))
+    
+    if (allGroupFilesSelected) {
+      // Unselect all files in the group
+      const newSelectedFiles = selectedFiles.filter(file => !found.files.includes(file))
+      setSelectedFiles(newSelectedFiles)
+      // Clear active group if we're deselecting it
+      if (activeGroupName === name) {
+        setActiveGroupName(null)
+      }
+    } else {
+      // Select all files in the group (add any missing ones)
+      const newSelectedFiles = [...selectedFiles]
+      found.files.forEach(file => {
+        if (!newSelectedFiles.includes(file)) {
+          newSelectedFiles.push(file)
+        }
+      })
+      setSelectedFiles(newSelectedFiles)
+      setActiveGroupName(name)
+    }
+  }
+
   const removeGroup = async (name: string) => {
     // Reset active group if removing the active one
     if (activeGroupName === name) {
@@ -280,6 +309,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     groups,
     createGroupFromSelection,
     selectGroup,
+    toggleGroup,
     removeGroup,
     activeGroupName,
 

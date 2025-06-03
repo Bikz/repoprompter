@@ -11,6 +11,7 @@ export function DirectorySelector() {
     createGroupFromSelection,
     groups,
     selectGroup,
+    toggleGroup,
     removeGroup,
     activeGroupName,
     unselectLargeFiles,
@@ -110,10 +111,10 @@ export function DirectorySelector() {
             <div
               key={group.name}
               className={`file-group-item ${activeGroupName === group.name ? 'active' : ''}`}
-              title={`Select group "${group.name}" (${group.files.length} files)`}
+              title={`Toggle group "${group.name}" (${group.files.length} files)`}
             >
               <span
-                onClick={() => selectGroup(group.name)}
+                onClick={() => toggleGroup(group.name)}
                 className="inline-flex items-center"
               >
                 {group.name}

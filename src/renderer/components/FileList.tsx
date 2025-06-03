@@ -1,94 +1,239 @@
-import React, { useState, useMemo } from 'react'
+import React, { useMemo, useRef, useEffect, useState } from 'react'
+import { Tree } from 'react-arborist'
 import { useRepoContext } from '../hooks/useRepoContext'
-import { FileTreeNode } from './FileTreeNode'
 
-interface FileNode {
+interface TreeNode {
+  id: string
   name: string
+  isFolder: boolean
+  children?: TreeNode[]
   path: string
-  children?: FileNode[]
 }
 
-/**
- * Recursively convert an object-based tree to an array-based tree.
- */
-function convertToArray(obj: Record<string, FileNode>): FileNode[] {
-  return Object.values(obj).map(node => {
-    if (node.children) {
-      return {
-        name: node.name,
-        path: node.path,
-        children: convertToArray(node.children as Record<string, FileNode>)
-      }
-    }
-    return { name: node.name, path: node.path }
+function buildArboristTree(files: string[], baseDir: string): TreeNode[] {
+  if (!files.length) return []
+
+  const projectName = baseDir.split('/').pop() || 'Project'
+  
+  // Create a simple flat-to-tree converter
+  const createNode = (path: string, name: string, isFolder: boolean): TreeNode => ({
+    id: path,
+    name: name,
+    path: path,
+    isFolder: isFolder,
+    children: isFolder ? [] : undefined
   })
-}
 
-/**
- * Build a file tree from a flat array of relative paths.
- */
-function buildFileTree(files: string[]): FileNode[] {
-  const root: Record<string, FileNode> = {}
+  // Build tree structure
+  const nodeMap = new Map<string, TreeNode>()
+  const rootChildren: TreeNode[] = []
 
+  // First pass: create all nodes
   for (const file of files) {
-    const parts = file.split(/[\\/]/)
-    let current = root
+    const parts = file.split('/').filter(part => part.length > 0)
     let currentPath = ''
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
+      const previousPath = currentPath
       currentPath = currentPath ? `${currentPath}/${part}` : part
-
-      if (!current[part]) {
-        current[part] = {
-          name: part,
-          path: currentPath,
-          children: {}
+      const isFolder = i < parts.length - 1
+      
+      if (!nodeMap.has(currentPath)) {
+        const node = createNode(currentPath, part, isFolder)
+        nodeMap.set(currentPath, node)
+        
+        if (previousPath) {
+          // Add to parent
+          const parent = nodeMap.get(previousPath)
+          if (parent && parent.children) {
+            parent.children.push(node)
+          }
+        } else {
+          // Top level node
+          rootChildren.push(node)
         }
-      }
-
-      if (i === parts.length - 1) {
-        // no children at leaf
-        current[part].children = undefined
-      } else {
-        if (!current[part].children) {
-          current[part].children = {}
-        }
-        current = current[part].children as Record<string, FileNode>
       }
     }
   }
 
-  return convertToArray(root)
+  // Sort children alphabetically (folders first, then files)
+  const sortNodes = (nodes: TreeNode[]) => {
+    return nodes.sort((a, b) => {
+      if (a.isFolder && !b.isFolder) return -1
+      if (!a.isFolder && b.isFolder) return 1
+      return a.name.localeCompare(b.name)
+    })
+  }
+
+  // Sort all children recursively
+  nodeMap.forEach(node => {
+    if (node.children) {
+      node.children = sortNodes(node.children)
+    }
+  })
+
+  const sortedRootChildren = sortNodes(rootChildren)
+
+  // Return with root wrapper
+  return [{
+    id: '__ROOT__',
+    name: projectName,
+    path: '__ROOT__',
+    isFolder: true,
+    children: sortedRootChildren
+  }]
+}
+
+function getFileIcon(name: string | undefined, isFolder: boolean, isOpen?: boolean) {
+  if (!name) return '📄'
+  
+  if (isFolder) {
+    if (name === '__ROOT__' || name.includes('Project')) {
+      return '📁'
+    }
+    return isOpen ? '📂' : '📁'
+  }
+
+  const ext = name.split('.').pop()?.toLowerCase() || ''
+  switch (ext) {
+    case 'ts': return '🔷'
+    case 'tsx': return '⚛️'
+    case 'js': return '🟨'
+    case 'jsx': return '⚛️'
+    case 'json': return '📋'
+    case 'md': return '📝'
+    case 'html': return '🌐'
+    case 'css': case 'scss': return '🎨'
+    case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': return '🖼️'
+    default: return '📄'
+  }
 }
 
 export function FileList() {
   const { baseDir, fileList, selectedFiles, toggleSelectedFile } = useRepoContext()
-  const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({})
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerHeight, setContainerHeight] = useState(400)
 
-  // Build a nested tree from the array of paths
-  const treeNodes = useMemo(
-    () => (fileList.length > 0 ? buildFileTree(fileList) : []),
-    [fileList]
-  )
+  const treeData = useMemo(() => {
+    if (!fileList.length || !baseDir) return []
+    console.log('Building tree with files:', fileList.slice(0, 5)) // Log first 5 files
+    const tree = buildArboristTree(fileList, baseDir)
+    console.log('Generated tree:', tree)
+    return tree
+  }, [fileList, baseDir])
 
-  // Use a set for quick membership checks
   const selectedSet = useMemo(() => new Set(selectedFiles), [selectedFiles])
 
-  // Auto-expand first-level folders for better UX
-  useMemo(() => {
-    if (treeNodes.length > 0) {
-      const initialExpanded: Record<string, boolean> = {}
-      treeNodes.forEach(node => {
-        if (node.children) {
-          initialExpanded[node.path] = true
-        }
-      })
-      setExpandedMap(prev => ({ ...prev, ...initialExpanded }))
+  // Calculate container height
+  useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        setContainerHeight(rect.height || 400)
+      }
     }
-  }, [treeNodes])
 
-  // If user hasn't selected a dir or there's no files, show a message
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
+
+  const handleSelect = (nodes: TreeNode[]) => {
+    // Handle selection changes
+    const newSelection = nodes.map(n => n.path).filter(path => path !== '__ROOT__')
+    
+    // Find files to add and remove
+    const toAdd = newSelection.filter(path => !selectedFiles.includes(path))
+    const toRemove = selectedFiles.filter(path => !newSelection.includes(path))
+    
+    // Apply changes
+    toAdd.forEach(path => toggleSelectedFile(path))
+    toRemove.forEach(path => toggleSelectedFile(path))
+  }
+
+  const isSelected = (node: TreeNode) => {
+    if (node.path === '__ROOT__') {
+      // Root is selected if all files are selected
+      return fileList.length > 0 && fileList.every(file => selectedFiles.includes(file))
+    }
+    return selectedSet.has(node.path)
+  }
+
+  const Node = ({ node, style, dragHandle }: any) => {
+    if (!node) return null
+    
+    console.log('Full node object:', node)
+    console.log('Node keys:', Object.keys(node))
+    
+    // React-arborist wraps our data - try to find the actual data
+    const nodeData = node.data || node
+    
+    console.log('Node data:', { 
+      id: nodeData.id, 
+      name: nodeData.name, 
+      path: nodeData.path, 
+      isFolder: nodeData.isFolder,
+      nodeData: nodeData
+    })
+    
+    const selected = isSelected(nodeData)
+    const icon = getFileIcon(nodeData.name, nodeData.isFolder, node.isOpen)
+    
+    const handleClick = () => {
+      if (nodeData.isFolder) {
+        // For folders, gather all descendant files
+        const gatherFiles = (n: TreeNode): string[] => {
+          if (!n.isFolder) return [n.path]
+          if (!n.children) return []
+          return n.children.flatMap(gatherFiles)
+        }
+        
+        const allFiles = nodeData.path === '__ROOT__' ? fileList : gatherFiles(nodeData)
+        const allSelected = allFiles.every(file => selectedFiles.includes(file))
+        
+        if (allSelected) {
+          // Unselect all
+          allFiles.forEach(file => {
+            if (selectedFiles.includes(file)) {
+              toggleSelectedFile(file)
+            }
+          })
+        } else {
+          // Select all
+          allFiles.forEach(file => {
+            if (!selectedFiles.includes(file)) {
+              toggleSelectedFile(file)
+            }
+          })
+        }
+      } else {
+        // Single file
+        toggleSelectedFile(nodeData.path)
+      }
+    }
+
+    return (
+      <div
+        ref={dragHandle}
+        style={style}
+        className={`flex items-center py-1 px-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-colors ${
+          selected ? 'bg-blue-50 dark:bg-blue-900/30 font-medium border-l-2 border-blue-500' : ''
+        }`}
+        onClick={handleClick}
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => {}} // Handled by onClick
+          className="mr-2 pointer-events-none w-3 h-3 rounded border border-gray-300 dark:border-gray-600"
+        />
+        <span className="mr-2 text-base leading-none">{icon}</span>
+        <span className="truncate text-gray-700 dark:text-gray-300 font-mono text-xs">{nodeData.name || 'Unknown'}</span>
+      </div>
+    )
+  }
+
   if (!baseDir || fileList.length === 0) {
     return (
       <div className="p-4 text-sm text-gray-500 dark:text-gray-300">
@@ -113,80 +258,23 @@ export function FileList() {
     )
   }
 
-  // Toggle folder => select or unselect all children
-  const handleToggleSelected = (pathStr: string, isFolder: boolean) => {
-    if (!isFolder) {
-      toggleSelectedFile(pathStr)
-      return
-    }
-
-    // Recursively gather all children
-    function gatherAllDescendants(node: FileNode): string[] {
-      if (!node.children) return [node.path]
-      let result: string[] = []
-      for (const child of node.children) {
-        if (!child.children) {
-          result.push(child.path)
-        } else {
-          result = result.concat(gatherAllDescendants(child))
-        }
-      }
-      return result
-    }
-
-    // Find the node by path
-    function findNode(list: FileNode[], p: string): FileNode | null {
-      for (const item of list) {
-        if (item.path === p) return item
-        if (item.children) {
-          const found = findNode(item.children, p)
-          if (found) return found
-        }
-      }
-      return null
-    }
-
-    const node = findNode(treeNodes, pathStr)
-    if (!node) return
-
-    const allDesc = gatherAllDescendants(node)
-    const allSelected = allDesc.every(d => selectedSet.has(d))
-    let newSel = [...selectedFiles]
-
-    if (allSelected) {
-      // unselect
-      newSel = newSel.filter(f => !allDesc.includes(f))
-    } else {
-      // select
-      for (const d of allDesc) {
-        if (!newSel.includes(d)) {
-          newSel.push(d)
-        }
-      }
-    }
-
-    // Update
-    const toRemove = selectedFiles.filter(sf => !newSel.includes(sf))
-    const toAdd = newSel.filter(nf => !selectedFiles.includes(nf))
-
-    toRemove.forEach(sf => toggleSelectedFile(sf))
-    toAdd.forEach(nf => toggleSelectedFile(nf))
-  }
-
   return (
-    <div className="file-tree overflow-y-auto text-sm p-1 h-full">
-      {treeNodes.map((node, i) => (
-        <FileTreeNode
-          key={node.path}
-          node={node}
-          selectedSet={selectedSet}
-          toggleSelected={handleToggleSelected}
-          expandedMap={expandedMap}
-          setExpandedMap={setExpandedMap}
-          level={0}
-          isLastChild={i === treeNodes.length - 1}
-        />
-      ))}
+    <div ref={containerRef} className="h-full react-arborist-tree">
+      <Tree
+        data={treeData}
+        openByDefault={true}
+        width={containerRef.current?.clientWidth || 300}
+        height={containerHeight}
+        indent={20}
+        rowHeight={26}
+        overscanCount={20}
+        disableDrop
+        disableDrag
+        disableMultiSelection={true}
+        padding={4}
+      >
+        {Node}
+      </Tree>
     </div>
   )
 }

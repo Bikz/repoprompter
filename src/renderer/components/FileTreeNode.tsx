@@ -35,6 +35,10 @@ function getCheckboxState(node: FileNode, selected: Set<string>): 'checked' | 'p
 /** Decide which icon to show for a file (by extension) or folder. */
 function getIconPath(node: FileNode, isExpanded: boolean, isFolder: boolean): string {
   if (isFolder) {
+    // Special icon for root node
+    if (node.path === '__ROOT__') {
+      return "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+    }
     // show a folder icon that changes for open/close
     return isExpanded
       ? "M2 6C2 4.89543 2.89543 4 4 4H10L12 6H20C21.1046 6 22 6.89543 22 8V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6Z"
@@ -72,7 +76,9 @@ function getIconPath(node: FileNode, isExpanded: boolean, isFolder: boolean): st
 
 /** Get the icon CSS class based on file extension */
 function getIconClass(node: FileNode, isFolder: boolean): string {
-  if (isFolder) return 'folder-icon'
+  if (isFolder) {
+    return node.path === '__ROOT__' ? 'project-icon' : 'folder-icon'
+  }
   
   const ext = node.name.split('.').pop()?.toLowerCase() || ''
   switch (ext) {
