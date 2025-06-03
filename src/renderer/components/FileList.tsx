@@ -86,28 +86,127 @@ function buildArboristTree(files: string[], baseDir: string): TreeNode[] {
 }
 
 function getFileIcon(name: string | undefined, isFolder: boolean, isOpen?: boolean) {
-  if (!name) return '📄'
+  if (!name) {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    )
+  }
   
   if (isFolder) {
     if (name === '__ROOT__' || name.includes('Project')) {
-      return '📁'
+      // Project root icon
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-blue-500">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" fill="currentColor"/>
+        </svg>
+      )
     }
-    return isOpen ? '📂' : '📁'
+    // Regular folder icon
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className={isOpen ? "text-yellow-600" : "text-yellow-500"}>
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" fill="currentColor"/>
+      </svg>
+    )
   }
 
   const ext = name.split('.').pop()?.toLowerCase() || ''
-  switch (ext) {
-    case 'ts': return '🔷'
-    case 'tsx': return '⚛️'
-    case 'js': return '🟨'
-    case 'jsx': return '⚛️'
-    case 'json': return '📋'
-    case 'md': return '📝'
-    case 'html': return '🌐'
-    case 'css': case 'scss': return '🎨'
-    case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': return '🖼️'
-    default: return '📄'
+  
+  // TypeScript files
+  if (ext === 'ts' || ext === 'tsx') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-blue-600">
+        <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor"/>
+        <text x="12" y="16" textAnchor="middle" className="fill-white text-xs font-bold">TS</text>
+      </svg>
+    )
   }
+  
+  // JavaScript files
+  if (ext === 'js' || ext === 'jsx') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-yellow-500">
+        <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor"/>
+        <text x="12" y="16" textAnchor="middle" className="fill-black text-xs font-bold">JS</text>
+      </svg>
+    )
+  }
+  
+  // React files
+  if (ext === 'jsx' || ext === 'tsx') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-cyan-500">
+        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        <path d="M12 1a15.3 15.3 0 0 1 4 0 15.3 15.3 0 0 1 4 0" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <path d="M12 23a15.3 15.3 0 0 1-4 0 15.3 15.3 0 0 1-4 0" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <path d="M20 5.5a15.3 15.3 0 0 1-4 3.5 15.3 15.3 0 0 1-4 3.5" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <path d="M4 18.5a15.3 15.3 0 0 1 4-3.5 15.3 15.3 0 0 1 4-3.5" stroke="currentColor" strokeWidth="2" fill="none"/>
+      </svg>
+    )
+  }
+  
+  // JSON files
+  if (ext === 'json') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-green-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <text x="12" y="16" textAnchor="middle" className="fill-current text-xs font-bold">{}</text>
+      </svg>
+    )
+  }
+  
+  // Markdown files
+  if (ext === 'md' || ext === 'markdown') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-700">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <text x="12" y="16" textAnchor="middle" className="fill-current text-xs font-bold">M</text>
+      </svg>
+    )
+  }
+  
+  // CSS files
+  if (ext === 'css' || ext === 'scss' || ext === 'sass') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-pink-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" fill="none"/>
+      </svg>
+    )
+  }
+  
+  // HTML files
+  if (ext === 'html' || ext === 'htm') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-orange-500">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" fill="none"/>
+      </svg>
+    )
+  }
+  
+  // Image files
+  if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'].includes(ext)) {
+    return (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-purple-500">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" fill="none"/>
+        <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+        <polyline points="21,15 16,10 5,21" stroke="currentColor" strokeWidth="2" fill="none"/>
+      </svg>
+    )
+  }
+  
+  // Default file icon
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-gray-500">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" fill="none"/>
+      <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2" fill="none"/>
+    </svg>
+  )
 }
 
 export function FileList() {
@@ -184,9 +283,6 @@ export function FileList() {
           }
           
           const allPaths = gatherAllPaths(nodeData)
-          console.log('All paths in tree:', allPaths)
-          console.log('Currently selected:', selectedFiles)
-          
           const allSelected = allPaths.every(path => selectedFiles.includes(path))
           
           if (allSelected) {
@@ -241,19 +337,53 @@ export function FileList() {
       <div
         ref={dragHandle}
         style={style}
-        className={`flex items-center py-1 px-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 text-sm transition-colors ${
-          selected ? 'bg-blue-50 dark:bg-blue-900/30 font-medium border-l-2 border-blue-500' : ''
+        className={`flex items-center py-0.5 px-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-sm transition-colors group ${
+          selected ? 'bg-blue-50 dark:bg-blue-900/30 font-medium' : ''
         }`}
-        onClick={handleClick}
       >
+        {/* Expand/collapse arrow for folders */}
+        {nodeData.isFolder ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              node.toggle()
+            }}
+            className="w-4 h-4 flex items-center justify-center mr-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-sm transition-all opacity-70 hover:opacity-100"
+          >
+            <svg
+              width="8"
+              height="8"
+              viewBox="0 0 24 24"
+              fill="none"
+              className={`transform transition-transform duration-150 ${node.isOpen ? 'rotate-90' : ''}`}
+            >
+              <path
+                d="M9 6l6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ) : (
+          <div className="w-4 h-4 mr-1" />
+        )}
+        
         <input
           type="checkbox"
           checked={selected}
-          onChange={() => {}} // Handled by onClick
-          className="mr-2 pointer-events-none w-3 h-3 rounded border border-gray-300 dark:border-gray-600"
+          onChange={() => {}}
+          onClick={handleClick}
+          className="mr-2 w-3 h-3 rounded-sm border border-gray-300 dark:border-gray-600 cursor-pointer accent-blue-500 focus:ring-1 focus:ring-blue-500"
         />
-        <span className="mr-2 text-base leading-none">{icon}</span>
-        <span className="truncate text-gray-700 dark:text-gray-300 font-mono text-xs">{nodeData.name || 'Unknown'}</span>
+        <div className="mr-2 flex-shrink-0">{icon}</div>
+        <span 
+          className="truncate text-gray-800 dark:text-gray-200 text-sm cursor-pointer flex-1 font-medium"
+          onClick={handleClick}
+        >
+          {nodeData.name || 'Unknown'}
+        </span>
       </div>
     )
   }
@@ -286,16 +416,16 @@ export function FileList() {
     <div ref={containerRef} className="h-full react-arborist-tree">
       <Tree
         data={treeData}
-        openByDefault={true}
+        openByDefault={false}
         width={containerRef.current?.clientWidth || 300}
         height={containerHeight}
-        indent={20}
-        rowHeight={26}
+        indent={16}
+        rowHeight={24}
         overscanCount={20}
         disableDrop
         disableDrag
         disableMultiSelection={true}
-        padding={4}
+        padding={2}
       >
         {Node}
       </Tree>
