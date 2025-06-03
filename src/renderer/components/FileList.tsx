@@ -117,10 +117,7 @@ export function FileList() {
 
   const treeData = useMemo(() => {
     if (!fileList.length || !baseDir) return []
-    console.log('Building tree with files:', fileList.slice(0, 5)) // Log first 5 files
-    const tree = buildArboristTree(fileList, baseDir)
-    console.log('Generated tree:', tree)
-    return tree
+    return buildArboristTree(fileList, baseDir)
   }, [fileList, baseDir])
 
   const selectedSet = useMemo(() => new Set(selectedFiles), [selectedFiles])
@@ -163,49 +160,76 @@ export function FileList() {
   const Node = ({ node, style, dragHandle }: any) => {
     if (!node) return null
     
-    console.log('Full node object:', node)
-    console.log('Node keys:', Object.keys(node))
-    
-    // React-arborist wraps our data - try to find the actual data
+    // React-arborist wraps our data - access the actual data
     const nodeData = node.data || node
-    
-    console.log('Node data:', { 
-      id: nodeData.id, 
-      name: nodeData.name, 
-      path: nodeData.path, 
-      isFolder: nodeData.isFolder,
-      nodeData: nodeData
-    })
     
     const selected = isSelected(nodeData)
     const icon = getFileIcon(nodeData.name, nodeData.isFolder, node.isOpen)
     
     const handleClick = () => {
       if (nodeData.isFolder) {
-        // For folders, gather all descendant files
-        const gatherFiles = (n: TreeNode): string[] => {
-          if (!n.isFolder) return [n.path]
-          if (!n.children) return []
-          return n.children.flatMap(gatherFiles)
-        }
-        
-        const allFiles = nodeData.path === '__ROOT__' ? fileList : gatherFiles(nodeData)
-        const allSelected = allFiles.every(file => selectedFiles.includes(file))
-        
-        if (allSelected) {
-          // Unselect all
-          allFiles.forEach(file => {
-            if (selectedFiles.includes(file)) {
-              toggleSelectedFile(file)
+        if (nodeData.path === '__ROOT__') {
+          // Special handling for root - select/unselect ALL items (files + directories)
+          const gatherAllPaths = (n: TreeNode): string[] => {
+            const paths: string[] = []
+            if (n.path !== '__ROOT__') {
+              paths.push(n.path)
             }
-          })
+            if (n.children) {
+              n.children.forEach(child => {
+                paths.push(...gatherAllPaths(child))
+              })
+            }
+            return paths
+          }
+          
+          const allPaths = gatherAllPaths(nodeData)
+          console.log('All paths in tree:', allPaths)
+          console.log('Currently selected:', selectedFiles)
+          
+          const allSelected = allPaths.every(path => selectedFiles.includes(path))
+          
+          if (allSelected) {
+            // Unselect all
+            allPaths.forEach(path => {
+              if (selectedFiles.includes(path)) {
+                toggleSelectedFile(path)
+              }
+            })
+          } else {
+            // Select all
+            allPaths.forEach(path => {
+              if (!selectedFiles.includes(path)) {
+                toggleSelectedFile(path)
+              }
+            })
+          }
         } else {
-          // Select all
-          allFiles.forEach(file => {
-            if (!selectedFiles.includes(file)) {
-              toggleSelectedFile(file)
-            }
-          })
+          // For regular folders, gather all descendant files
+          const gatherFiles = (n: TreeNode): string[] => {
+            if (!n.isFolder) return [n.path]
+            if (!n.children) return []
+            return n.children.flatMap(gatherFiles)
+          }
+          
+          const allFiles = gatherFiles(nodeData)
+          const allSelected = allFiles.every(file => selectedFiles.includes(file))
+          
+          if (allSelected) {
+            // Unselect all
+            allFiles.forEach(file => {
+              if (selectedFiles.includes(file)) {
+                toggleSelectedFile(file)
+              }
+            })
+          } else {
+            // Select all
+            allFiles.forEach(file => {
+              if (!selectedFiles.includes(file)) {
+                toggleSelectedFile(file)
+              }
+            })
+          }
         }
       } else {
         // Single file
