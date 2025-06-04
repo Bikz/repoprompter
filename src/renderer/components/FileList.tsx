@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react'
 import { Tree } from 'react-arborist'
 import { useRepoContext } from '../hooks/useRepoContext'
+import { calculateFolderTokens, formatTokenCount, calculateTokenPercentage, getTokenColorClass } from '../../common/tokenUtils'
 
 interface TreeNode {
   id: string
@@ -209,9 +210,14 @@ function getFileIcon(name: string | undefined, isFolder: boolean, isOpen?: boole
   )
 }
 
-export function FileList() {
-  const { baseDir, fileList, selectedFiles, toggleSelectedFile, getTokenData } = useRepoContext()
+interface FileListProps {
+  isTreeCollapsed?: boolean
+}
+
+export function FileList({ isTreeCollapsed = false }: FileListProps) {
+  const { baseDir, fileList, selectedFiles, toggleSelectedFile, getTokenData, fileTokens, totalSelectedTokens } = useRepoContext()
   const containerRef = useRef<HTMLDivElement>(null)
+  const treeRef = useRef<any>(null)
   const [containerHeight, setContainerHeight] = useState(400)
 
   const treeData = useMemo(() => {
@@ -234,6 +240,37 @@ export function FileList() {
     window.addEventListener('resize', updateHeight)
     return () => window.removeEventListener('resize', updateHeight)
   }, [])
+
+  // Handle collapse/expand when isTreeCollapsed changes
+  useEffect(() => {
+    if (!treeRef.current || !treeData.length) return
+
+    const tree = treeRef.current
+    
+    // Wait for tree to be fully initialized
+    setTimeout(() => {
+      if (isTreeCollapsed) {
+        // Close all folders except root
+        tree.closeAll()
+        // Keep root open
+        if (tree.root?.children?.[0]) {
+          tree.open('__ROOT__')
+        }
+      } else {
+        // Open root and first level folders
+        tree.open('__ROOT__')
+        // Open first level folders (direct children of root)
+        const rootNode = treeData[0]
+        if (rootNode?.children) {
+          rootNode.children.forEach(child => {
+            if (child.isFolder) {
+              tree.open(child.id)
+            }
+          })
+        }
+      }
+    }, 50)
+  }, [isTreeCollapsed, treeData])
 
   const handleSelect = (nodes: TreeNode[]) => {
     // Handle selection changes
@@ -264,7 +301,24 @@ export function FileList() {
     
     const selected = isSelected(nodeData)
     const icon = getFileIcon(nodeData.name, nodeData.isFolder, node.isOpen)
+    
+    // For files, get token data directly. For folders, calculate total tokens if collapsed
     const tokenData = !nodeData.isFolder ? getTokenData(nodeData.path) : null
+    const folderTokenData = nodeData.isFolder && !node.isOpen && nodeData.path !== '__ROOT__' ? (() => {
+      const folderTokens = calculateFolderTokens(nodeData, fileTokens)
+      if (folderTokens === 0) return null
+      
+      const percentage = calculateTokenPercentage(folderTokens, totalSelectedTokens)
+      const colorClass = getTokenColorClass(percentage)
+      
+      return {
+        tokens: folderTokens,
+        percentage,
+        formatted: formatTokenCount(folderTokens),
+        colorClass,
+        shouldShow: true
+      }
+    })() : null
     
     const handleClick = () => {
       if (nodeData.isFolder) {
@@ -338,7 +392,7 @@ export function FileList() {
       <div
         ref={dragHandle}
         style={style}
-        className={`flex items-center py-0.5 px-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-sm transition-colors group ${
+        className={`flex items-center py-0.5 px-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-xs transition-colors group ${
           selected ? 'bg-blue-50 dark:bg-blue-900/30 font-medium' : ''
         }`}
       >
@@ -380,16 +434,23 @@ export function FileList() {
         />
         <div className="mr-2 flex-shrink-0">{icon}</div>
         <span 
-          className="truncate text-gray-800 dark:text-gray-200 text-sm cursor-pointer flex-1 font-medium"
+          className="truncate text-gray-800 dark:text-gray-200 text-xs cursor-pointer flex-1 font-medium"
           onClick={handleClick}
         >
           {nodeData.name || 'Unknown'}
         </span>
         
-        {/* Token info for files (only show for medium/large files) */}
+        {/* Token info for files */}
         {tokenData && tokenData.shouldShow && (
           <span className={`text-xs ml-2 font-mono ${tokenData.colorClass}`}>
             ({tokenData.formatted} ⏺ {tokenData.percentage}%)
+          </span>
+        )}
+        
+        {/* Token info for collapsed folders */}
+        {folderTokenData && folderTokenData.shouldShow && (
+          <span className={`text-xs ml-2 font-mono ${folderTokenData.colorClass}`}>
+            ({folderTokenData.formatted} ⏺ {folderTokenData.percentage}%)
           </span>
         )}
       </div>
@@ -398,45 +459,64 @@ export function FileList() {
 
   if (!baseDir || fileList.length === 0) {
     return (
-      <div className="p-4 text-sm text-gray-500 dark:text-gray-300">
-        <span className="flex items-center justify-center space-x-2">
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
           <svg
-            width="18"
-            height="18"
+            width="48"
+            height="48"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.5"
+            className="mx-auto mb-3 text-gray-400 dark:text-gray-500"
           >
             <path
-              d="M9 13h6m-3-3v6m-9-6h.01M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4m-5-4v-8a2 2 0 012-2h2.5M15 3H9m6 0v2.5"
+              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-          <span>No files. Please select a directory.</span>
-        </span>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">No repository selected</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Click "Open Repo" to get started</p>
+        </div>
       </div>
     )
   }
 
+  const tokenDisplayHeight = selectedFiles.length > 0 ? 18 : 0
+
   return (
-    <div ref={containerRef} className="h-full react-arborist-tree">
-      <Tree
-        data={treeData}
-        openByDefault={(node) => node.data?.path === '__ROOT__'}
-        width={containerRef.current?.clientWidth || 300}
-        height={containerHeight}
-        indent={16}
-        rowHeight={24}
-        overscanCount={20}
-        disableDrop
-        disableDrag
-        disableMultiSelection={true}
-        padding={2}
-      >
-        {Node}
-      </Tree>
+    <div className="flex-1 flex flex-col -mt-2">
+      <div ref={containerRef} className="flex-1 overflow-hidden -mt-1" style={{marginTop: '-8px'}}>
+        <Tree
+          ref={treeRef}
+          data={treeData}
+          openByDefault={(node) => {
+            // Always open root by default, let the effect handle the rest
+            return node.data?.path === '__ROOT__'
+          }}
+          width={containerRef.current?.clientWidth || 300}
+          height={Math.max(containerHeight - tokenDisplayHeight, 200)} // Ensure minimum height
+          indent={12}
+          rowHeight={18}
+          overscanCount={20}
+          disableDrop
+          disableDrag
+          disableMultiSelection={true}
+          padding={0}
+        >
+          {Node}
+        </Tree>
+      </div>
+      
+      {/* Total token display */}
+      {selectedFiles.length > 0 && (
+        <div className="flex-shrink-0 px-2 py-0.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          <span className="text-[10px] text-gray-600 dark:text-gray-400 font-mono">
+            Total: {formatTokenCount(totalSelectedTokens)} tokens ({selectedFiles.length} files)
+          </span>
+        </div>
+      )}
     </div>
   )
 }

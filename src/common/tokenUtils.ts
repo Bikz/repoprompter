@@ -67,8 +67,31 @@ export function getTokenColorClass(percentage: number): string {
 
 /**
  * Determine if token info should be displayed
- * Only show for medium and large files to keep UI clean
+ * Show for all files to give complete visibility
  */
 export function shouldShowTokenInfo(percentage: number): boolean {
-  return percentage >= 5 // Only show for files that are 5%+ of total tokens
+  return true // Show for all files - users want complete visibility
+}
+
+/**
+ * Calculate total tokens for a folder by summing all descendant files
+ */
+export function calculateFolderTokens(
+  folderNode: any, 
+  fileTokens: Record<string, number>
+): number {
+  let total = 0
+  
+  const gatherFileTokens = (node: any): void => {
+    if (!node.isFolder) {
+      // This is a file - add its tokens
+      total += fileTokens[node.path] || 0
+    } else if (node.children) {
+      // This is a folder - recurse into children
+      node.children.forEach(gatherFileTokens)
+    }
+  }
+  
+  gatherFileTokens(folderNode)
+  return total
 }

@@ -114,10 +114,10 @@ export function RepoProvider({ children }: RepoProviderProps) {
   // Calculate tokens when selected files change
   useEffect(() => {
     if (selectedFiles.length > 0 && baseDir) {
-      // Debounce the calculation to avoid excessive API calls
+      // Quick calculation - token estimation is very fast
       const timer = setTimeout(() => {
         calculateMissingTokens()
-      }, 500)
+      }, 100)
       return () => clearTimeout(timer)
     }
   }, [selectedFiles, baseDir])
@@ -178,12 +178,23 @@ export function RepoProvider({ children }: RepoProviderProps) {
     if (filesToCalculate.length === 0) return
 
     try {
-      const { contents } = await window.api.readMultipleFileContents(baseDir, filesToCalculate)
-      Object.entries(contents).forEach(([filePath, content]) => {
-        if (content && !content.startsWith('// File too large') && !content.startsWith('// Error reading file')) {
-          updateFileTokens(filePath, content)
+      // Process in batches for better performance with large selections
+      const batchSize = 50
+      for (let i = 0; i < filesToCalculate.length; i += batchSize) {
+        const batch = filesToCalculate.slice(i, i + batchSize)
+        const { contents } = await window.api.readMultipleFileContents(baseDir, batch)
+        
+        Object.entries(contents).forEach(([filePath, content]) => {
+          if (content && !content.startsWith('// File too large') && !content.startsWith('// Error reading file')) {
+            updateFileTokens(filePath, content)
+          }
+        })
+        
+        // Small delay between batches to keep UI responsive
+        if (i + batchSize < filesToCalculate.length) {
+          await new Promise(resolve => setTimeout(resolve, 50))
         }
-      })
+      }
     } catch (error) {
       console.error('Error calculating tokens:', error)
     }
