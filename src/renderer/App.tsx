@@ -22,10 +22,10 @@ function App() {
       {/* Full screen so we don't scroll at the page level */}
       <div className="h-screen overflow-hidden flex flex-col font-sans bg-white dark:bg-off-black text-gray-800 dark:text-white">
         {/* Top header bar */}
-        <header className="draggable flex items-center justify-between bg-brand-blue dark:bg-off-black text-white p-4 shadow">
+        <header className="draggable flex items-center justify-between bg-brand-blue dark:bg-off-black text-white p-3 shadow">
           <div>
-            <h1 className="text-2xl font-bold">RepoPrompter</h1>
-            <p className="text-sm text-gray-200 mt-1">
+            <h1 className="text-xl font-bold">RepoPrompter</h1>
+            <p className="text-xs text-gray-200 mt-0.5">
               Select a directory, choose files, build a prompt, then paste AI diffs for quick code updates.
             </p>
           </div>
