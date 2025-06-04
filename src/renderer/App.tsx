@@ -42,7 +42,7 @@ function App() {
         {/* Main 3-column layout */}
         <main className="flex flex-1 overflow-hidden">
           {/* LEFT COLUMN: Directory selector and file list */}
-          <div className="w-64 flex flex-col bg-gray-50 dark:bg-off-black border-r border-gray-200 dark:border-gray-800 p-4 overflow-y-auto">
+          <div className="w-64 flex flex-col bg-gray-50 dark:bg-off-black border-r border-gray-200 dark:border-gray-800 p-2 overflow-y-auto">
             <DirectorySelector />
           </div>
 
