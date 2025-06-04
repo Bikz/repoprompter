@@ -62,7 +62,7 @@ export function DirectorySelector() {
   }
 
   return (
-    <div className="flex flex-col gap-1 text-sm text-gray-800 dark:text-white h-full overflow-hidden">
+    <div className="flex flex-col gap-1 text-sm text-gray-800 dark:text-white flex-1 min-h-0">
       {/* All buttons on one row */}
       <div className="flex gap-1.5">
         <button
