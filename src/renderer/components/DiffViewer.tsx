@@ -17,7 +17,7 @@ export function DiffViewer() {
   return (
     <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-white">
       <textarea
-        className="w-full h-24 border border-gray-300 dark:border-gray-800 rounded p-2 bg-white dark:bg-off-black text-gray-800 dark:text-white"
+        className="w-full h-72 border border-gray-300 dark:border-gray-800 rounded p-2 bg-white dark:bg-off-black text-gray-800 dark:text-white"
         placeholder="Paste AI's XML diff here..."
         value={xmlDiff}
         onChange={e => setXmlDiff(e.target.value)}
