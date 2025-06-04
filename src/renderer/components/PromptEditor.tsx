@@ -63,7 +63,7 @@ You are a code editing assistant. You can only reply with XML according to the i
   return (
     <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-white">
       <textarea
-        className="w-full h-24 border border-gray-300 dark:border-gray-800 rounded p-2 bg-white dark:bg-off-black text-gray-800 dark:text-white"
+        className="w-full h-72 border border-gray-300 dark:border-gray-800 rounded p-2 bg-white dark:bg-off-black text-gray-800 dark:text-white"
         placeholder="Type your instructions here..."
         value={userInstructions}
         onChange={e => setUserInstructions(e.target.value)}
