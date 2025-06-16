@@ -1,11 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 
 export function CodeEditorTabs() {
   const { diffChanges, acceptAllDiffs, acceptSingleDiff, rejectSingleDiff } = useRepoContext()
-  const [activeTab, setActiveTab] = useState<string | null>(
-    diffChanges.length > 0 ? diffChanges[0].fileName : null
-  )
+  const [activeTab, setActiveTab] = useState<string | null>(null)
+
+  // When a new set of diffs is loaded, default to the first file
+  useEffect(() => {
+    if (diffChanges.length > 0) {
+      setActiveTab(diffChanges[0].fileName)
+    } else {
+      setActiveTab(null)
+    }
+  }, [diffChanges])
 
   if (diffChanges.length === 0) {
     return (
@@ -24,7 +31,7 @@ export function CodeEditorTabs() {
   return (
     <div className="flex flex-col h-full text-sm text-gray-800 dark:text-white">
       {/* Tabs */}
-      <div className="flex border-b border-gray-300 dark:border-gray-800 mb-2">
+      <div className="flex border-b border-gray-300 dark:border-gray-800 mb-2 overflow-x-auto whitespace-nowrap">
         {diffChanges.map(change => (
           <div
             key={change.fileName}
