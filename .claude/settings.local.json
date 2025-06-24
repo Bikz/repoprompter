@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(pnpm lint:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": []
   }

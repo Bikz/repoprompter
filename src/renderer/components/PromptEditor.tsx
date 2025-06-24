@@ -8,15 +8,27 @@ export function PromptEditor() {
   const [combinedPrompt, setCombinedPrompt] = useState('')
   const [showCombinedPrompt, setShowCombinedPrompt] = useState(false)
 
-  const systemPrompt = `
-You are a code editing assistant. You can only reply with XML according to the instructions below:
-1) Use the exact XML formatting structure with <file> tags, etc.
-2) No additional text outside of XML.
-3) Do not wrap output in <![CDATA[ ]].
-4) Provide changes as needed.
+  const xmlSystemPrompt = `
+You are a code editing assistant. You must respond with XML-formatted diffs for code changes.
+
+Instructions:
+1. Analyze the provided code files and user instructions
+2. Return ONLY XML output with your proposed changes
+3. Use this exact format for each file change:
+
+<file name="path/to/file.ext">
+<replace>
+new content here
+</replace>
+</file>
+
+4. Include the complete updated content in the <replace> section
+5. Do not include any text outside of the XML structure
+6. Do not wrap output in <![CDATA[ ]]
+7. Multiple files can be included, each in its own <file> tag
 `
 
-  async function buildFullPrompt() {
+  async function buildPrompt(includeXmlInstructions: boolean) {
     const { contents: fileContentMap, errors } = await window.api.readMultipleFileContents(baseDir, selectedFiles)
     
     if (errors.length > 0) {
@@ -30,7 +42,12 @@ You are a code editing assistant. You can only reply with XML according to the i
       }
     })
     
-    let result = '<system_instructions>\n' + systemPrompt.trim() + '\n</system_instructions>\n\n'
+    let result = ''
+    
+    if (includeXmlInstructions) {
+      result += '<system_instructions>\n' + xmlSystemPrompt.trim() + '\n</system_instructions>\n\n'
+    }
+    
     result += '<file_map>\n'
     selectedFiles.forEach(file => {
       result += `File: ${file}\n\`\`\`\n${fileContentMap[file] || '// File not available'}\n\`\`\`\n\n`
@@ -40,21 +57,33 @@ You are a code editing assistant. You can only reply with XML according to the i
     return result
   }
 
-  const handleGenerateAndCopyPrompt = async () => {
+  const handleCopy = async () => {
     try {
-      const prompt = await buildFullPrompt()
+      const prompt = await buildPrompt(false)
       setCombinedPrompt(prompt)
       await navigator.clipboard.writeText(prompt)
       alert('Prompt copied to clipboard!')
     } catch (err) {
-      console.error('Failed to generate or copy prompt:', err)
-      alert('Failed to generate or copy prompt. See console for details.')
+      console.error('Failed to copy prompt:', err)
+      alert('Failed to copy prompt. See console for details.')
+    }
+  }
+
+  const handleCopyWithXml = async () => {
+    try {
+      const prompt = await buildPrompt(true)
+      setCombinedPrompt(prompt)
+      await navigator.clipboard.writeText(prompt)
+      alert('Prompt with XML instructions copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy prompt:', err)
+      alert('Failed to copy prompt. See console for details.')
     }
   }
 
   const handleViewCombinedPrompt = async () => {
     if (!showCombinedPrompt) {
-      const prompt = await buildFullPrompt()
+      const prompt = await buildPrompt(true)
       setCombinedPrompt(prompt)
     }
     setShowCombinedPrompt(!showCombinedPrompt)
@@ -70,10 +99,16 @@ You are a code editing assistant. You can only reply with XML according to the i
       />
       <div className="flex gap-2">
         <button
-          onClick={handleGenerateAndCopyPrompt}
+          onClick={handleCopy}
           className="btn btn-success"
         >
-          Generate &amp; Copy Prompt
+          Copy
+        </button>
+        <button
+          onClick={handleCopyWithXml}
+          className="btn btn-primary"
+        >
+          Copy with XML
         </button>
         <button
           onClick={handleViewCombinedPrompt}
@@ -91,7 +126,7 @@ You are a code editing assistant. You can only reply with XML according to the i
             readOnly
           />
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            This is the generated prompt. Use the "Generate &amp; Copy Prompt" button to copy it again if needed.
+            This is the generated prompt with XML instructions. Use the buttons above to copy it again.
           </p>
         </div>
       )}

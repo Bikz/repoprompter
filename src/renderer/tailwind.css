@@ -332,36 +332,39 @@ html, body, #root {
 .file-group-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 2px 0 0 0;
-  padding: 6px;
-  border-radius: 4px;
-  background-color: #f9fafb;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
 }
 .dark .file-group-container {
-  background-color: #1e1e1e;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  background-color: #1a1a1a;
+  border-color: #333;
 }
 .file-group-heading {
   width: 100%;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #4b5563;
-  margin-bottom: 3px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
+  letter-spacing: 0.025em;
 }
 .file-group-item {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  background-color: #f3f4f6;
-  border-radius: 16px;
+  padding: 4px 12px;
+  background-color: white;
+  border-radius: 20px;
   transition: all 0.15s;
   border: 1px solid #e5e7eb;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   cursor: pointer;
+  font-weight: 500;
 }
 .file-group-item:hover {
   background-color: #e5e7eb;
@@ -380,13 +383,14 @@ html, body, #root {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: #e5e7eb;
   border-radius: 9999px;
-  padding: 0 4px;
-  margin-left: 4px;
-  font-size: 0.65rem;
-  min-width: 16px;
-  height: 16px;
+  padding: 0 6px;
+  margin-left: 6px;
+  font-size: 0.7rem;
+  min-width: 18px;
+  height: 18px;
+  font-weight: 600;
 }
 
 /* Buttons */
@@ -545,9 +549,9 @@ html, body, #root {
   color: #fff;
 }
 .dark .file-group-item {
-  color: #eee;
-  border-color: #444;
-  background-color: #2d2d2d;
+  color: #e5e7eb;
+  border-color: #404040;
+  background-color: #2a2a2a;
 }
 .dark .file-group-item:hover {
   background-color: #222;
@@ -560,8 +564,8 @@ html, body, #root {
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 .dark .file-group-count {
-  background-color: #222;
-  color: #ccc;
+  background-color: #404040;
+  color: #e5e7eb;
 }
 
 /* Enhanced dark scrollbars */

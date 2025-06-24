@@ -9,6 +9,7 @@ import {
   setKnownLargeFiles
 } from './configStore'
 import { autoUpdater } from 'electron-updater'
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -216,6 +217,16 @@ function setupAutoUpdater() {
 }
 
 app.whenReady().then(async () => {
+  // Install React Developer Tools in development
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const name = await installExtension(REACT_DEVELOPER_TOOLS)
+      console.log(`Added Extension: ${name}`)
+    } catch (err) {
+      console.log('An error occurred installing React DevTools: ', err)
+    }
+  }
+  
   createAppMenu()
   await createMainWindow()
   setupIpcHandlers()

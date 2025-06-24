@@ -62,21 +62,21 @@ export function DirectorySelector() {
   }
 
   return (
-    <div className="flex flex-col gap-1 text-sm text-gray-800 dark:text-white flex-1 min-h-0">
-      {/* All buttons on one row */}
-      <div className="flex gap-1.5">
+    <div className="flex flex-col gap-4 text-sm text-gray-800 dark:text-white flex-1 min-h-0">
+      {/* Action buttons */}
+      <div className="flex gap-2">
         <button
           onClick={handleSelectDirectory}
-          className="btn btn-primary flex-1 h-8 px-2 text-xs"
+          className="btn btn-primary flex-1 h-10 px-4 text-sm font-medium rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
           title="Select repository folder"
         >
           <svg
-            width="14"
-            height="14"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="mr-1.5"
+            className="mr-2"
           >
             <path
               d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
@@ -91,12 +91,12 @@ export function DirectorySelector() {
         </button>
         <button
           onClick={handleRefreshDirectory}
-          className="btn btn-secondary w-8 h-8 p-0 flex items-center justify-center"
+          className="btn btn-secondary w-10 h-10 p-0 flex items-center justify-center rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
           title="Refresh files"
         >
           <svg
-            width="14"
-            height="14"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -134,12 +134,12 @@ export function DirectorySelector() {
         <button
           ref={groupButtonRef}
           onClick={handleCreateGroup}
-          className="btn btn-primary w-8 h-8 p-0 flex items-center justify-center"
+          className="btn btn-primary w-10 h-10 p-0 flex items-center justify-center rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
           title="Create group from selected files"
         >
           <svg
-            width="14"
-            height="14"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -170,12 +170,12 @@ export function DirectorySelector() {
         </button>
         <button
           onClick={handleUnselectUnnecessaryFiles}
-          className="btn btn-secondary w-8 h-8 p-0 flex items-center justify-center"
+          className="btn btn-secondary w-10 h-10 p-0 flex items-center justify-center rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
           title="Remove files that don't contribute meaningful context for AI coding (lock files, build artifacts, assets, configs)"
         >
           <svg
-            width="14"
-            height="14"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -204,8 +204,10 @@ export function DirectorySelector() {
 
       {/* File Groups */}
       {groups.length > 0 && (
-        <div className="file-group-container">
-          <div className="file-group-heading">
+        <>
+          <div className="h-px bg-gray-200 dark:bg-gray-700 mx-2" />
+          <div className="file-group-container">
+            <div className="file-group-heading">
             <svg
               width="14"
               height="14"
@@ -251,12 +253,13 @@ export function DirectorySelector() {
               </button>
             </div>
           ))}
-        </div>
+          </div>
+        </>
       )}
 
       {/* Always show “Current Repository” heading + FileList */}
-      {/* Current Repository header */}
-      <div className="flex items-center justify-between -mb-2 flex-shrink-0">
+      {(groups.length > 0 || baseDir) && <div className="h-px bg-gray-200 dark:bg-gray-700 mx-2" />}
+      <div className="flex items-center justify-between flex-shrink-0 px-1">
         <h4 className="text-sm font-semibold">Current Repository:</h4>
         <button
           onClick={handleToggleTreeCollapse}

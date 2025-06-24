@@ -392,7 +392,7 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
       <div
         ref={dragHandle}
         style={style}
-        className={`flex items-center py-0.5 px-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-xs transition-colors group ${
+        className={`flex items-center py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 text-sm transition-colors group ${
           selected ? 'bg-blue-50 dark:bg-blue-900/30 font-medium' : ''
         }`}
       >
@@ -403,7 +403,7 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
               e.stopPropagation()
               node.toggle()
             }}
-            className="w-4 h-4 flex items-center justify-center mr-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-sm transition-all opacity-70 hover:opacity-100"
+            className="w-5 h-5 flex items-center justify-center mr-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-all opacity-70 hover:opacity-100"
           >
             <svg
               width="8"
@@ -422,7 +422,7 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
             </svg>
           </button>
         ) : (
-          <div className="w-4 h-4 mr-1" />
+          <div className="w-5 h-5 mr-1" />
         )}
         
         <input
@@ -430,11 +430,11 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
           checked={selected}
           onChange={() => {}}
           onClick={handleClick}
-          className="mr-2 w-3 h-3 rounded-sm border border-gray-300 dark:border-gray-600 cursor-pointer accent-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="mr-2 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 cursor-pointer accent-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
         />
         <div className="mr-2 flex-shrink-0">{icon}</div>
         <span 
-          className="truncate text-gray-800 dark:text-gray-200 text-xs cursor-pointer flex-1 font-medium"
+          className="truncate text-gray-800 dark:text-gray-200 text-sm cursor-pointer flex-1 font-medium"
           onClick={handleClick}
         >
           {nodeData.name || 'Unknown'}
@@ -486,8 +486,8 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
   const tokenDisplayHeight = selectedFiles.length > 0 ? 18 : 0
 
   return (
-    <div className="flex-1 flex flex-col -mt-2">
-      <div ref={containerRef} className="flex-1 overflow-hidden -mt-1" style={{marginTop: '-8px'}}>
+    <div className="flex-1 flex flex-col">
+      <div ref={containerRef} className="flex-1 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <Tree
           ref={treeRef}
           data={treeData}
@@ -497,8 +497,8 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
           }}
           width={containerRef.current?.clientWidth || 300}
           height={Math.max(containerHeight - tokenDisplayHeight, 200)} // Ensure minimum height
-          indent={12}
-          rowHeight={18}
+          indent={20}
+          rowHeight={24}
           overscanCount={20}
           disableDrop
           disableDrag
@@ -511,8 +511,8 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
       
       {/* Total token display */}
       {selectedFiles.length > 0 && (
-        <div className="flex-shrink-0 px-2 py-0.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <span className="text-[10px] text-gray-600 dark:text-gray-400 font-mono">
+        <div className="flex-shrink-0 px-3 py-2 mt-2 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
+          <span className="text-xs text-gray-600 dark:text-gray-400 font-mono font-medium">
             Total: {formatTokenCount(totalSelectedTokens)} tokens ({selectedFiles.length} files)
           </span>
         </div>
