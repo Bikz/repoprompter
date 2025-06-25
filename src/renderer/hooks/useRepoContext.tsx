@@ -30,6 +30,7 @@ interface RepoContextType {
   acceptAllDiffs: () => Promise<void>
   acceptSingleDiff: (fileName: string, newContent: string) => Promise<void>
   rejectSingleDiff: (fileName: string) => void
+  getOriginalFileContent: (fileName: string) => Promise<string>
 
   groups: RepoGroup[]
   createGroupFromSelection: (buttonElement?: HTMLElement | null) => void
@@ -69,6 +70,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
   const [fileList, setFileListState] = useState<string[]>([])
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [diffChanges, setDiffChanges] = useState<FileChange[]>([])
+  const [originalFileCache, setOriginalFileCache] = useState<Record<string, string>>({})
   const [groups, setGroups] = useState<RepoGroup[]>([])
   const [activeGroupName, setActiveGroupName] = useState<string | null>(null)
   const [userInstructions, setUserInstructionsState] = useState('')
@@ -200,11 +202,35 @@ export function RepoProvider({ children }: RepoProviderProps) {
     }
   }
 
+  const getOriginalFileContent = async (fileName: string): Promise<string> => {
+    if (originalFileCache[fileName]) return originalFileCache[fileName]
+    try {
+      const content = await window.api.readFileContents(baseDir, fileName)
+      setOriginalFileCache(prev => ({ ...prev, [fileName]: content }))
+      return content
+    } catch (error) {
+      console.error('Failed to read original file:', error)
+      return ''
+    }
+  }
+
   const setDiffXmlAndParse = async (xmlString: string) => {
     if (!xmlString?.trim() || !window.api.parseXmlDiff) return
     try {
       const changes = await window.api.parseXmlDiff(xmlString)
       setDiffChanges(changes)
+      const cache: Record<string, string> = {}
+      await Promise.all(
+        changes.map(async ch => {
+          try {
+            cache[ch.fileName] = await window.api.readFileContents(baseDir, ch.fileName)
+          } catch (err) {
+            console.error('Failed to read file for diff', ch.fileName, err)
+            cache[ch.fileName] = ''
+          }
+        })
+      )
+      setOriginalFileCache(cache)
     } catch (err) {
       alert(`Failed to parse diff XML: ${String(err)}`)
     }
@@ -218,6 +244,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
       } else {
         alert('Diff applied successfully!')
         setDiffChanges([])
+        setOriginalFileCache({})
       }
     } catch (error) {
       alert(`Error applying diff: ${error}`)
@@ -234,6 +261,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     })
     xmlString += '</root>'
     await applyFullDiff(xmlString)
+    setOriginalFileCache({})
   }
 
   const acceptSingleDiff = async (fileName: string, newContent: string) => {
@@ -250,6 +278,10 @@ export function RepoProvider({ children }: RepoProviderProps) {
         return
       }
       setDiffChanges(prev => prev.filter(fc => fc.fileName !== fileName))
+      setOriginalFileCache(prev => {
+        const { [fileName]: _, ...rest } = prev
+        return rest
+      })
       alert(`Changes for ${fileName} accepted and applied!`)
     } catch (err) {
       alert(`Error applying diff for ${fileName}: ${String(err)}`)
@@ -258,6 +290,10 @@ export function RepoProvider({ children }: RepoProviderProps) {
 
   const rejectSingleDiff = (fileName: string) => {
     setDiffChanges(prev => prev.filter(fc => fc.fileName !== fileName))
+    setOriginalFileCache(prev => {
+      const { [fileName]: _, ...rest } = prev
+      return rest
+    })
   }
 
   const handlePromptConfirm = async (groupName: string) => {
@@ -500,6 +536,7 @@ export function RepoProvider({ children }: RepoProviderProps) {
     acceptAllDiffs,
     acceptSingleDiff,
     rejectSingleDiff,
+    getOriginalFileContent,
 
     groups,
     createGroupFromSelection,
