@@ -11,6 +11,7 @@ import type {
   LoadRepoSettingsResponse,
   UpdateRepoSettingsResponse,
   KnownLargeFilesResponse,
+  IgnorePatternsResponse,
   RepoSettings
 } from '../common/types'
 
@@ -128,6 +129,24 @@ const api: FileSystemApi = {
       return await ipcRenderer.invoke('config:setKnownLargeFiles', newList) as KnownLargeFilesResponse
     } catch (error) {
       console.error('Failed to set known large files:', error)
+      return { success: false, error: String(error) }
+    }
+  },
+
+  getIgnorePatterns: async () => {
+    try {
+      return await ipcRenderer.invoke('config:getIgnorePatterns') as IgnorePatternsResponse
+    } catch (error) {
+      console.error('Failed to get ignore patterns:', error)
+      return { success: false, error: String(error) }
+    }
+  },
+
+  setIgnorePatterns: async (newList) => {
+    try {
+      return await ipcRenderer.invoke('config:setIgnorePatterns', newList) as IgnorePatternsResponse
+    } catch (error) {
+      console.error('Failed to set ignore patterns:', error)
       return { success: false, error: String(error) }
     }
   }

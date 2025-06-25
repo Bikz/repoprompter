@@ -40,6 +40,13 @@ export interface KnownLargeFilesResponse {
   error?: string
 }
 
+/** Response shape from retrieving ignore patterns. */
+export interface IgnorePatternsResponse {
+  success: boolean
+  list?: string[]
+  error?: string
+}
+
 /**
  * The FileSystemApi is exposed in the renderer as `window.api`, providing a
  * restricted set of methods for reading directories/files, parsing diffs,
@@ -77,6 +84,8 @@ export interface FileSystemApi {
   updateRepoSettings: (repoPath: string, updates: Partial<RepoSettings>) => Promise<UpdateRepoSettingsResponse>
   getKnownLargeFiles: () => Promise<KnownLargeFilesResponse>
   setKnownLargeFiles: (newList: string[]) => Promise<KnownLargeFilesResponse>
+  getIgnorePatterns: () => Promise<IgnorePatternsResponse>
+  setIgnorePatterns: (newList: string[]) => Promise<IgnorePatternsResponse>
 }
 
 declare global {

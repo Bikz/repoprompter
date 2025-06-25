@@ -6,7 +6,9 @@ import {
   getRepoSettings,
   updateRepoSettings,
   getKnownLargeFiles,
-  setKnownLargeFiles
+  setKnownLargeFiles,
+  getIgnorePatterns,
+  setIgnorePatterns
 } from './configStore'
 import { autoUpdater } from 'electron-updater'
 
@@ -40,6 +42,28 @@ function createAppMenu() {
 
 async function readDirRecursive(dirPath: string): Promise<string[]> {
   const files: string[] = []
+  const ignoreList = getIgnorePatterns()
+  const compiled = ignoreList.map(pattern => {
+    try {
+      return new RegExp(pattern)
+    } catch {
+      return pattern
+    }
+  })
+
+  const shouldIgnore = (relPath: string): boolean => {
+    const normalized = relPath.replace(/\\/g, '/')
+    return compiled.some(p => {
+      if (p instanceof RegExp) {
+        return p.test(normalized)
+      }
+      return (
+        normalized === p ||
+        normalized.endsWith('/' + p) ||
+        normalized.includes('/' + p)
+      )
+    })
+  }
 
   async function traverse(currentPath: string) {
     const entries = await fs.promises.readdir(currentPath, { withFileTypes: true })
@@ -47,12 +71,14 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
       const fullPath = path.join(currentPath, entry.name)
       const relativePath = path.relative(dirPath, fullPath)
       if (entry.isDirectory()) {
-        await traverse(fullPath)
+        if (!shouldIgnore(relativePath + '/')) {
+          await traverse(fullPath)
+        }
       } else {
         if (
           !entry.name.startsWith('.') &&
-          !relativePath.includes('node_modules') &&
-          !relativePath.includes('.git')
+          !relativePath.includes('.git') &&
+          !shouldIgnore(relativePath)
         ) {
           files.push(relativePath)
         }
@@ -207,6 +233,16 @@ function setupIpcHandlers() {
 
   ipcMain.handle('config:setKnownLargeFiles', (_, newList: string[]) => {
     setKnownLargeFiles(newList)
+    return { success: true }
+  })
+
+  ipcMain.handle('config:getIgnorePatterns', () => ({
+    success: true,
+    list: getIgnorePatterns()
+  }))
+
+  ipcMain.handle('config:setIgnorePatterns', (_, newList: string[]) => {
+    setIgnorePatterns(newList)
     return { success: true }
   })
 }

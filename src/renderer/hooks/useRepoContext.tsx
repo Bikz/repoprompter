@@ -40,8 +40,6 @@ interface RepoContextType {
   
   userInstructions: string
   setUserInstructions: (val: string) => void
-
-  unselectUnnecessaryFiles: () => void
   
   // Token management
   fileTokens: Record<string, number>
@@ -376,115 +374,6 @@ export function RepoProvider({ children }: RepoProviderProps) {
     }
   }
 
-  const unselectUnnecessaryFiles = () => {
-    // Define patterns for files that don't contribute meaningful context for AI coding
-    const unnecessaryPatterns = [
-      // Lock files - massive but don't contain code logic
-      'package-lock.json',
-      'pnpm-lock.yaml', 
-      'yarn.lock',
-      'composer.lock',
-      'Pipfile.lock',
-      'poetry.lock',
-      'Gemfile.lock',
-      'go.sum',
-      'Cargo.lock',
-      
-      // Build/dist directories and files
-      /^(dist|build|out|target|release)[\\/]/,
-      /^\.next[\\/]/,
-      /^\.nuxt[\\/]/,
-      /^\.output[\\/]/,
-      /^public[\\/].*\.(js|css|map)$/,
-      
-      // Dependencies
-      /^node_modules[\\/]/,
-      /^vendor[\\/]/,
-      /^__pycache__[\\/]/,
-      
-      // Config files (useful but not critical for understanding code logic)
-      /\.(config|conf)\.(js|ts|json|yaml|yml)$/,
-      'webpack.config.js',
-      'vite.config.js',
-      'rollup.config.js',
-      'babel.config.js',
-      '.eslintrc.json',
-      '.prettierrc',
-      'jest.config.js',
-      'cypress.config.js',
-      'playwright.config.js',
-      'tailwind.config.js',
-      'postcss.config.js',
-      
-      // Documentation and meta files
-      /^README\.(md|txt|rst)$/i,
-      /^CHANGELOG\.(md|txt|rst)$/i,
-      /^LICENSE(\.(md|txt))?$/i,
-      /^CONTRIBUTING\.(md|txt)$/i,
-      '.gitignore',
-      '.gitattributes',
-      '.dockerignore',
-      
-      // IDE/Editor files
-      /^\.vscode[\\/]/,
-      /^\.idea[\\/]/,
-      /^\.vs[\\/]/,
-      '*.swp',
-      '*.swo',
-      '*~',
-      
-      // Assets that don't contain logic
-      /\.(png|jpe?g|gif|svg|ico|webp|avif)$/i,
-      /\.(mp4|avi|mov|wmv|flv|webm)$/i,
-      /\.(mp3|wav|ogg|m4a|aac)$/i,
-      /\.(woff2?|ttf|eot|otf)$/i,
-      /\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$/i,
-      
-      // Generated/compiled files
-      /\.min\.(js|css)$/,
-      /\.map$/,
-      /\.d\.ts$/,
-      /coverage[\\/]/,
-      /\.nyc_output[\\/]/,
-      /logs?[\\/]/,
-      /tmp[\\/]/,
-      /temp[\\/]/,
-      
-      // Environment and secrets (shouldn't be selected anyway)
-      /^\.env(\.|$)/,
-      '.DS_Store',
-      'Thumbs.db',
-      
-      // Large data files
-      /\.(csv|json|xml|sql)$/i, // Only if they're likely data files, not config
-      
-      // Test fixtures and mock data (keep actual test files)
-      /[\\/](fixtures|mocks|__fixtures__|__mocks__)[\\/]/,
-      /\.fixtures?\.(js|ts|json)$/,
-      /\.mock\.(js|ts)$/,
-    ]
-    
-    const isUnnecessary = (filePath: string): boolean => {
-      return unnecessaryPatterns.some(pattern => {
-        if (typeof pattern === 'string') {
-          return filePath.endsWith(pattern) || filePath.includes(`/${pattern}`) || filePath === pattern
-        } else {
-          return pattern.test(filePath)
-        }
-      })
-    }
-    
-    const necessaryFiles = selectedFiles.filter(file => !isUnnecessary(file))
-    const removedCount = selectedFiles.length - necessaryFiles.length
-    
-    setSelectedFiles(necessaryFiles)
-    
-    if (removedCount > 0) {
-      alert(`Removed ${removedCount} unnecessary files from selection. Kept ${necessaryFiles.length} core files for AI context.`)
-    } else {
-      alert('No unnecessary files found in current selection.')
-    }
-  }
 
   const contextValue: RepoContextType = {
     baseDir,
@@ -510,9 +399,6 @@ export function RepoProvider({ children }: RepoProviderProps) {
 
     userInstructions,
     setUserInstructions,
-
-    unselectUnnecessaryFiles,
-    
     // Token management
     fileTokens,
     getTokenData,
