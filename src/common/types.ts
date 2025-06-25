@@ -77,6 +77,7 @@ export interface FileSystemApi {
   updateRepoSettings: (repoPath: string, updates: Partial<RepoSettings>) => Promise<UpdateRepoSettingsResponse>
   getKnownLargeFiles: () => Promise<KnownLargeFilesResponse>
   setKnownLargeFiles: (newList: string[]) => Promise<KnownLargeFilesResponse>
+  getIgnorePatterns: () => Promise<{ success: boolean; ignorePatterns?: (string | { pattern: string; flags?: string })[], error?: string }>
 }
 
 declare global {

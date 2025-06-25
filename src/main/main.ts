@@ -6,7 +6,9 @@ import {
   getRepoSettings,
   updateRepoSettings,
   getKnownLargeFiles,
-  setKnownLargeFiles
+  setKnownLargeFiles,
+  isFileIgnored,
+  getIgnorePatterns
 } from './configStore'
 import { autoUpdater } from 'electron-updater'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
@@ -47,16 +49,20 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
     for (const entry of entries) {
       const fullPath = path.join(currentPath, entry.name)
       const relativePath = path.relative(dirPath, fullPath)
+      
+      // Check if file/directory should be ignored
+      if (isFileIgnored(relativePath)) {
+        continue
+      }
+      
       if (entry.isDirectory()) {
-        await traverse(fullPath)
-      } else {
-        if (
-          !entry.name.startsWith('.') &&
-          !relativePath.includes('node_modules') &&
-          !relativePath.includes('.git')
-        ) {
-          files.push(relativePath)
+        // Also check if the directory itself should be ignored
+        const dirRelativePath = relativePath + '/'
+        if (!isFileIgnored(dirRelativePath)) {
+          await traverse(fullPath)
         }
+      } else {
+        files.push(relativePath)
       }
     }
   }
@@ -210,6 +216,11 @@ function setupIpcHandlers() {
     setKnownLargeFiles(newList)
     return { success: true }
   })
+  
+  ipcMain.handle('config:getIgnorePatterns', () => ({
+    success: true,
+    ignorePatterns: getIgnorePatterns()
+  }))
 }
 
 function setupAutoUpdater() {

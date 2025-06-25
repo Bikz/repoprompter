@@ -1,117 +1,127 @@
-# CLAUDE.md
+---
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+### **`CLAUDE.md`**
+
+This file provides guidance to Claude when working with code in this repository.
 
 ## RepoPrompter Overview
 
 RepoPrompter is an Electron desktop application that bridges local codebases with AI assistants. It allows developers to:
 
-1. Select files from their local Git repositories
-2. Generate structured prompts containing those files' contents
-3. Send these prompts to AI models (like Claude)
-4. Receive XML-formatted code changes back
-5. Preview and apply those changes directly to their local files
+1.  Select files from their local repositories.
+2.  Generate structured prompts containing the files' contents.
+3.  Send these prompts to AI models like Claude.
+4.  Receive XML-formatted code changes back.
+5.  Preview and apply those changes directly to their local files.
 
 ## Commands
 
-- **Development**: `pnpm dev` - Starts Electron with HMR
-- **Build**: `pnpm build` - Compiles TypeScript and bundles
-- **Distribution**: `pnpm dist` - Creates platform installers
-- **Lint**: `pnpm lint` - Runs ESLint
-- **Clean**: `pnpm clean` - Removes build artifacts
-- **Preview**: `pnpm preview` - Preview production build
+-   **Development**: `pnpm dev` - Starts Electron with HMR for the renderer.
+-   **Build**: `pnpm build` - Compiles and bundles all code into the `dist` directory.
+-   **Distribution**: `pnpm dist` - Creates platform-specific installers from the `dist` output.
+-   **Lint**: `pnpm lint` - Runs ESLint to check for code quality issues.
+-   **Clean**: `pnpm clean` - Removes the `dist` directory.
+-   **Preview**: `pnpm preview` - Runs the production build locally.
 
 ## Architecture
 
 ### Process Model
-- **Main Process** (`src/main/`): File system operations, window management, IPC handlers
-- **Renderer Process** (`src/renderer/`): React UI with TypeScript/Tailwind
-- **Preload** (`src/main/preload.ts`): Secure bridge exposing `window.api`
+
+-   **Main Process** (`src/main/`): Node.js environment. Handles file system operations, window management, configuration, and all IPC logic.
+-   **Renderer Process** (`src/renderer/`): Chromium environment. Renders the UI using React, TypeScript, and Tailwind CSS.
+-   **Preload Script** (`src/main/preload.ts`): Securely exposes a limited `window.api` object to the Renderer process using `contextBridge`.
 
 ### State Management
-- Central `RepoContext` (no Redux) manages all app state via React Context
-- Persistent settings stored in OS userData directory via `configStore.ts`
+
+-   A central `RepoContext` (`useRepoContext.tsx`) manages all UI state via the React Context API.
+-   Persistent settings (file groups, instructions) are stored in a JSON file in the OS's user data directory, managed by `configStore.ts`.
 
 ### Key Components
-- **App.tsx**: 3-column layout orchestrator
-- **DirectorySelector/FileList**: Repository browsing and file selection
-- **PromptEditor**: Generates AI prompts from selected files
-- **DiffViewer**: Parses and previews XML diffs
-- **CodeEditorTabs**: Displays file contents with syntax highlighting
+
+-   **App.tsx**: The root component, sets up the 3-column layout.
+-   **DirectorySelector.tsx / FileList.tsx**: Handles repository browsing and file selection.
+-   **PromptEditor.tsx**: Generates the final AI prompt from the selected files and user instructions.
+-   **DiffViewer.tsx**: Parses and initiates the preview of the AI's XML diff.
+-   **CodeEditorTabs.tsx**: Displays proposed file changes for user review and approval.
 
 ### IPC Communication
-Main process handlers in `main.ts`:
-- `select-directory`: Opens directory picker
-- `read-directory-recursive`: Gets file tree
-- `read-file-content`: Reads single file
-- `read-multiple-files`: Batch file reading
-- `write-file-content`: Applies changes
-- `load-repo-settings`/`update-repo-settings`: Settings persistence
+
+All backend operations are requested via `window.api` and handled in `main.ts`:
+
+-   `dialog:selectDirectory`
+-   `fs:readDirectory`
+-   `fs:readFile`
+-   `fs:readMultipleFiles`
+-   `fs:parseXmlDiff`
+-   `fs:applyXmlDiff`
+-   `config:loadRepoSettings`
+-   `config:updateRepoSettings`
+-   `config:getKnownLargeFiles`
+-   `config:setKnownLargeFiles`
 
 ## Conventions
 
 ### Code Style
-- TypeScript with strict checking
-- React functional components + hooks
-- Async/await for all async operations
-- Path aliases: `@/` → `src/`, `@renderer/` → `src/renderer/`, `@common/` → `src/common/`
 
-### AI Integration
-- **Prompt Format**: system_instructions → file_map → user_instructions
-- **Diff Format**: `<file name="path"><replace>new content</replace></file>`
-- XML parsing expects exact format - validate before applying
+-   TypeScript with strict type checking enabled.
+-   React functional components with Hooks.
+-   Async/await is used for all asynchronous operations.
+-   No path aliases are configured; use relative paths for imports (e.g., `../common/types`).
 
-### UI Patterns
-- Apple-style window with `titleBarStyle: 'hiddenInset'`
-- Dark mode support throughout
-- Modal positioning uses button refs
-- File tree auto-expands first level
+### AI Interaction Formats
 
-## Development Tips
+-   **Prompt Format**: The app generates a prompt with a `<file_map>` containing all selected files, followed by `<user_instructions>`.
+-   **Diff Format**: The AI must respond with an XML structure. Each file to be changed must be in its own `<file>` tag: `<file name="path/to/file.ext"><replace>...new content...</replace></file>`. The root element can be `<root>` or omitted.
 
-### Testing Changes
-1. Run `pnpm dev` to start with HMR
-2. Main process changes require restart
-3. Renderer changes hot-reload automatically
-4. Check DevTools console for errors
+### Security
 
-### Common Tasks
-- **Add new IPC handler**: Define in `main.ts`, expose in `preload.ts`, add type in `preload.ts`
-- **New component**: Place in `src/renderer/components/`, use Tailwind classes
-- **Modify file operations**: Update both `main.ts` handler and `fileSystem.ts` types
+-   The Renderer process has **no direct file system access**. All FS operations must go through the IPC bridge.
+-   `contextIsolation` is enabled for security.
+-   All file paths in incoming diffs are validated in `diffParser.ts` and `applyDiffPatches` to prevent path traversal attacks.
 
-### Security Notes
-- All file paths are validated against directory traversal
-- Renderer has no direct file system access
-- Context isolation enabled - use IPC for all Node.js operations
+---
 
-Current Features
+### FILE STRUCTURE
 
-  1. Repository Browsing
-    - Directory picker to select any local folder
-    - File tree view with expandable folders
-    - Smart filtering (excludes .git, node_modules, hidden files)
-    - First-level folders auto-expand
-  2. File Selection
-    - Multi-select files via checkboxes
-    - File groups (save/load named selections)
-    - Group management (create, activate, remove)
-    - Per-repository settings persistence
-  3. Prompt Generation
-    - Structured format: system instructions → file map → user instructions
-    - Copy prompt to clipboard
-    - Shows selected files with their full contents
-  4. Diff Processing
-    - Parses XML-formatted diffs from AI responses
-    - Side-by-side diff preview with syntax highlighting
-    - Apply changes to local files
-    - Validates XML format before applying
-  5. Code Viewing
-    - Tabbed interface for viewing multiple files
-    - Syntax highlighting
-    - Shows file paths and content
-  6. UI/UX
-    - 3-column layout (file browser | prompt/diff | code viewer)
-    - Dark mode support
-    - Apple-style window design
-    - Modal dialogs for user input
+```
+repoprompter/
+├─ .gitignore
+├─ package.json
+├─ pnpm-lock.yaml
+├─ postcss.config.cjs
+├─ tailwind.config.cjs
+├─ tsconfig.json
+├─ tsconfig.node.json
+├─ electron.vite.config.ts
+├─ vite.config.ts
+│
+├─ src/
+│  ├─ main/                      # Electron Main Process
+│  │  ├─ main.ts                 # App entry (creates BrowserWindow, sets up IPC)
+│  │  ├─ preload.ts              # Exposes secure `window.api` to the renderer
+│  │  └─ configStore.ts          # Manages settings.json for repos & global settings
+│  │
+│  ├─ common/                    # Shared logic (isomorphic TypeScript)
+│  │  ├─ diffParser.ts           # Parse & apply XML diffs
+│  │  ├─ fileSystem.ts           # Low-level filesystem wrappers
+│  │  ├─ promptBuilder.ts        # Helper to combine user instructions + file content
+│  │  ├─ tokenUtils.ts           # Utilities for estimating and formatting token counts
+│  │  └─ types.ts                # Shared TypeScript interfaces for API, config, state
+│  │
+│  ├─ renderer/                  # React Frontend (Renderer Process)
+│  │  ├─ index.html              # HTML entry point
+│  │  ├─ index.tsx               # React root entry point
+│  │  ├─ tailwind.css            # Tailwind base CSS and directives
+│  │  ├─ App.tsx                 # Main React App component (3-column layout)
+│  │  ├─ components/             # Reusable UI components
+│  │  │  ├─ DirectorySelector.tsx # "Open Repo" button and File Groups management
+│  │  │  ├─ FileList.tsx          # Virtualized file tree using react-arborist
+│  │  │  ├─ FileTreeNode.tsx      # (DEPRECATED - Should be removed)
+│  │  │  ├─ PromptEditor.tsx      # Textarea for instructions and "Copy" buttons
+│  │  │  ├─ DiffViewer.tsx        # Textarea for pasting AI diff
+│  │  │  ├─ CodeEditorTabs.tsx    # Tabbed view to preview and accept/reject changes
+│  │  │  └─ PromptModal.tsx       # Modal dialog for naming file groups
+│  │  └─ hooks/
+│  │     └─ useRepoContext.tsx    # Global React context hook for all application state
+│
+└─ release/                      # Output directory for packaged app (generated by `pnpm dist`)

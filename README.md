@@ -1,127 +1,83 @@
 # Repoprompter
 
-Repoprompter is a desktop app (Electron + Vite React) that allows users to interact with their Git repositories in a streamlined manner.
+Repoprompter is a desktop application built with Electron, Vite, and React, designed to streamline the developer workflow of interacting with AI code assistants. It allows developers to easily select files from a local repository, build a comprehensive context-rich prompt, and apply AI-generated code changes directly to their local files.
 
 ## Features
 
-1. Opens a local directory (the user's Git repo).
-2. Lets users select which folders or files they want to feed as context.
-3. Provides a prompt area for users to type instructions to the AI.
-4. Generates a combined prompt (code + instructions) for users to copy/paste into ChatGPT.
-5. Users paste back the AI's XML diff.
-6. Displays the diff for each file, allowing users to review and choose "accept" or "reject."
-   - On accept, the patch is applied to the local file, providing near-instant code changes.
+-   **Repository Browsing:**
+    -   Select any local directory via a native folder picker.
+    -   View the entire repository in a collapsible file tree (`react-arborist`).
+    -   Automatically filters out noise like `.git`, `node_modules`, and other common unnecessary files.
+-   **Intelligent File Selection:**
+    -   Select individual files or entire folders with checkboxes.
+    -   Create, save, and load "File Groups" to quickly re-select common sets of files.
+    -   "Unselect Unnecessary Files" feature to intelligently prune the selection, removing lock files, assets, and configs to optimize AI context.
+-   **Prompt Generation:**
+    -   Builds a structured prompt containing system instructions, the full content of selected files, and your custom instructions.
+    -   Copy the generated prompt to the clipboard with one click.
+    -   Displays the total estimated token count for the selected files to help manage context limits.
+-   **AI Diff Application:**
+    -   Paste an AI-generated XML diff into the Diff Viewer.
+    -   Preview the proposed changes for each file in a tabbed interface.
+    -   Accept or reject changes on a per-file basis, or accept all at once.
+    -   Changes are applied directly to your local files on acceptance.
+-   **Modern UI/UX:**
+    -   Clean, three-column layout: File Browser | Editors | Code Preview.
+    -   Full dark mode support.
+    -   Custom Apple-style window with a draggable header.
 
 ## Tech Stack
 
-- **Electron**: Desktop app packaging, Node environment in the main process.
-- **React + TypeScript**: Modern UI in the renderer.
-- **electron-updater or electron-builder**: Auto-update from GitHub.
-- **Local FS**: Via Node's `fs` or `fs-extra` in the main process.
-- **Diff Library**: (Optional) A small diff library or custom logic to apply patches from ChatGPT's XML.
-- **Styling**: Could be plain CSS or a framework (e.g., Tailwind). For a sleek Apple-like design, consider minimalistic pastel colors, subtle shadows, and an Apple-style layout.
-- **Package Manager**: pnpm
+-   **Framework:** Electron with `electron-vite` for a modern build pipeline.
+-   **UI:** React 19 with TypeScript, using Hooks and Context for state management.
+-   **File Tree:** `react-arborist` for a highly performant and virtualized file tree view.
+-   **Styling:** Tailwind CSS for a utility-first design system.
+-   **Diff Parsing:** `xmldoc` for parsing AI-generated XML diffs securely.
+-   **Packaging & Updates:** `electron-builder` for creating installers and `electron-updater` for auto-updates.
+-   **Package Manager**: pnpm
 
 ## Installation and Usage
 
-To get started with the Repoprompter app, follow these commands:
-
-1. **Install Dependencies**:
-   ```bash
-   pnpm install
-   ```
-
-2. **Run Development Server**:
-   ```bash
-   pnpm dev
-   ```
-
-3. **Build for Production**:
-   ```bash
-   pnpm build && pnpm dist
-   ```
-
-## Troubleshooting Steps
-
-If you encounter issues with the Electron installation when trying to run your Vite React Electron app, follow these steps:
-
-1. **Check Electron Installation**:
-   - Ensure that Electron is correctly installed in your project. You can check this by running:
-
-     ```bash
-     pnpm list electron
-     ```
-
-   - If it's not listed or if there's an issue, you can reinstall it:
-
-     ```bash
-     pnpm add electron@latest
-     ```
-
-2. **Verify Electron Version**:
-   - Ensure that the installed version of Electron is compatible with other dependencies, especially `electron-vite`. Check the documentation for any version compatibility notes.
-
-3. **Clear pnpm Cache**:
-   - Clearing the cache can resolve issues with package installations:
-
+1.  **Install Dependencies**:
     ```bash
-     pnpm store prune
-     ```
+    pnpm install
+    ```
 
-4. **Reinstall Dependencies**:
-   - If the issue persists, try removing the `node_modules` directory and the lock file, then reinstalling:
+2.  **Run in Development Mode**:
+    This starts the Vite dev server and Electron with hot-reloading for the renderer.
+    ```bash
+    pnpm dev
+    ```
 
-     ```bash
-     rm -rf node_modules
-     rm pnpm-lock.yaml
-     pnpm install
-     ```
+3.  **Build for Production**:
+    ```bash
+    pnpm build
+    ```
 
-5. **Check for Deprecated Packages**:
-   - Update any deprecated packages (like `eslint@8.57.1`) to their latest versions to avoid potential issues.
+4.  **Package for Distribution**:
+    After building, this creates the platform-specific installer (e.g., `.dmg`, `.exe`).
+    ```bash
+    pnpm dist
+    ```
 
-6. **Run `pnpm approve-builds`**:
-   - Run `pnpm approve-builds` to allow specific dependencies to run scripts, which may be necessary for Electron to function correctly.
+## Troubleshooting
 
-7. **Check Configuration**:
-   - Ensure that your `vite.config.js` and `electron-builder` configurations are set up correctly. Look for any misconfigurations that could lead to the Electron path not being found.
+If you encounter issues during setup, try these common solutions:
 
-8. **Consult Documentation**:
-   - If the problem continues, refer to the documentation for `electron-vite` and `electron-builder` for specific setup instructions or troubleshooting tips.
+1.  **Hard Reset:** The most effective fix for many dependency and cache-related issues.
+    ```bash
+    rm -rf node_modules
+    rm pnpm-lock.yaml
+    pnpm install
+    ```
 
-9. **Tailwind Error**:
-   -  ensure File: postcss.config.cjs has:
-module.exports = {
-  plugins: {
-    '@tailwindcss/postcss': {},
-    autoprefixer: {},
-  }
-}
+2.  **Clear Caches:** If the above doesn't work, clear pnpm's global store cache and Vite's cache.
+    ```bash
+    pnpm store prune
+    rm -rf node_modules/.vite
+    ```
 
-### Example Command to Reinstall Electron:
-
-```bash
-pnpm add electron@latest
-```
-
-After following these steps, try running your development server again with:
-
-```bash
-pnpm dev
-```
-
-If you still encounter issues, please provide any new error messages or logs for further assistance.
-
-
-####
-
-'''
-rm -rf dist
-rm -rf node_modules/.vite
-rm -rf node_modules/.cache
-pnpm install
-pnpm dev
-'''
-
-
-
+3.  **Check Electron Installation:** Ensure Electron was downloaded correctly. If you suspect an issue:
+    ```bash
+    pnpm add electron@latest --force
+    ```

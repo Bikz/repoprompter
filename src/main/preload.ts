@@ -130,6 +130,15 @@ const api: FileSystemApi = {
       console.error('Failed to set known large files:', error)
       return { success: false, error: String(error) }
     }
+  },
+
+  getIgnorePatterns: async () => {
+    try {
+      return await ipcRenderer.invoke('config:getIgnorePatterns')
+    } catch (error) {
+      console.error('Failed to get ignore patterns:', error)
+      return { success: false, error: String(error) }
+    }
   }
 }
 
