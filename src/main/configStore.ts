@@ -22,6 +22,7 @@ interface RepoSettings {
 interface RepoprompterConfig {
   global: {
     knownLargeFiles: string[]
+    ignorePatterns: string[]
   }
   repos: {
     [repoPath: string]: RepoSettings
@@ -43,6 +44,70 @@ function getDefaultConfig(): RepoprompterConfig {
         'project.pbxproj',
         'package-lock.json',
         '.DS_Store'
+      ],
+      ignorePatterns: [
+        'package-lock.json',
+        'pnpm-lock.yaml',
+        'yarn.lock',
+        'composer.lock',
+        'Pipfile.lock',
+        'poetry.lock',
+        'Gemfile.lock',
+        'go.sum',
+        'Cargo.lock',
+        '^(dist|build|out|target|release)[\\/]',
+        '^\\.next[\\/]',
+        '^\\.nuxt[\\/]',
+        '^\\.output[\\/]',
+        '^public[\\/].*\\.(js|css|map)$',
+        '^node_modules[\\/]',
+        '^vendor[\\/]',
+        '^__pycache__[\\/]',
+        '\\.(config|conf)\\.(js|ts|json|yaml|yml)$',
+        'webpack.config.js',
+        'vite.config.js',
+        'rollup.config.js',
+        'babel.config.js',
+        '.eslintrc.json',
+        '.prettierrc',
+        'jest.config.js',
+        'cypress.config.js',
+        'playwright.config.js',
+        'tailwind.config.js',
+        'postcss.config.js',
+        '^README\\.(md|txt|rst)$',
+        '^CHANGELOG\\.(md|txt|rst)$',
+        '^LICENSE(\\.(md|txt))?$',
+        '^CONTRIBUTING\\.(md|txt)$',
+        '.gitignore',
+        '.gitattributes',
+        '.dockerignore',
+        '^\\.vscode[\\/]',
+        '^\\.idea[\\/]',
+        '^\\.vs[\\/]',
+        '*.swp',
+        '*.swo',
+        '*~',
+        '\\.(png|jpe?g|gif|svg|ico|webp|avif)$',
+        '\\.(mp4|avi|mov|wmv|flv|webm)$',
+        '\\.(mp3|wav|ogg|m4a|aac)$',
+        '\\.(woff2?|ttf|eot|otf)$',
+        '\\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$',
+        '\\.min\\.(js|css)$',
+        '\\.map$',
+        '\\.d\\.ts$',
+        'coverage[\\/]',
+        '\\.nyc_output[\\/]',
+        'logs?[\\/]',
+        'tmp[\\/]',
+        'temp[\\/]',
+        '^\\.env(\\.|$)',
+        '.DS_Store',
+        'Thumbs.db',
+        '\\.(csv|json|xml|sql)$',
+        '[\\/](fixtures|mocks|__fixtures__|__mocks__)[\\/]',
+        '\\.fixtures?\\.(js|ts|json)$',
+        '\\.mock\\.(js|ts)$'
       ]
     },
     repos: {}
@@ -116,5 +181,18 @@ export function getKnownLargeFiles(): string[] {
 export function setKnownLargeFiles(newList: string[]) {
   const config = loadConfig()
   config.global.knownLargeFiles = newList
+  saveConfig(config)
+}
+
+/** Retrieve global ignore patterns. */
+export function getIgnorePatterns(): string[] {
+  const config = loadConfig()
+  return config.global.ignorePatterns
+}
+
+/** Persist a new global ignore pattern list. */
+export function setIgnorePatterns(newList: string[]) {
+  const config = loadConfig()
+  config.global.ignorePatterns = newList
   saveConfig(config)
 }
