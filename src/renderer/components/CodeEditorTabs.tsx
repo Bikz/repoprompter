@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react'
+import { createTwoFilesPatch } from 'diff'
+import { Diff2Html } from 'diff2html'
+import 'diff2html/bundles/css/diff2html.min.css'
 import { useRepoContext } from '../hooks/useRepoContext'
 
 export function CodeEditorTabs() {
-  const { diffChanges, acceptAllDiffs, acceptSingleDiff, rejectSingleDiff } = useRepoContext()
+  const {
+    diffChanges,
+    acceptAllDiffs,
+    acceptSingleDiff,
+    rejectSingleDiff,
+    getOriginalFileContent
+  } = useRepoContext()
   const [activeTab, setActiveTab] = useState<string | null>(null)
+  const [diffHtml, setDiffHtml] = useState('')
 
   // When a new set of diffs is loaded, default to the first file
   useEffect(() => {
@@ -13,6 +23,31 @@ export function CodeEditorTabs() {
       setActiveTab(null)
     }
   }, [diffChanges])
+
+  useEffect(() => {
+    const generateDiff = async () => {
+      if (!activeTab) {
+        setDiffHtml('')
+        return
+      }
+      const change = diffChanges.find(ch => ch.fileName === activeTab)
+      if (!change) return
+      const original = await getOriginalFileContent(change.fileName)
+      const patch = createTwoFilesPatch(
+        change.fileName,
+        change.fileName,
+        original || '',
+        change.newContent || ''
+      )
+      const html = Diff2Html.getPrettyHtml(patch, {
+        inputFormat: 'diff',
+        outputFormat: 'side-by-side',
+        showFiles: false
+      })
+      setDiffHtml(html)
+    }
+    generateDiff()
+  }, [activeTab, diffChanges, getOriginalFileContent])
 
   if (diffChanges.length === 0) {
     return (
@@ -62,9 +97,10 @@ export function CodeEditorTabs() {
       <div className="flex-1 border border-gray-300 dark:border-gray-800 rounded p-2 overflow-auto">
         {currentFileChange ? (
           <>
-            <pre className="bg-gray-50 dark:bg-off-black rounded p-2 text-xs text-gray-800 dark:text-white overflow-auto whitespace-pre-wrap">
-              {currentFileChange.newContent}
-            </pre>
+            <div
+              className="text-xs"
+              dangerouslySetInnerHTML={{ __html: diffHtml }}
+            />
 
             <div className="mt-2 flex gap-2">
               <button
