@@ -9,6 +9,10 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
+let configCache: RepoprompterConfig | null = null
+let saveTimer: NodeJS.Timeout | null = null
+const SAVE_DEBOUNCE_MS = 200
+
 interface RepoGroup {
   name: string
   files: string[]
@@ -49,10 +53,7 @@ function getDefaultConfig(): RepoprompterConfig {
   }
 }
 
-/**
- * Load config from disk, or return a default config if file not found / parse error.
- */
-export function loadConfig(): RepoprompterConfig {
+function readConfigFromDisk(): RepoprompterConfig {
   const configPath = getConfigFilePath()
   if (!fs.existsSync(configPath)) {
     return getDefaultConfig()
@@ -67,8 +68,7 @@ export function loadConfig(): RepoprompterConfig {
   }
 }
 
-/** Save the entire config object to disk. */
-export function saveConfig(config: RepoprompterConfig) {
+function writeConfigToDisk(config: RepoprompterConfig) {
   const configPath = getConfigFilePath()
   try {
     fs.mkdirSync(path.dirname(configPath), { recursive: true })
@@ -76,6 +76,32 @@ export function saveConfig(config: RepoprompterConfig) {
   } catch (err) {
     console.error('Failed to save settings.json:', err)
   }
+}
+
+/**
+ * Load config from disk, or return a default config if file not found / parse error.
+ */
+export function loadConfig(): RepoprompterConfig {
+  if (!configCache) {
+    configCache = readConfigFromDisk()
+  }
+  return configCache
+}
+
+/** Save the entire config object to disk. */
+function saveConfigDebounced() {
+  if (!configCache) return
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => {
+    if (configCache) {
+      writeConfigToDisk(configCache)
+    }
+    saveTimer = null
+  }, SAVE_DEBOUNCE_MS)
+}
+
+export function saveConfig() {
+  saveConfigDebounced()
 }
 
 /** Get or create the settings object for a particular repo. */
@@ -86,6 +112,7 @@ export function getRepoSettings(repoPath: string): RepoSettings {
       userInstructions: '',
       groups: []
     }
+    saveConfig()
   }
   return config.repos[repoPath]
 }
@@ -103,7 +130,7 @@ export function updateRepoSettings(repoPath: string, updates: Partial<RepoSettin
     ...updates
   }
   config.repos[repoPath] = newSettings
-  saveConfig(config)
+  saveConfig()
 }
 
 /** Retrieve global knownLargeFiles. */
@@ -116,5 +143,5 @@ export function getKnownLargeFiles(): string[] {
 export function setKnownLargeFiles(newList: string[]) {
   const config = loadConfig()
   config.global.knownLargeFiles = newList
-  saveConfig(config)
+  saveConfig()
 }
