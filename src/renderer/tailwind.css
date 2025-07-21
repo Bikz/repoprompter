@@ -8,11 +8,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
-  Custom styles
-  For brand color and general classes
-*/
-
 /* Base styles */
 @layer base {
   * {
@@ -27,7 +22,7 @@
   }
 }
 
-/* Glassmorphism Components */
+/* Component styles */
 @layer components {
   /* Glass surface with backdrop blur */
   .glass-surface {
@@ -54,19 +49,6 @@
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
   }
-  
-  /* Card component */
-  .card {
-    @apply glass-surface rounded-lg p-4;
-  }
-  
-  .card-header {
-    @apply font-semibold text-lg mb-3 text-primary;
-  }
-  
-  .card-body {
-    @apply text-secondary;
-  }
 }
 
 /* Utility classes */
@@ -82,9 +64,12 @@
   
   /* Border utilities */
   .border-surface { border-color: var(--surface-border); }
+  
+  /* Placeholder utilities */
+  .placeholder-tertiary::placeholder { color: var(--text-tertiary); }
 }
 
-/* Remove overall scroll by ensuring html/body/#root fill 100% and no overflow */
+/* Global layout */
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -100,48 +85,6 @@ body {
   background: transparent;
 }
 
-/* File Tree styling - Clean IDE-like appearance */
-.file-tree {
-  height: 100%;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scroll-behavior: smooth;
-  font-size: var(--text-xs);
-  font-family: var(--font-mono);
-  background: var(--surface-primary);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--surface-border);
-  padding: var(--space-2) 0;
-}
-
-.file-tree::-webkit-scrollbar {
-  width: 8px;
-}
-.file-tree::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: var(--radius-sm);
-}
-.file-tree::-webkit-scrollbar-thumb {
-  background-color: #aaa;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
-}
-.file-tree::-webkit-scrollbar-thumb:hover {
-  background-color: #999;
-}
-
-.dark .file-tree::-webkit-scrollbar-track {
-  background: #333;
-}
-.dark .file-tree::-webkit-scrollbar-thumb {
-  background-color: #555;
-}
-.dark .file-tree::-webkit-scrollbar-thumb:hover {
-  background-color: #666;
-}
-
-/* Legacy styles - to be replaced with unified components */
-
 /* Draggable region classes */
 .draggable {
   -webkit-app-region: drag;
@@ -150,9 +93,7 @@ body {
   -webkit-app-region: no-drag;
 }
 
-/* Legacy dark mode styles - to be replaced with unified components */
-
-/* React Arborist Tree Styling - Optimized */
+/* React Arborist Tree Styling */
 .react-arborist-tree {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -162,7 +103,6 @@ body {
   font-weight: 500;
 }
 
-/* Tree row styling */
 .react-arborist-row {
   border-radius: var(--radius-sm);
   transition: background-color var(--transition-fast);
@@ -185,7 +125,6 @@ body {
   background-color: rgba(10, 132, 255, 0.2) !important;
 }
 
-/* Tree lines - clean IDE style */
 .react-arborist-tree .react-arborist-tree-container::before {
   content: '';
   position: absolute;
@@ -197,7 +136,6 @@ body {
   z-index: 1;
 }
 
-/* Indent guides */
 .react-arborist-indent-line {
   border-left: 1px solid var(--surface-border);
   height: 100%;
@@ -206,7 +144,6 @@ body {
   top: 0;
 }
 
-/* Arrow styling */
 .react-arborist-arrow {
   color: var(--text-secondary);
   transition: transform var(--transition-fast);
@@ -220,31 +157,4 @@ body {
 
 .react-arborist-arrow-expanded {
   transform: rotate(90deg);
-}
-
-/* Modal styles - Optimized */
-.modal-overlay {
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-}
-.dark .modal-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.modal-container {
-  box-shadow: var(--shadow-lg);
-  border-radius: var(--radius-lg);
-  max-width: 500px;
-  width: 100%;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-primary);
-  box-sizing: border-box;
-}
-.modal-container input {
-  box-sizing: border-box;
-  max-width: 100%;
-  width: 100%;
-}
-.dark .modal-container input::placeholder {
-  color: var(--text-tertiary);
 }

@@ -30,6 +30,9 @@ module.exports = {
         'secondary': 'var(--text-secondary)',
         'tertiary': 'var(--text-tertiary)',
       },
+      placeholderColor: {
+        'tertiary': 'var(--text-tertiary)',
+      },
       fontFamily: {
         'sans': ['var(--font-sans)'],
         'mono': ['var(--font-mono)'],
