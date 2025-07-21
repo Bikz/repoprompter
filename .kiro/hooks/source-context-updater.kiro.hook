@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "name": "Source Context Updater",
+  "description": "Monitors TypeScript source files, configuration files, and documentation for changes and updates CLAUDE.md with relevant context for AI coding agents",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "*.ts",
+      "*.json",
+      "*.md",
+      "*.config.*",
+      "tailwind.config.cjs",
+      "tsconfig*.json",
+      "package.json",
+      "electron.vite.config.ts",
+      "vite.config.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source files have been modified in this TypeScript/React/Electron project. Please analyze the changes and update CLAUDE.md to provide AI coding agents with current, relevant context about the codebase structure, recent changes, and any important patterns or conventions that have been established or modified. Focus on information that would help an AI agent understand the current state of the project and make informed coding decisions."
+  }
+}

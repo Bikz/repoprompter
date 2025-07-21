@@ -2,6 +2,8 @@
  * File: tailwind.css
  * Description: Tailwind base imports for styles, components, utilities.
  */
+@import './styles/design-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,6 +13,77 @@
   For brand color and general classes
 */
 
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply font-sans text-primary bg-substrate;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Glassmorphism Components */
+@layer components {
+  /* Glass surface with backdrop blur */
+  .glass-surface {
+    @apply relative overflow-hidden backdrop-blur-xl;
+    background: var(--surface-primary);
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* Glass button base */
+  .glass-button {
+    @apply relative overflow-hidden transition-all backdrop-blur;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .glass-button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* Card component */
+  .card {
+    @apply glass-surface rounded-lg p-4;
+  }
+  
+  .card-header {
+    @apply font-semibold text-lg mb-3 text-primary;
+  }
+  
+  .card-body {
+    @apply text-secondary;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Text utilities */
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-tertiary { color: var(--text-tertiary); }
+  
+  /* Background utilities */
+  .bg-substrate { background: var(--bg-substrate); }
+  .bg-surface { background: var(--surface-primary); }
+  
+  /* Border utilities */
+  .border-surface { border-color: var(--surface-border); }
+}
+
 /* Remove overall scroll by ensuring html/body/#root fill 100% and no overflow */
 html, body, #root {
   height: 100%;
@@ -19,371 +92,55 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* File Tree styling - IDE-like appearance */
+html {
+  background: var(--bg-gradient);
+}
+
+body {
+  background: transparent;
+}
+
+/* File Tree styling - Clean IDE-like appearance */
 .file-tree {
   height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #007bff rgba(0, 0, 0, 0.1);
   scroll-behavior: smooth;
-  font-size: 0.75rem;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #e5e7eb;
-  padding: 6px 0;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  background: var(--surface-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  padding: var(--space-2) 0;
 }
-.dark .file-tree {
-  background-color: #1e1e1e;
-  border-color: #333;
-}
+
 .file-tree::-webkit-scrollbar {
   width: 8px;
 }
 .file-tree::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .file-tree::-webkit-scrollbar-thumb {
   background-color: #aaa;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
 }
 .file-tree::-webkit-scrollbar-thumb:hover {
   background-color: #999;
 }
 
-/* File tree node styling */
-.file-tree-node {
-  position: relative;
+.dark .file-tree::-webkit-scrollbar-track {
+  background: #333;
+}
+.dark .file-tree::-webkit-scrollbar-thumb {
+  background-color: #555;
+}
+.dark .file-tree::-webkit-scrollbar-thumb:hover {
+  background-color: #666;
 }
 
-/* Lines connecting parent to child nodes */
-.file-tree-node-child {
-  position: relative;
-}
-.file-tree-node-child::before {
-  content: "";
-  position: absolute;
-  left: 0.75rem;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background-color: #111827;
-  z-index: 1;
-  border-radius: 1px;
-}
-.dark .file-tree-node-child::before {
-  background-color: #e5e7eb;
-}
-
-/* Horizontal connector to items */
-.file-tree-node-with-connector::after {
-  content: "";
-  position: absolute;
-  left: 0.75rem;
-  top: 0.875rem;
-  width: 0.875rem;
-  height: 2px;
-  background-color: #111827;
-  z-index: 1;
-  border-radius: 1px;
-}
-.dark .file-tree-node-with-connector::after {
-  background-color: #e5e7eb;
-}
-
-.file-tree-item {
-  display: flex;
-  align-items: center;
-  padding: 2px 4px;
-  border-radius: 3px;
-  transition: all 0.15s;
-  margin-bottom: 1px;
-  line-height: 1.5;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position: relative;
-}
-.file-tree-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-.file-tree-item.selected {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-.file-tree-item:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.4);
-}
-
-.file-tree-checkbox {
-  min-width: 14px;
-  min-height: 14px;
-  border-radius: 3px;
-  cursor: pointer;
-  margin-right: 4px;
-  border: 1.5px solid #d1d5db;
-  transition: all 0.2s;
-  z-index: 2;
-  position: relative;
-}
-.file-tree-checkbox:checked {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-.file-tree-checkbox:indeterminate {
-  background-color: #007bff;
-  border-color: #007bff;
-  opacity: 0.6;
-}
-
-.file-tree-folder-arrow {
-  display: inline-flex;
-  width: 12px;
-  height: 12px;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-  margin-right: 2px;
-  color: #6b7280;
-  position: relative;
-  z-index: 2;
-}
-.dark .file-tree-folder-arrow {
-  color: #9ca3af;
-}
-.file-tree-folder-arrow.expanded {
-  transform: rotate(90deg);
-}
-
-/* File icon enhancements */
-.file-icon {
-  position: relative;
-  z-index: 2;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.folder-icon {
-  color: #e9b308;
-}
-.dark .folder-icon {
-  color: #ca8a04;
-}
-.project-icon {
-  color: #3b82f6;
-}
-.dark .project-icon {
-  color: #60a5fa;
-}
-.ts-icon, .tsx-icon {
-  color: #007acc;
-}
-.js-icon, .jsx-icon {
-  color: #f7df1e;
-}
-.json-icon {
-  color: #8bc34a;
-}
-.md-icon {
-  color: #ff5722;
-}
-.css-icon, .scss-icon {
-  color: #2196f3;
-}
-.html-icon {
-  color: #e34c26;
-}
-
-/* File-group styles */
-.file-group-button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.file-group-button:hover {
-  background-color: #0069d9;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
-}
-.file-group-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.file-group-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 12px;
-  border-radius: 8px;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s;
-}
-.dark .file-group-container {
-  background-color: #1a1a1a;
-  border-color: #333;
-}
-.file-group-heading {
-  width: 100%;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #4b5563;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  letter-spacing: 0.025em;
-}
-.file-group-item {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  background-color: white;
-  border-radius: 20px;
-  transition: all 0.15s;
-  border: 1px solid #e5e7eb;
-  font-size: 0.75rem;
-  cursor: pointer;
-  font-weight: 500;
-}
-.file-group-item:hover {
-  background-color: #e5e7eb;
-  border-color: #d1d5db;
-  transform: translateY(-1px);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-.file-group-item.active {
-  background-color: #dbeafe;
-  border-color: #93c5fd;
-  color: #1e40af;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.file-group-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #e5e7eb;
-  border-radius: 9999px;
-  padding: 0 6px;
-  margin-left: 6px;
-  font-size: 0.7rem;
-  min-width: 18px;
-  height: 18px;
-  font-weight: 600;
-}
-
-/* Buttons */
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: inline-flex;
-}
-
-/* Small button variant */
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-  display: inline-flex;
-  align-items: center;
-  line-height: 1.5;
-}
-
-/* Primary button in light mode => brand color. In dark => tinted brand or near dark. */
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-.btn-primary:hover {
-  background-color: rgba(0, 123, 255, 0.9);
-}
-.dark .btn-primary {
-  background-color: #0e1111;
-  color: #fff;
-}
-.dark .btn-primary:hover {
-  background-color: #222;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-.btn-secondary:hover {
-  background-color: #9ca3af;
-}
-.dark .btn-secondary {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-.dark .btn-secondary:hover {
-  background-color: #3a3a3a;
-}
-
-.btn-success {
-  background-color: #10b981;
-  color: white;
-}
-.btn-success:hover {
-  filter: brightness(90%);
-}
-.dark .btn-success {
-  background-color: #126e63;
-  color: #fff;
-}
-.dark .btn-success:hover {
-  background-color: #0a4e44;
-}
-
-.btn-danger {
-  background-color: #dc2626;
-  color: white;
-}
-.btn-danger:hover {
-  filter: brightness(90%);
-}
-.dark .btn-danger {
-  background-color: #850f0f;
-  color: #fff;
-}
-.dark .btn-danger:hover {
-  background-color: #5c0b0b;
-}
-
-.btn-warning {
-  background-color: #f59e0b;
-  color: black;
-}
-.btn-warning:hover {
-  filter: brightness(90%);
-}
-.dark .btn-warning {
-  background-color: #7c5600;
-  color: #fff;
-}
-.dark .btn-warning:hover {
-  background-color: #5e4100;
-}
+/* Legacy styles - to be replaced with unified components */
 
 /* Draggable region classes */
 .draggable {
@@ -393,107 +150,22 @@ html, body, #root {
   -webkit-app-region: no-drag;
 }
 
-/* Dark mode for file tree */
-.dark .file-tree {
-  background-color: #1e1e1e;
-  border-color: #333;
-}
-.dark .file-tree-item {
-  color: #fff;
-}
-.dark .file-tree-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-.dark .file-tree-item.selected {
-  background-color: rgba(30, 58, 138, 0.3);
-}
-.dark .file-tree-checkbox {
-  border-color: #444;
-}
-.dark .file-tree-checkbox:checked {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
-}
-.dark .file-tree-checkbox:indeterminate {
-  background-color: #3b82f6;
-  opacity: 0.6;
-}
-.dark .file-tree-node-child::before,
-.dark .file-tree-node-with-connector::after {
-  background-color: #e5e7eb;
-}
+/* Legacy dark mode styles - to be replaced with unified components */
 
-/* file-group button in dark */
-.dark .file-group-button {
-  background-color: #0f0f0f;
-  color: #f3f4f6;
-  border-color: #000;
-}
-.dark .file-group-button:hover {
-  background-color: #222;
-}
-
-/* container border in dark */
-.dark .file-group-container {
-  border-color: #333;
-}
-.dark .file-group-heading {
-  color: #fff;
-}
-.dark .file-group-item {
-  color: #e5e7eb;
-  border-color: #404040;
-  background-color: #2a2a2a;
-}
-.dark .file-group-item:hover {
-  background-color: #222;
-}
-.dark .file-group-item.active {
-  background-color: #0f172a;
-  border-color: #334155;
-  color: #e2e8f0;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-.dark .file-group-count {
-  background-color: #404040;
-  color: #e5e7eb;
-}
-
-/* Enhanced dark scrollbars */
-.dark .file-tree::-webkit-scrollbar {
-  width: 8px;
-}
-.dark .file-tree::-webkit-scrollbar-track {
-  background: #333;
-}
-.dark .file-tree::-webkit-scrollbar-thumb {
-  background-color: #555;
-  border-radius: 4px;
-}
-.dark .file-tree::-webkit-scrollbar-thumb:hover {
-  background-color: #666;
-}
-
-/* React Arborist Tree Styling */
+/* React Arborist Tree Styling - Optimized */
 .react-arborist-tree {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 13px;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  background: var(--surface-primary);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
   font-weight: 500;
-}
-
-.dark .react-arborist-tree {
-  background-color: #1f2937;
-  border-color: #374151;
 }
 
 /* Tree row styling */
 .react-arborist-row {
-  border-radius: 3px;
-  transition: background-color 0.1s ease;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
 }
 
 .react-arborist-row:hover {
@@ -505,13 +177,12 @@ html, body, #root {
 }
 
 .react-arborist-row-selected {
-  background-color: #e3f2fd !important;
-  border-left: 3px solid #2196f3;
+  background-color: rgba(10, 132, 255, 0.1) !important;
+  border-left: 3px solid var(--color-primary);
 }
 
 .dark .react-arborist-row-selected {
-  background-color: rgba(30, 58, 138, 0.3) !important;
-  border-left: 3px solid #60a5fa;
+  background-color: rgba(10, 132, 255, 0.2) !important;
 }
 
 /* Tree lines - clean IDE style */
@@ -522,31 +193,23 @@ html, body, #root {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #e0e0e0;
+  background: var(--surface-border);
   z-index: 1;
-}
-
-.dark .react-arborist-tree .react-arborist-tree-container::before {
-  background: #404040;
 }
 
 /* Indent guides */
 .react-arborist-indent-line {
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid var(--surface-border);
   height: 100%;
   position: absolute;
   left: 0;
   top: 0;
 }
 
-.dark .react-arborist-indent-line {
-  border-color: #404040;
-}
-
 /* Arrow styling */
 .react-arborist-arrow {
-  color: #6b7280;
-  transition: transform 0.2s ease;
+  color: var(--text-secondary);
+  transition: transform var(--transition-fast);
   font-size: 10px;
   width: 12px;
   height: 12px;
@@ -555,15 +218,11 @@ html, body, #root {
   justify-content: center;
 }
 
-.dark .react-arborist-arrow {
-  color: #9ca3af;
-}
-
 .react-arborist-arrow-expanded {
   transform: rotate(90deg);
 }
 
-/* Modal styles */
+/* Modal styles - Optimized */
 .modal-overlay {
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(2px);
@@ -573,11 +232,12 @@ html, body, #root {
 }
 
 .modal-container {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
   max-width: 500px;
   width: 100%;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-primary);
   box-sizing: border-box;
 }
 .modal-container input {
@@ -585,11 +245,6 @@ html, body, #root {
   max-width: 100%;
   width: 100%;
 }
-.dark .modal-container {
-  background-color: #1e1e1e;
-  border: 1px solid #333;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-}
 .dark .modal-container input::placeholder {
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }

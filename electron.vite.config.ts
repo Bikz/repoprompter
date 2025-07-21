@@ -6,7 +6,6 @@
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   // Disable auto-start so we only see the window from main.ts
@@ -59,7 +58,7 @@ export default defineConfig({
         '@common': path.join(__dirname, 'src/common'),
       },
     },
-    plugins: [react(), tailwindcss()],
+    plugins: [react()],
     server: {
       port: 5173,
       open: false,

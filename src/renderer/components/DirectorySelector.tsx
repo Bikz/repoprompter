@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 import { FileList } from './FileList'
 import { PromptModal } from './PromptModal'
+import { Button } from './ui/Button'
+import { Card, CardHeader, CardBody } from './ui/Card'
 
 export function DirectorySelector() {
   const {
@@ -48,245 +50,159 @@ export function DirectorySelector() {
   }
 
   const groupButtonRef = React.useRef<HTMLButtonElement>(null)
-  
-  const handleCreateGroup = () => {
-    createGroupFromSelection(groupButtonRef.current)
-  }
-
-  const handleUnselectUnnecessaryFiles = () => {
-    unselectUnnecessaryFiles()
-  }
-  
-  const handleToggleTreeCollapse = () => {
-    setIsTreeCollapsed(!isTreeCollapsed)
-  }
 
   return (
-    <div className="flex flex-col gap-4 text-sm text-gray-800 dark:text-white flex-1 min-h-0">
-      {/* Action buttons */}
-      <div className="flex gap-2">
-        <button
-          onClick={handleSelectDirectory}
-          className="btn btn-primary flex-1 h-10 px-4 text-sm font-medium rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
-          title="Select repository folder"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="mr-2"
-          >
-            <path
-              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </svg>
-          Open Repo
-        </button>
-        <button
-          onClick={handleRefreshDirectory}
-          className="btn btn-secondary w-10 h-10 p-0 flex items-center justify-center rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
-          title="Refresh files"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M21 3v5h-5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3 21v-5h5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <button
-          ref={groupButtonRef}
-          onClick={handleCreateGroup}
-          className="btn btn-primary w-10 h-10 p-0 flex items-center justify-center rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
-          title="Create group from selected files"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-            <polyline
-              points="14,2 14,8 20,8"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M10 15h4M12 13v4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={handleUnselectUnnecessaryFiles}
-          className="btn btn-secondary w-10 h-10 p-0 flex items-center justify-center rounded-md transition-all duration-200 hover:shadow-md active:scale-95"
-          title="Remove files that don't contribute meaningful context for AI coding (lock files, build artifacts, assets, configs)"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </svg>
-        </button>
-      </div>
-      
+    <div className="flex flex-col h-full gap-2">
+      {/* Repository Card */}
+      <Card className="flex-shrink-0">
+        <CardBody className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+              <h3 className="text-sm font-semibold text-primary">Repository</h3>
+            </div>
+            <Button onClick={handleSelectDirectory} variant="primary" size="sm">
+              Open Repo
+            </Button>
+          </div>
+
+          {baseDir ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs text-secondary">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span className="truncate">{baseDir.split('/').pop()}</span>
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex gap-2">
+                <Button onClick={handleRefreshDirectory} variant="secondary" size="sm" className="flex-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
+                </Button>
+                <Button onClick={createGroupFromSelection} variant="secondary" size="sm" className="flex-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Save Group
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-tertiary text-center py-4">
+              No repository selected
+            </p>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* File Groups */}
+      {groups.length > 0 && (
+        <Card className="flex-shrink-0">
+          <CardBody className="p-4">
+            <h3 className="text-sm font-semibold text-primary mb-3">File Groups</h3>
+            <div className="space-y-1">
+              {groups.map((group) => (
+                <div
+                  key={group.name}
+                  className={`group flex items-center gap-2 px-3 py-2 rounded-md transition-all cursor-pointer
+                    ${activeGroupName === group.name 
+                      ? 'bg-primary/10 text-primary' 
+                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-secondary'
+                    }`}
+                  onClick={() => selectGroup(group.name)}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleGroup(group.name)
+                    }}
+                    className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10"
+                  >
+                    <svg 
+                      className={`w-3 h-3 transition-transform ${
+                        activeGroupName === group.name ? 'rotate-90' : ''
+                      }`} 
+                      fill="currentColor" 
+                      viewBox="0 0 20 20"
+                    >
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  <span className="flex-1 text-sm font-medium truncate">{group.name}</span>
+                  <span className="text-xs bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full">
+                    {group.files.length}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeGroup(group.name)
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-danger/10 text-danger transition-opacity"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* File Tree */}
+      {baseDir && (
+        <Card className="flex-1 overflow-hidden">
+          <CardHeader className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold">Files</h3>
+              <Button
+                onClick={() => setIsTreeCollapsed(!isTreeCollapsed)}
+                variant="ghost"
+                size="sm"
+                className="p-1"
+              >
+                <svg 
+                  className={`w-4 h-4 transition-transform ${isTreeCollapsed ? '' : 'rotate-90'}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Button>
+            </div>
+            <Button
+              onClick={unselectUnnecessaryFiles}
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+            >
+              Clean Selection
+            </Button>
+          </CardHeader>
+          {!isTreeCollapsed && (
+            <CardBody className="p-2 overflow-auto">
+              <FileList />
+            </CardBody>
+          )}
+        </Card>
+      )}
+
       {/* Prompt Modal */}
       <PromptModal
         isOpen={isPromptModalOpen}
         onClose={closePromptModal}
         onConfirm={handlePromptConfirm}
-        title="Create Group"
         defaultValue={modalDefaultValue}
-        anchorElement={modalButtonRef}
+        triggerRef={modalButtonRef}
       />
-
-      {/* File Groups */}
-      {groups.length > 0 && (
-        <>
-          <div className="h-px bg-gray-200 dark:bg-gray-700 mx-2" />
-          <div className="file-group-container">
-            <div className="file-group-heading">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-2"
-            >
-              <path
-                d="M4 20H20M4 4H20M9 8.5H20M9 15.5H20M4 8.5L6 11L4 13.5M4 15.5L6 18L4 20.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            File Groups
-          </div>
-          {groups.map(group => (
-            <div
-              key={group.name}
-              className={`file-group-item ${activeGroupName === group.name ? 'active' : ''}`}
-              title={`Toggle group "${group.name}" (${group.files.length} files)`}
-            >
-              <span
-                onClick={() => toggleGroup(group.name)}
-                className="inline-flex items-center"
-              >
-                {group.name}
-                <span className="file-group-count">{group.files.length}</span>
-              </span>
-              <button
-                onClick={e => {
-                  e.stopPropagation()
-                  if (confirm(`Are you sure you want to remove group "${group.name}"?`)) {
-                    removeGroup(group.name)
-                  }
-                }}
-                className="ml-2 text-xs text-red-600 dark:text-red-400 hover:opacity-80"
-                title="Remove this group"
-              >
-                x
-              </button>
-            </div>
-          ))}
-          </div>
-        </>
-      )}
-
-      {/* Always show “Current Repository” heading + FileList */}
-      {(groups.length > 0 || baseDir) && <div className="h-px bg-gray-200 dark:bg-gray-700 mx-2" />}
-      <div className="flex items-center justify-between flex-shrink-0 px-1">
-        <h4 className="text-sm font-semibold">Current Repository:</h4>
-        <button
-          onClick={handleToggleTreeCollapse}
-          className="w-6 h-6 p-0 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-          title={isTreeCollapsed ? "Expand all folders" : "Collapse all folders"}
-        >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className={`transform transition-transform duration-150 ${isTreeCollapsed ? 'rotate-0' : 'rotate-90'}`}
-          >
-            <path
-              d="M9 6l6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
-      
-      {/* FileList takes remaining space */}
-      <FileList isTreeCollapsed={isTreeCollapsed} />
     </div>
   )
 }

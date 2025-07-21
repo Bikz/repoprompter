@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { Modal, ModalBody, ModalFooter } from './ui/Modal'
+import { Input } from './ui/Input'
+import { Button } from './ui/Button'
 
 interface PromptModalProps {
   isOpen: boolean
@@ -9,18 +12,150 @@ interface PromptModalProps {
   anchorElement?: HTMLElement | null
 }
 
-export function PromptModal({ isOpen, onClose, onConfirm, title, defaultValue, anchorElement }: PromptModalProps) {
+export function PromptModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  title, 
+  defaultValue, 
+  anchorElement 
+}: PromptModalProps) {
   const [value, setValue] = useState(defaultValue)
   const inputRef = useRef<HTMLInputElement>(null)
-  const modalRef = useRef<HTMLDivElement>(null)
 
-  // Focus input on modal open and position modal
+  // Focus input when modal opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
+  }, [isOpen])
+
+  // Handle Enter key to confirm
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && isOpen) {
+        handleConfirm()
+      }
+    }
     
-    // Position modal relative to the anchor element if provided
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, value])
+
+  // Reset value when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setValue(defaultValue)
+    }
+  }, [isOpen, defaultValue])
+
+  const handleConfirm = () => {
+    if (value.trim()) {
+      onConfirm(value)
+    }
+  }
+
+  // For anchor-positioned modals, we'll use a custom positioned modal
+  if (anchorElement) {
+    return (
+      <AnchoredModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={title}
+        anchorElement={anchorElement}
+      >
+        <ModalBody>
+          <Input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            size="sm"
+            placeholder="Enter a name"
+            className="w-full"
+          />
+        </ModalBody>
+        
+        <ModalFooter>
+          <Button 
+            variant="secondary"
+            size="sm"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="primary"
+            size="sm"
+            onClick={handleConfirm}
+          >
+            Confirm
+          </Button>
+        </ModalFooter>
+      </AnchoredModal>
+    )
+  }
+
+  // Standard centered modal
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      size="sm"
+    >
+      <ModalBody>
+        <Input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          size="sm"
+          placeholder="Enter a name"
+          className="w-full"
+        />
+      </ModalBody>
+      
+      <ModalFooter>
+        <Button 
+          variant="secondary"
+          size="sm"
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
+        <Button 
+          variant="primary"
+          size="sm"
+          onClick={handleConfirm}
+        >
+          Confirm
+        </Button>
+      </ModalFooter>
+    </Modal>
+  )
+}
+
+// Specialized anchored modal for positioning relative to elements
+interface AnchoredModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+  anchorElement: HTMLElement
+}
+
+function AnchoredModal({ 
+  isOpen, 
+  onClose, 
+  title, 
+  children, 
+  anchorElement 
+}: AnchoredModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  // Position modal relative to anchor element
+  useEffect(() => {
     if (isOpen && anchorElement && modalRef.current) {
       try {
         const anchorRect = anchorElement.getBoundingClientRect()
@@ -32,20 +167,18 @@ export function PromptModal({ isOpen, onClose, onConfirm, title, defaultValue, a
           return
         }
         
-        // Position to the right of the button with more spacing
+        // Position to the right of the button with spacing
         const left = anchorRect.right + 16
-        // Align vertically centered with the button, but slightly higher
+        // Align vertically centered with the button
         const top = anchorRect.top - (modalRect.height / 2) + (anchorRect.height / 2) - 20
         
-        // Make sure the modal doesn't go off-screen on the right
+        // Ensure modal stays within viewport
         const maxRight = window.innerWidth - 20
         const adjustedLeft = left + modalRect.width > maxRight 
           ? anchorRect.left - modalRect.width - 16  // Position to the left instead
           : left
         
-        // Make sure the modal doesn't go off-screen on the top
         const adjustedTop = Math.max(20, top)
-        // Make sure the modal doesn't go off-screen on the bottom
         const maxBottom = window.innerHeight - 20
         const adjustedBottom = adjustedTop + modalRect.height
         const finalTop = adjustedBottom > maxBottom 
@@ -56,117 +189,55 @@ export function PromptModal({ isOpen, onClose, onConfirm, title, defaultValue, a
         modalRef.current.style.left = `${Math.max(20, adjustedLeft)}px`
         modalRef.current.style.top = `${finalTop}px`
         modalRef.current.style.transform = 'none'
+        modalRef.current.style.zIndex = '50'
       } catch (error) {
-        console.warn('Error positioning modal, falling back to centered:', error)
-        // Reset positioning to allow centered fallback
-        if (modalRef.current) {
-          modalRef.current.style.position = ''
-          modalRef.current.style.left = ''
-          modalRef.current.style.top = ''
-          modalRef.current.style.transform = ''
-        }
+        console.warn('Error positioning modal:', error)
       }
     }
   }, [isOpen, anchorElement])
 
-  // Handle escape key to close modal
+  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose()
-      } else if (e.key === 'Enter' && isOpen) {
-        handleConfirm()
       }
     }
     
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, value])
-
-  const handleConfirm = () => {
-    if (value.trim()) {
-      onConfirm(value)
-    }
-  }
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
-  // Create floating modal when we have an anchor element, or centered modal when not
-  if (anchorElement) {
-    return (
-      <div className="fixed inset-0 z-40" onClick={onClose}>
-        <div 
-          ref={modalRef}
-          onClick={e => e.stopPropagation()}
-          className="modal-container bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg z-50"
-          style={{ width: "280px" }}
-        >
-          <h2 className="text-md font-semibold mb-3 dark:text-white">{title}</h2>
-          
-          <div className="flex justify-center mb-6">
-            <input
-              ref={inputRef}
-              type="text"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              className="w-full px-2 py-1 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-              placeholder="Enter a name"
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            <button 
-              onClick={onClose}
-              className="btn-sm btn-secondary"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleConfirm}
-              className="btn-sm btn-primary"
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  
-  // Fallback to centered modal
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 z-40" 
+      onClick={onClose}
+      style={{ background: 'rgba(0, 0, 0, 0.1)' }}
+    >
       <div 
         ref={modalRef}
-        className="modal-container bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg"
+        onClick={e => e.stopPropagation()}
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
         style={{ width: "280px" }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="anchored-modal-title"
       >
-        <h2 className="text-md font-semibold mb-3 dark:text-white">{title}</h2>
-        
-        <div className="flex justify-center mb-6">
-          <input
-            ref={inputRef}
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            className="w-full px-2 py-1 border rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-            placeholder="Enter a name"
-          />
+        {/* Header */}
+        <div className="p-4 pb-2">
+          <h2 
+            id="anchored-modal-title"
+            className="text-sm font-semibold text-gray-900 dark:text-white"
+          >
+            {title}
+          </h2>
         </div>
-        
-        <div className="flex justify-end space-x-2">
-          <button 
-            onClick={onClose}
-            className="btn-sm btn-secondary"
-          >
-            Cancel
-          </button>
-          <button 
-            onClick={handleConfirm}
-            className="btn-sm btn-primary"
-          >
-            Confirm
-          </button>
+
+        {/* Content */}
+        <div className="px-4 pb-4">
+          {children}
         </div>
       </div>
     </div>

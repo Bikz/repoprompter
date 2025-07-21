@@ -145,3 +145,61 @@ export function setKnownLargeFiles(newList: string[]) {
   config.global.knownLargeFiles = newList
   saveConfig()
 }
+
+const DEFAULT_IGNORE_PATTERNS = [
+  '.git',
+  '.svn',
+  '.hg',
+  'node_modules',
+  'dist',
+  'build',
+  'coverage',
+  '.next',
+  '.nuxt',
+  '.cache',
+  '.vscode',
+  '.idea',
+  '*.log',
+  '*.lock',
+  '.DS_Store',
+  'Thumbs.db',
+  '__pycache__',
+  '*.pyc',
+  '.pytest_cache',
+  '.mypy_cache',
+  'target',
+  'out',
+  'bin',
+  'obj',
+  '.gradle',
+  '.settings',
+  '.classpath',
+  '.project'
+]
+
+export function getIgnorePatterns(): (string | { pattern: string; flags?: string })[] {
+  return DEFAULT_IGNORE_PATTERNS
+}
+
+export function isFileIgnored(filePath: string): boolean {
+  const patterns = getIgnorePatterns()
+  
+  return patterns.some(pattern => {
+    const patternStr = typeof pattern === 'string' ? pattern : pattern.pattern
+    
+    // Check if the file ends with the pattern (for file extensions like *.log)
+    if (patternStr.startsWith('*')) {
+      const extension = patternStr.substring(1)
+      if (filePath.endsWith(extension)) return true
+    }
+    
+    // Check if the pattern matches the file or directory name
+    const parts = filePath.split('/')
+    if (parts.some(part => part === patternStr)) return true
+    
+    // Check if the path starts with the pattern (for directories)
+    if (filePath.startsWith(patternStr + '/') || filePath === patternStr) return true
+    
+    return false
+  })
+}

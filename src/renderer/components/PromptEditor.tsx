@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useRepoContext } from '../hooks/useRepoContext'
 import { getTokenInfo } from '../../common/tokenUtils'
+import { Card, CardBody } from './ui/Card'
+import { Button } from './ui/Button'
 
 export function PromptEditor() {
   const { baseDir, selectedFiles, updateFileTokens } = useRepoContext()
@@ -38,98 +40,173 @@ new content here
     // Calculate and cache token counts for all loaded files
     Object.entries(fileContentMap).forEach(([filePath, content]) => {
       if (content && !content.startsWith('// File too large') && !content.startsWith('// Error reading file')) {
-        updateFileTokens(filePath, content)
+        const tokenInfo = getTokenInfo(content)
+        updateFileTokens(filePath, tokenInfo.tokenCount)
       }
     })
     
-    let result = ''
+    let combinedContent = ''
     
     if (includeXmlInstructions) {
-      result += '<system_instructions>\n' + xmlSystemPrompt.trim() + '\n</system_instructions>\n\n'
+      combinedContent += xmlSystemPrompt + '\n\n'
     }
     
-    result += '<file_map>\n'
-    selectedFiles.forEach(file => {
-      result += `File: ${file}\n\`\`\`\n${fileContentMap[file] || '// File not available'}\n\`\`\`\n\n`
+    combinedContent += '<file_map>\n'
+    
+    Object.entries(fileContentMap).forEach(([filePath, content]) => {
+      combinedContent += `<file name="${filePath}">\n${content}\n</file>\n\n`
     })
-    result += '</file_map>\n\n'
-    result += `<user_instructions>\n${userInstructions}\n</user_instructions>\n`
-    return result
+    
+    combinedContent += '</file_map>\n\n'
+    combinedContent += `<user_instructions>\n${userInstructions}\n</user_instructions>`
+    
+    return combinedContent
   }
 
   const handleCopy = async () => {
-    try {
-      const prompt = await buildPrompt(false)
-      setCombinedPrompt(prompt)
-      await navigator.clipboard.writeText(prompt)
-      alert('Prompt copied to clipboard!')
-    } catch (err) {
-      console.error('Failed to copy prompt:', err)
-      alert('Failed to copy prompt. See console for details.')
+    const prompt = await buildPrompt(false)
+    navigator.clipboard.writeText(prompt)
+    const button = document.querySelector('#copy-button') as HTMLButtonElement
+    if (button) {
+      const originalText = button.textContent
+      button.textContent = '✓ Copied!'
+      button.classList.add('bg-success')
+      setTimeout(() => {
+        button.textContent = originalText
+        button.classList.remove('bg-success')
+      }, 2000)
     }
   }
 
-  const handleCopyWithXml = async () => {
-    try {
-      const prompt = await buildPrompt(true)
-      setCombinedPrompt(prompt)
-      await navigator.clipboard.writeText(prompt)
-      alert('Prompt with XML instructions copied to clipboard!')
-    } catch (err) {
-      console.error('Failed to copy prompt:', err)
-      alert('Failed to copy prompt. See console for details.')
+  const handleCopyWithXML = async () => {
+    const prompt = await buildPrompt(true)
+    navigator.clipboard.writeText(prompt)
+    const button = document.querySelector('#copy-xml-button') as HTMLButtonElement
+    if (button) {
+      const originalText = button.textContent
+      button.textContent = '✓ Copied!'
+      button.classList.add('bg-success')
+      setTimeout(() => {
+        button.textContent = originalText
+        button.classList.remove('bg-success')
+      }, 2000)
     }
   }
 
-  const handleViewCombinedPrompt = async () => {
-    if (!showCombinedPrompt) {
-      const prompt = await buildPrompt(true)
-      setCombinedPrompt(prompt)
-    }
-    setShowCombinedPrompt(!showCombinedPrompt)
+  const handleViewCombined = async () => {
+    const prompt = await buildPrompt(true)
+    setCombinedPrompt(prompt)
+    setShowCombinedPrompt(true)
   }
+
+  const totalTokens = Object.values(useRepoContext().fileTokens).reduce((sum, count) => sum + count, 0)
+  const hasSelectedFiles = selectedFiles.length > 0
 
   return (
-    <div className="flex flex-col gap-2 text-sm text-gray-800 dark:text-white">
-      <textarea
-        className="w-full h-72 border border-gray-300 dark:border-gray-800 rounded p-2 bg-white dark:bg-off-black text-gray-800 dark:text-white"
-        placeholder="Type your instructions here..."
-        value={userInstructions}
-        onChange={e => setUserInstructions(e.target.value)}
-      />
-      <div className="flex gap-2">
-        <button
-          onClick={handleCopy}
-          className="btn btn-success"
-        >
-          Copy
-        </button>
-        <button
-          onClick={handleCopyWithXml}
-          className="btn btn-primary"
-        >
-          Copy with XML
-        </button>
-        <button
-          onClick={handleViewCombinedPrompt}
-          className="btn btn-secondary"
-        >
-          {showCombinedPrompt ? 'Hide' : 'View'} combined prompt
-        </button>
-      </div>
-
-      {showCombinedPrompt && combinedPrompt && (
-        <div className="mt-2 flex flex-col gap-2">
-          <textarea
-            className="w-full h-40 border border-gray-300 dark:border-gray-800 rounded p-2 bg-white dark:bg-off-black text-gray-800 dark:text-white text-sm"
-            value={combinedPrompt}
-            readOnly
-          />
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            This is the generated prompt with XML instructions. Use the buttons above to copy it again.
-          </p>
+    <Card className="h-[50%]">
+      <CardBody className="p-6 h-full flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-primary">Prompt Editor</h2>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-secondary">
+              {selectedFiles.length} files • {totalTokens.toLocaleString()} tokens
+            </span>
+          </div>
         </div>
-      )}
-    </div>
+
+        <div className="flex-1 min-h-0">
+          <textarea
+            value={userInstructions}
+            onChange={(e) => setUserInstructions(e.target.value)}
+            placeholder="Type your instructions here..."
+            className="w-full h-full p-4 bg-black/5 dark:bg-white/5 border border-surface rounded-lg 
+                     text-primary placeholder-tertiary resize-none focus:outline-none 
+                     focus:ring-2 focus:ring-primary/50 transition-all font-mono text-sm"
+            disabled={!hasSelectedFiles}
+          />
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          <Button
+            id="copy-button"
+            onClick={handleCopy}
+            variant="primary"
+            disabled={!hasSelectedFiles || !userInstructions.trim()}
+            className="flex-1"
+          >
+            Copy
+          </Button>
+          <Button
+            id="copy-xml-button"
+            onClick={handleCopyWithXML}
+            variant="secondary"
+            disabled={!hasSelectedFiles || !userInstructions.trim()}
+            className="flex-1"
+          >
+            Copy with XML
+          </Button>
+          <Button
+            onClick={handleViewCombined}
+            variant="ghost"
+            disabled={!hasSelectedFiles || !userInstructions.trim()}
+          >
+            View combined prompt
+          </Button>
+        </div>
+
+        {/* Combined Prompt Modal */}
+        {showCombinedPrompt && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="max-w-4xl w-full max-h-[80vh] flex flex-col">
+              <CardBody className="p-6 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Combined Prompt</h3>
+                  <Button
+                    onClick={() => setShowCombinedPrompt(false)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </Button>
+                </div>
+                <textarea
+                  value={combinedPrompt}
+                  readOnly
+                  className="flex-1 w-full p-4 bg-black/5 dark:bg-white/5 border border-surface rounded-lg 
+                           text-primary font-mono text-sm resize-none focus:outline-none"
+                />
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(combinedPrompt)
+                      setShowCombinedPrompt(false)
+                    }}
+                    variant="primary"
+                  >
+                    Copy & Close
+                  </Button>
+                  <Button
+                    onClick={() => setShowCombinedPrompt(false)}
+                    variant="secondary"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+        )}
+      </CardBody>
+    </Card>
   )
 }

@@ -80,6 +80,53 @@ export interface FileSystemApi {
   getIgnorePatterns: () => Promise<{ success: boolean; ignorePatterns?: (string | { pattern: string; flags?: string })[], error?: string }>
 }
 
+/**
+ * Design System Types
+ */
+
+/** Configuration for component styling variants and sizes */
+export interface ComponentStyles {
+  button: {
+    variants: Record<string, string>
+    sizes: Record<string, string>
+    base: string
+  }
+  input: {
+    variants: Record<string, string>
+    sizes: Record<string, string>
+    base: string
+  }
+  card: {
+    base: string
+    variants: Record<string, string>
+  }
+}
+
+/** Design token configuration interface */
+export interface DesignTokens {
+  spacing: Record<string, string>
+  colors: {
+    primary: string
+    secondary: string
+    success: string
+    danger: string
+    warning: string
+  }
+  typography: {
+    sizes: Record<string, string>
+    weights: Record<string, string>
+  }
+  borderRadius: Record<string, string>
+  shadows: Record<string, string>
+}
+
+/** Input component prop types for consistent styling */
+export interface InputStyleProps {
+  variant?: 'default' | 'search'
+  size?: 'sm' | 'md' | 'lg'
+  error?: boolean
+}
+
 declare global {
   interface Window {
     api: FileSystemApi

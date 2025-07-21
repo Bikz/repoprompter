@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm lint:*)",
       "Bash(rg:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build)"
     ],
     "deny": []
   }
