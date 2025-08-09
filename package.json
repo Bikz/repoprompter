@@ -5,6 +5,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron-vite dev",
+    "dev:debug": "cross-env NODE_ENV=development VITE_DEV_SERVER_URL=http://localhost:5173 REMOTE_DEBUGGING_PORT=9222 electron-vite dev",
     "dev:renderer": "vite --port 5173",
     "dev:main": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron-vite dev",
     "build": "electron-vite build",

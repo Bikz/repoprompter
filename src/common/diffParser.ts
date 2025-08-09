@@ -1,5 +1,5 @@
 import { writeFileContent } from './fileSystem'
-import * as xmldoc from 'xmldoc'
+import xmldoc from 'xmldoc'
 import path from 'path'
 
 interface DiffSegment {
@@ -37,7 +37,7 @@ export function parseDiffXml(xmlString: string): DiffSegment[] {
   const changes: DiffSegment[] = []
   const seenFiles = new Set<string>()
 
-  fileNodes.forEach((fileNode, index) => {
+  fileNodes.forEach((fileNode: any, index: number) => {
     const fileName = fileNode.attr.name
     if (!fileName) {
       throw new Error(`File element at index ${index} is missing 'name' attribute`)

@@ -14,44 +14,73 @@ RepoPrompter is an Electron desktop application that bridges local codebases wit
 4.  Receive XML-formatted code changes back.
 5.  Preview and apply those changes directly to their local files.
 
-## Current Development Focus: Design System Optimization
+## Current Development Focus: Electron-Puppeteer Integration
 
-**Active Spec**: `.kiro/specs/design-system-optimization/`
+**Active Spec**: `.kiro/specs/electron-puppeteer-integration/`
 
-The project is currently undergoing a comprehensive design system optimization to consolidate styling approaches, eliminate redundant CSS, and create a unified Tailwind-based design system. The Modal component implementation has been completed, and the focus is now on fixing undefined CSS classes and final cleanup.
+Following the successful completion of the design system optimization, the project is now actively implementing Puppeteer integration for enhanced debugging capabilities. This feature will enable programmatic control of the Electron app, console log extraction, automated testing, and seamless debugging workflows.
 
-### Completed Tasks
-- ✅ Optimized design tokens in `src/renderer/styles/design-tokens.css` with simplified spacing, color, and typography scales
-- ✅ Created unified Input component with consistent styling variants, focus states, and error handling
-- ✅ Refactored Button component to use Tailwind classes with design tokens
-- ✅ Updated Card component with optimized glass-surface styling
-- ✅ Created unified Modal component with proper positioning, backdrop, and responsive behavior
-- ✅ Updated PromptModal to use new unified Modal and Button components (replacing legacy CSS classes)
+**Previous Completed**: Design System Optimization ✅ - All 11 tasks completed with unified Tailwind-based design system.
 
-### Next Priority Tasks
-1. **Fix Undefined CSS Classes** (Task 7): Replace undefined Tailwind classes throughout the codebase:
-   - `text-title-md` → `text-lg` (6 locations: App.tsx, Card.tsx, PromptEditor.tsx, CodeEditorTabs.tsx, DiffViewer.tsx)
-   - `duration-fast` → `duration-150` (Button.tsx, Input.tsx)
-   - `ease-smooth` → `ease-out` (Button.tsx, Input.tsx)
+**Current Status**: All tasks are **PENDING** - ready to begin implementation of the Electron-Puppeteer integration.
 
-2. **CSS Cleanup** (Task 8): Remove redundant styles from `tailwind.css` and consolidate remaining styles
+### 🎯 Electron-Puppeteer Integration Requirements
 
-3. **Accessibility & Performance** (Tasks 9-11): Add focus states, test theme switching, and optimize performance
+The new integration will provide comprehensive debugging capabilities through Chrome DevTools Protocol (CDP):
+
+1. **CDP Connection** - Enable remote debugging in development mode with automatic endpoint exposure
+2. **Console Log Extraction** - Capture all console messages (log, error, warn, info) with timestamps and formatting
+3. **Screenshot Capture** - Take full-page and element-specific screenshots in PNG/JPEG formats
+4. **User Interaction Automation** - Programmatically click buttons, input text, and navigate the interface
+5. **CLI Debug Tool** - Simple command-line interface for quick debugging operations
+6. **Development Workflow Integration** - Seamless integration without impacting normal app usage
+7. **Shareable Debug Sessions** - Export logs, screenshots, and interaction history in multiple formats
+
+### 📋 Implementation Progress
+
+**All Tasks Currently Pending** - ⏳ **READY TO START**
+- Task 1: Configure Electron for remote debugging (CDP setup, security configuration)
+- Task 2: Create Puppeteer debug script with CDP connection logic
+- Task 3: Implement log extraction and formatting with timestamps
+- Task 4: Add screenshot functionality with window state handling
+- Task 5: Create convenient package scripts (dev:debug, debug:capture, etc.)
+- Task 6: Test and validate the integration across all scenarios
+
+**Next Priority:** Task 1 - Configure Electron main process for remote debugging with proper security constraints
+
+### ✅ Design System Optimization - COMPLETED
+All 11 tasks completed with 8.2% CSS bundle reduction and unified component system.
+
+### Key Achievements
+- **Unified Design System**: All components now use consistent Tailwind utilities with CSS custom properties
+- **Performance Optimized**: CSS bundle reduced by 8.2% with improved loading performance
+- **Accessibility Compliant**: Proper focus states, ARIA labels, and high contrast mode support
+- **Theme Consistency**: Smooth light/dark mode transitions across all components
+- **Component Library**: Complete set of reusable UI components (Button, Input, Card, Modal)
 
 ### Design System Architecture
-- **Tailwind-First**: All components should use Tailwind utilities with CSS custom properties
+- **Tailwind-First**: All components use Tailwind utilities with CSS custom properties
 - **Design Tokens**: CSS variables in `:root` for theming (spacing, colors, typography, transitions)
 - **Glass Morphism**: Apple-inspired glass surface styling with backdrop blur
+- **Component Composition**: Reusable UI components in `src/renderer/components/ui/`
+- **Modal System**: Unified Modal component with sub-components (ModalHeader, ModalBody, ModalFooter) and anchored positioning support
 - **Component Composition**: Reusable UI components in `src/renderer/components/ui/`
 - **Modal System**: Unified Modal component with sub-components (ModalHeader, ModalBody, ModalFooter) and anchored positioning support
 
 ## Commands
 
+### Core Development
 -   **Development**: `pnpm dev` - Starts Electron with HMR for the renderer.
+-   **Debug Mode**: `pnpm dev:debug` - Starts Electron with remote debugging enabled (CDP on port 9222)
 -   **Build**: `pnpm build` - Compiles and bundles all code into the `dist` directory.
 -   **Distribution**: `pnpm dist` - Creates platform-specific installers from the `dist` output.
--   **Lint**: `pnpm lint` - Runs ESLint to check for code quality issues.
 -   **Clean**: `pnpm clean` - Removes the `dist` directory.
+
+### Debugging & Testing
+-   **Debug Capture**: `pnpm debug:capture` - Connects to running Electron app and captures logs/screenshots
+-   **Logs Only**: `pnpm debug:logs` - Extracts console logs from running app
+-   **Screenshot**: `pnpm debug:screenshot` - Takes screenshot of current app state
+-   **Lint**: `pnpm lint` - Runs ESLint to check for code quality issues.
 -   **Preview**: `pnpm preview` - Runs the production build locally.
 
 ## Architecture
@@ -90,31 +119,57 @@ All backend operations are requested via `window.api` and handled in `main.ts`:
 -   `config:getKnownLargeFiles`
 -   `config:setKnownLargeFiles`
 
-## Known Issues & Technical Debt
+## Recent Changes & Current State
 
-### Undefined CSS Classes (Priority Fix Needed)
-The following undefined Tailwind classes are currently used and need replacement:
-- `text-title-md` → Use `text-lg` (found in 6 locations: App.tsx, Card.tsx, PromptEditor.tsx, CodeEditorTabs.tsx, DiffViewer.tsx)
-- `duration-fast` → Use `duration-150` (found in Button.tsx and Input.tsx)
-- `ease-smooth` → Use `ease-out` (found in Button.tsx and Input.tsx)
+### Electron-Puppeteer Integration - IN PROGRESS
+The project is now implementing comprehensive debugging capabilities through Puppeteer integration. **Requirements have been recently updated and expanded** to include more detailed acceptance criteria for each feature:
 
-### Modal Component Implementation
-The unified Modal component has been successfully implemented with:
-- **Core Modal**: Main modal with backdrop, escape key handling, focus management
-- **Sub-components**: ModalHeader, ModalBody, ModalFooter for better composition
-- **Size variants**: sm, md, lg with responsive behavior
-- **Accessibility**: Proper ARIA labels, focus management, keyboard navigation
-- **Anchored Modal**: Special variant for positioning relative to elements (used in PromptModal)
-- **Features**: Backdrop click to close, escape key handling, scroll prevention
+#### 🔧 **Architecture Overview**
+- **CDP Endpoint**: Chrome DevTools Protocol exposed on port 9222 in development mode
+- **Debug Script**: Standalone Node.js script (`debug-electron.js`) for connecting to running Electron app
+- **CLI Interface**: Command-line tools for log extraction, screenshots, and automation
+- **Output Formats**: JSON, HTML reports, and plain text for easy sharing with AI assistants
 
-The PromptModal has been successfully migrated to use the new unified Modal component, eliminating the legacy CSS classes (`btn-sm`, `btn-primary`, `btn-secondary`) and replacing them with the unified Button component.
-- ✅ Button component: Unified with proper variants and Tailwind classes (but has undefined transition classes)
-- ✅ Card component: Updated with glass-surface styling (but uses undefined `text-title-md`)
-- ✅ Input component: Created with consistent styling variants, focus states, and error handling (but has undefined transition classes)
-- ✅ Modal component: Created unified Modal with ModalHeader, ModalBody, ModalFooter sub-components
-- ✅ PromptModal migration: Updated to use new unified Modal and Button components
-- ❌ CSS cleanup: Remove redundant styles from tailwind.css
-- ❌ Fix undefined CSS classes: Replace `text-title-md`, `duration-fast`, `ease-smooth` throughout codebase
+#### 📋 **Implementation Components**
+- **Main Process Changes**: Enable remote debugging with `--remote-debugging-port=9222` flag in development mode only
+- **Console Log Capture**: Real-time capture of all console messages with timestamps, log levels, and stack traces
+- **Screenshot System**: Full-page and element-specific capture with configurable formats (PNG/JPEG)
+- **Automation Framework**: User interaction simulation including file selection, button clicks, and text input
+- **CLI Debug Tool**: Standalone script with commands for log extraction, screenshots, and basic automation
+- **Export System**: Structured debug session exports in JSON, HTML, and plain text formats
+
+#### 🛡️ **Security & Performance**
+- Remote debugging only enabled in development mode
+- CDP endpoint bound to localhost only
+- Minimal performance impact on running application
+- Automatic cleanup of debug files with configurable retention
+
+### Development Environment Configuration
+- **VS Code Settings**: Project uses Peacock extension with purple theme (`#4a39b8`) for visual workspace identification
+- **Color Customizations**: Consistent purple branding across VS Code UI elements (activity bar, status bar, title bar)
+- **Development Experience**: Optimized for TypeScript/React development with Electron
+- **Editor Configuration**: Standard VS Code settings for consistent development experience
+
+### Design System Implementation - COMPLETED ✅
+The comprehensive design system optimization has been **successfully completed** with all 11 tasks finished:
+
+#### ✅ **Performance Achievements**
+- **CSS Bundle Optimization**: Reduced from 39.95 KB to 36.68 KB (8.2% reduction)
+- **Design Token Consolidation**: Streamlined CSS custom properties for better performance
+- **Tailwind Configuration**: Optimized with safelist and disabled unused plugins
+
+#### ✅ **Component Library Status**
+- **Button Component**: Unified with proper variants (primary, secondary, danger, ghost, success) and consistent Tailwind classes
+- **Input Component**: Created with variants (default, search), error states, and proper focus handling
+- **Card Component**: Updated with optimized glass-surface styling and consistent spacing
+- **Modal Component**: Complete unified system with ModalHeader, ModalBody, ModalFooter sub-components
+- **PromptModal**: Successfully migrated to use new unified Modal and Button components
+
+#### ✅ **System Improvements**
+- **CSS Cleanup**: Removed all redundant styles and undefined CSS classes
+- **Accessibility**: Enhanced focus states, ARIA labels, and high contrast mode support
+- **Theme System**: Verified smooth light/dark mode transitions across all components
+- **Performance**: Optimized transitions, backdrop filters, and CSS bundle size
 
 ## Conventions
 
@@ -123,23 +178,34 @@ The PromptModal has been successfully migrated to use the new unified Modal comp
 -   TypeScript with strict type checking enabled.
 -   React 19 functional components with Hooks.
 -   Async/await is used for all asynchronous operations.
--   No path aliases are configured; use relative paths for imports (e.g., `../common/types`).
+-   Path aliases are configured in `tsconfig.json`: `@/*`, `@renderer/*`, `@common/*` for clean imports.
 -   File tree visualization uses `react-arborist` for performance with large repositories.
+
+### Current TypeScript Issues
+-   Some React type declarations may be missing (React 19 types not fully resolved)
+-   Button component properly extends `React.ButtonHTMLAttributes` for onClick support
+-   Modal components use proper TypeScript interfaces with required children props
 
 ### Design System Conventions
 
 -   **Styling**: Tailwind CSS with CSS custom properties for theming
--   **Components**: Use unified UI components from `src/renderer/components/ui/` (Button, Card, Input)
+-   **Components**: Use unified UI components from `src/renderer/components/ui/` (Button, Card, Input, Modal)
 -   **Design Tokens**: Reference CSS variables (e.g., `var(--space-4)`, `var(--color-primary)`)
 -   **Glass Morphism**: Use `.glass-surface` and `.glass-button` classes for Apple-inspired styling
--   **Transitions**: Use standard Tailwind duration classes (`duration-150`, `duration-300`) instead of custom `duration-fast`
--   **Typography**: Use standard Tailwind text size classes (`text-sm`, `text-base`, `text-lg`) instead of custom `text-title-md`
--   **Legacy Classes**: Replace old CSS classes (`btn-sm`, `btn-primary`, `btn-secondary`) with unified Button component
+-   **Transitions**: Use standard Tailwind duration classes (`duration-150`, `duration-300`)
+-   **Typography**: Use standard Tailwind text size classes (`text-sm`, `text-base`, `text-lg`)
+-   **Component Composition**: Modal uses sub-components (ModalHeader, ModalBody, ModalFooter) for better structure
 
 ### AI Interaction Formats
 
 -   **Prompt Format**: The app generates a prompt with a `<file_map>` containing all selected files, followed by `<user_instructions>`.
 -   **Diff Format**: The AI must respond with an XML structure. Each file to be changed must be in its own `<file>` tag: `<file name="path/to/file.ext"><replace>...new content...</replace></file>`. The root element can be `<root>` or omitted.
+
+### Debugging Integration
+
+-   **Debug Output**: Console logs, screenshots, and interaction history can be exported in JSON, HTML, or plain text formats for sharing with AI assistants
+-   **CDP Connection**: Development mode exposes Chrome DevTools Protocol on port 9222 for external tool integration
+-   **Automated Testing**: Puppeteer scripts can simulate user interactions for consistent bug reproduction
 
 ### Security
 

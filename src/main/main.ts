@@ -15,6 +15,19 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 
 let mainWindow: BrowserWindow | null = null
 
+// Debug configuration for remote debugging
+interface DebugConfig {
+  enabled: boolean
+  port: number
+  host: string
+}
+
+const debugConfig: DebugConfig = {
+  enabled: process.env.NODE_ENV === 'development',
+  port: parseInt(process.env.REMOTE_DEBUGGING_PORT || '9222'),
+  host: 'localhost'
+}
+
 function createAppMenu() {
   const template = [
     {
@@ -226,6 +239,18 @@ function setupIpcHandlers() {
 function setupAutoUpdater() {
   autoUpdater.checkForUpdatesAndNotify()
 }
+
+// Configure remote debugging if enabled
+function configureRemoteDebugging() {
+  if (debugConfig.enabled) {
+    console.log(`Enabling remote debugging on ${debugConfig.host}:${debugConfig.port}`)
+    app.commandLine.appendSwitch('remote-debugging-port', debugConfig.port.toString())
+    app.commandLine.appendSwitch('remote-debugging-address', debugConfig.host)
+  }
+}
+
+// Configure remote debugging before app is ready
+configureRemoteDebugging()
 
 app.whenReady().then(async () => {
   // Install React Developer Tools in development

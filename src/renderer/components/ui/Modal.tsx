@@ -56,14 +56,53 @@ export function Modal({
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose, closeOnEscape])
 
-  // Focus management
+  // Focus management and accessibility
   useEffect(() => {
     if (isOpen && modalRef.current) {
+      // Store the previously focused element
+      const previouslyFocused = document.activeElement as HTMLElement
+      
       // Focus the modal container for accessibility
       modalRef.current.focus()
       
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden'
+      
+      // Focus trap - find all focusable elements
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      const firstFocusable = focusableElements[0] as HTMLElement
+      const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement
+      
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            // Shift + Tab
+            if (document.activeElement === firstFocusable) {
+              e.preventDefault()
+              lastFocusable?.focus()
+            }
+          } else {
+            // Tab
+            if (document.activeElement === lastFocusable) {
+              e.preventDefault()
+              firstFocusable?.focus()
+            }
+          }
+        }
+      }
+      
+      document.addEventListener('keydown', handleTabKey)
+      
+      return () => {
+        document.removeEventListener('keydown', handleTabKey)
+        document.body.style.overflow = ''
+        // Restore focus to previously focused element
+        if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+          previouslyFocused.focus()
+        }
+      }
     } else {
       // Restore body scroll when modal is closed
       document.body.style.overflow = ''
@@ -104,7 +143,7 @@ export function Modal({
           'bg-white dark:bg-gray-800',
           'border border-gray-200 dark:border-gray-700',
           'transform transition-all duration-200 ease-out',
-          'focus:outline-none',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
           sizeClasses[size],
           className
         )}
@@ -112,6 +151,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
+        aria-describedby="modal-content"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -148,7 +188,7 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-6">
+        <div id="modal-content" className="px-6 pb-6">
           {children}
         </div>
       </div>

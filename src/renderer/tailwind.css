@@ -20,23 +20,63 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  
+  /* Accessibility improvements */
+  *:focus {
+    outline: none;
+  }
+  
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  
+  /* Ensure interactive elements are accessible */
+  button, [role="button"], input, select, textarea, [tabindex]:not([tabindex="-1"]) {
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+  
+  /* High contrast mode improvements */
+  @media (prefers-contrast: high) {
+    *:focus-visible {
+      outline-width: 3px;
+      outline-offset: 3px;
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 /* Component styles */
 @layer components {
-  /* Glass surface with backdrop blur */
+  /* Glass surface with backdrop blur - optimized */
   .glass-surface {
-    @apply relative overflow-hidden backdrop-blur-xl;
+    @apply relative overflow-hidden;
     background: var(--surface-primary);
     border: 1px solid var(--surface-border);
     box-shadow: var(--shadow-md);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
   
-  /* Glass button base */
+  /* Glass button base - optimized */
   .glass-button {
-    @apply relative overflow-hidden transition-all backdrop-blur;
+    @apply relative overflow-hidden;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   
   .glass-button:hover {
@@ -67,6 +107,31 @@
   
   /* Placeholder utilities */
   .placeholder-tertiary::placeholder { color: var(--text-tertiary); }
+  
+  /* Accessibility utilities */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2;
+  }
+  
+  .focus-ring-danger {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:ring-offset-2;
+  }
+  
+  .focus-ring-inset {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset;
+  }
 }
 
 /* Global layout */
@@ -93,7 +158,7 @@ body {
   -webkit-app-region: no-drag;
 }
 
-/* React Arborist Tree Styling */
+/* React Arborist Tree Styling - optimized */
 .react-arborist-tree {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -116,6 +181,16 @@ body {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
+.react-arborist-row:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  background-color: rgba(10, 132, 255, 0.05);
+}
+
+.dark .react-arborist-row:focus-visible {
+  background-color: rgba(10, 132, 255, 0.15);
+}
+
 .react-arborist-row-selected {
   background-color: rgba(10, 132, 255, 0.1) !important;
   border-left: 3px solid var(--color-primary);
@@ -125,15 +200,21 @@ body {
   background-color: rgba(10, 132, 255, 0.2) !important;
 }
 
-.react-arborist-tree .react-arborist-tree-container::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--surface-border);
-  z-index: 1;
+/* High contrast mode for tree */
+@media (prefers-contrast: high) {
+  .react-arborist-row:focus-visible {
+    outline-width: 3px;
+    outline-offset: -3px;
+  }
+  
+  .react-arborist-row-selected {
+    border-left-width: 4px;
+    background-color: rgba(10, 132, 255, 0.2) !important;
+  }
+  
+  .dark .react-arborist-row-selected {
+    background-color: rgba(10, 132, 255, 0.3) !important;
+  }
 }
 
 .react-arborist-indent-line {

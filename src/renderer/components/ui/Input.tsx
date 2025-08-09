@@ -18,11 +18,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   className,
   ...props
 }, ref) => {
-  const baseStyles = 'w-full border transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-tertiary'
+  const baseStyles = 'w-full border transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-tertiary'
   
   const variants = {
-    default: 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-primary focus:ring-primary focus:border-primary',
-    search: 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-primary focus:ring-primary focus:border-primary focus:bg-white dark:focus:bg-gray-800'
+    default: 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-primary focus-visible:ring-primary/50 focus-visible:border-primary',
+    search: 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-primary focus-visible:ring-primary/50 focus-visible:border-primary focus-visible:bg-white dark:focus-visible:bg-gray-800'
   }
   
   const sizes = {
@@ -32,7 +32,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   }
   
   const errorStyles = error 
-    ? 'border-danger focus:ring-danger focus:border-danger' 
+    ? 'border-danger focus-visible:ring-danger/50 focus-visible:border-danger' 
     : ''
   
   const inputClasses = cn(
@@ -43,25 +43,39 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     className
   )
   
+  const inputId = props.id || `input-${Math.random().toString(36).substr(2, 9)}`
+  const helperId = helperText || errorMessage ? `${inputId}-helper` : undefined
+  
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-primary mb-1">
+        <label 
+          htmlFor={inputId}
+          className="block text-sm font-medium text-primary mb-1"
+        >
           {label}
         </label>
       )}
       
       <input
         ref={ref}
+        id={inputId}
         className={inputClasses}
+        aria-invalid={error}
+        aria-describedby={helperId}
         {...props}
       />
       
       {(helperText || errorMessage) && (
-        <p className={cn(
-          'mt-1 text-xs',
-          error ? 'text-danger' : 'text-secondary'
-        )}>
+        <p 
+          id={helperId}
+          className={cn(
+            'mt-1 text-xs',
+            error ? 'text-danger' : 'text-secondary'
+          )}
+          role={error ? 'alert' : 'status'}
+          aria-live={error ? 'assertive' : 'polite'}
+        >
           {error ? errorMessage : helperText}
         </p>
       )}

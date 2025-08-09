@@ -27,11 +27,7 @@ function App() {
   return (
     <RepoProvider>
       {/* Full screen container with gradient background */}
-      <div className="h-screen overflow-hidden flex flex-col font-sans bg-blue-500">
-        {/* Test if anything renders */}
-        <div className="p-4 bg-red-500 text-white">
-          <h1 className="text-2xl">TEST: Can you see this?</h1>
-        </div>
+      <div className="h-screen overflow-hidden flex flex-col font-sans bg-substrate">
         
         {/* Modern glass header */}
         <header className="draggable glass-surface border-b border-surface backdrop-blur-lg z-10">

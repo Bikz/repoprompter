@@ -16,7 +16,7 @@ src/renderer/styles/
 
 src/renderer/components/ui/
 ├── Button.tsx           # Unified button component
-├── Input.tsx            # New unified input component  
+├── Input.tsx            # New unified input component
 ├── Card.tsx             # Optimized card component
 ├── Modal.tsx            # New unified modal component
 └── FileTree.tsx         # New dedicated file tree component
@@ -36,12 +36,12 @@ src/renderer/components/ui/
 ```css
 :root {
   /* Spacing Scale - Simplified */
-  --space-1: 4px;   /* xs */
-  --space-2: 8px;   /* sm */
-  --space-3: 12px;  /* md */
-  --space-4: 16px;  /* lg */
-  --space-6: 24px;  /* xl */
-  --space-8: 32px;  /* 2xl */
+  --space-1: 4px; /* xs */
+  --space-2: 8px; /* sm */
+  --space-3: 12px; /* md */
+  --space-4: 16px; /* lg */
+  --space-6: 24px; /* xl */
+  --space-8: 32px; /* 2xl */
 
   /* Typography Scale */
   --text-xs: 12px;
@@ -55,16 +55,16 @@ src/renderer/components/ui/
   --radius-lg: 8px;
 
   /* Colors - Semantic */
-  --color-primary: #0A84FF;
-  --color-success: #32D74B;
-  --color-danger: #FF3B30;
-  --color-warning: #FF9500;
-  
+  --color-primary: #0a84ff;
+  --color-success: #32d74b;
+  --color-danger: #ff3b30;
+  --color-warning: #ff9500;
+
   /* Surface Colors */
   --surface-primary: rgba(255, 255, 255, 0.8);
   --surface-secondary: rgba(255, 255, 255, 0.6);
   --surface-border: rgba(0, 0, 0, 0.08);
-  
+
   /* Text Colors */
   --text-primary: rgba(0, 0, 0, 0.85);
   --text-secondary: rgba(0, 0, 0, 0.6);
@@ -75,7 +75,7 @@ src/renderer/components/ui/
   --surface-primary: rgba(44, 44, 46, 0.8);
   --surface-secondary: rgba(44, 44, 46, 0.6);
   --surface-border: rgba(255, 255, 255, 0.1);
-  
+
   --text-primary: rgba(255, 255, 255, 0.85);
   --text-secondary: rgba(255, 255, 255, 0.6);
   --text-tertiary: rgba(255, 255, 255, 0.4);
@@ -86,77 +86,81 @@ src/renderer/components/ui/
 
 ```typescript
 interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
-  children: React.ReactNode
-  className?: string
+  variant?: "primary" | "secondary" | "danger" | "ghost";
+  size?: "sm" | "md" | "lg";
+  children: React.ReactNode;
+  className?: string;
 }
 
 // Tailwind classes for consistent styling
 const buttonVariants = {
-  primary: 'bg-blue-500 text-white hover:bg-blue-600',
-  secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700',
-  danger: 'bg-red-500 text-white hover:bg-red-600',
-  ghost: 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-}
+  primary: "bg-blue-500 text-white hover:bg-blue-600",
+  secondary:
+    "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
+  danger: "bg-red-500 text-white hover:bg-red-600",
+  ghost:
+    "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
+};
 
 const buttonSizes = {
-  sm: 'h-8 px-3 text-sm',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-6 text-base'
-}
+  sm: "h-8 px-3 text-sm",
+  md: "h-10 px-4 text-sm",
+  lg: "h-12 px-6 text-base",
+};
 ```
 
 ### Input Component (New)
 
 ```typescript
 interface InputProps {
-  variant?: 'default' | 'search'
-  size?: 'sm' | 'md'
-  error?: boolean
-  className?: string
+  variant?: "default" | "search";
+  size?: "sm" | "md";
+  error?: boolean;
+  className?: string;
 }
 
 // Consistent input styling across all forms
-const inputStyles = 'border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600 dark:bg-gray-800 dark:text-white'
+const inputStyles =
+  "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-600 dark:bg-gray-800 dark:text-white";
 ```
 
 ### File Tree Component (Redesigned)
 
 ```typescript
 interface FileTreeProps {
-  nodes: TreeNode[]
-  selectedFiles: Set<string>
-  onSelectionChange: (path: string) => void
-  className?: string
+  nodes: TreeNode[];
+  selectedFiles: Set<string>;
+  onSelectionChange: (path: string) => void;
+  className?: string;
 }
 
 // Simplified tree styling with consistent spacing
 const treeStyles = {
-  container: 'font-mono text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg',
-  node: 'flex items-center py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer',
-  selected: 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500',
-  indent: 'w-4 flex-shrink-0'
-}
+  container:
+    "font-mono text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg",
+  node: "flex items-center py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer",
+  selected: "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500",
+  indent: "w-4 flex-shrink-0",
+};
 ```
 
 ### Modal Component (New)
 
 ```typescript
 interface ModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  children: React.ReactNode
-  size?: 'sm' | 'md' | 'lg'
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  size?: "sm" | "md" | "lg";
 }
 
 // Consistent modal styling and positioning
 const modalSizes = {
-  sm: 'max-w-sm',
-  md: 'max-w-md', 
-  lg: 'max-w-lg'
-}
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+};
 ```
 
 ## Data Models
@@ -165,20 +169,20 @@ const modalSizes = {
 
 ```typescript
 interface DesignTokens {
-  spacing: Record<string, string>
+  spacing: Record<string, string>;
   colors: {
-    primary: string
-    secondary: string
-    success: string
-    danger: string
-    warning: string
-  }
+    primary: string;
+    secondary: string;
+    success: string;
+    danger: string;
+    warning: string;
+  };
   typography: {
-    sizes: Record<string, string>
-    weights: Record<string, string>
-  }
-  borderRadius: Record<string, string>
-  shadows: Record<string, string>
+    sizes: Record<string, string>;
+    weights: Record<string, string>;
+  };
+  borderRadius: Record<string, string>;
+  shadows: Record<string, string>;
 }
 ```
 
@@ -187,19 +191,19 @@ interface DesignTokens {
 ```typescript
 interface ComponentStyles {
   button: {
-    variants: Record<string, string>
-    sizes: Record<string, string>
-    base: string
-  }
+    variants: Record<string, string>;
+    sizes: Record<string, string>;
+    base: string;
+  };
   input: {
-    variants: Record<string, string>
-    sizes: Record<string, string>
-    base: string
-  }
+    variants: Record<string, string>;
+    sizes: Record<string, string>;
+    base: string;
+  };
   card: {
-    base: string
-    variants: Record<string, string>
-  }
+    base: string;
+    variants: Record<string, string>;
+  };
 }
 ```
 
@@ -252,21 +256,25 @@ interface ComponentStyles {
 ## Implementation Phases
 
 ### Phase 1: Foundation
+
 - Optimize design tokens and remove unused CSS
 - Create unified Button and Input components
 - Update core layout components (Card, Modal)
 
-### Phase 2: File Tree Redesign  
+### Phase 2: File Tree Redesign
+
 - Create dedicated FileTree component
 - Implement clean, IDE-like styling
 - Optimize tree performance and interactions
 
 ### Phase 3: Component Migration
+
 - Migrate all existing components to new system
 - Remove old CSS classes and redundant styles
 - Update all component usage throughout the app
 
 ### Phase 4: Polish and Optimization
+
 - Fine-tune spacing and visual hierarchy
 - Optimize CSS bundle size
 - Add smooth transitions and micro-interactions

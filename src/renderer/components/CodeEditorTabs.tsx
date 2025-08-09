@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { createTwoFilesPatch } from 'diff'
+import * as Diff from 'diff'
 import * as Diff2Html from 'diff2html'
 import 'diff2html/bundles/css/diff2html.min.css'
 import { useRepoContext } from '../hooks/useRepoContext'

@@ -10,6 +10,7 @@ interface PromptModalProps {
   title: string
   defaultValue: string
   anchorElement?: HTMLElement | null
+  triggerRef?: React.RefObject<HTMLElement>
 }
 
 export function PromptModal({ 
@@ -18,7 +19,8 @@ export function PromptModal({
   onConfirm, 
   title, 
   defaultValue, 
-  anchorElement 
+  anchorElement,
+  triggerRef
 }: PromptModalProps) {
   const [value, setValue] = useState(defaultValue)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -73,7 +75,11 @@ export function PromptModal({
             size="sm"
             placeholder="Enter a name"
             className="w-full"
+            aria-describedby="prompt-modal-description"
           />
+          <p id="prompt-modal-description" className="sr-only">
+            Enter a name for this item and press Enter to confirm or Escape to cancel
+          </p>
         </ModalBody>
         
         <ModalFooter>
@@ -81,6 +87,7 @@ export function PromptModal({
             variant="secondary"
             size="sm"
             onClick={onClose}
+            aria-label="Cancel and close dialog"
           >
             Cancel
           </Button>
@@ -88,6 +95,8 @@ export function PromptModal({
             variant="primary"
             size="sm"
             onClick={handleConfirm}
+            disabled={!value.trim()}
+            aria-label="Confirm and save name"
           >
             Confirm
           </Button>

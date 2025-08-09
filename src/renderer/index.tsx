@@ -5,8 +5,8 @@
 
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-// import App from './App'
-import AppSimple from './AppSimple'
+import App from './App'
+// import AppSimple from './AppSimple'
 import './tailwind.css'
 
 if (typeof global === 'undefined') {
@@ -55,7 +55,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
-      <AppSimple />
+      <App />
     </ErrorBoundary>
   </React.StrictMode>
 )

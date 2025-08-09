@@ -287,9 +287,43 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
 
   const isSelected = (node: TreeNode) => {
     if (node.path === '__ROOT__') {
-      // Root is selected if all files are selected
-      return fileList.length > 0 && fileList.every(file => selectedFiles.includes(file))
+      // Root is selected if all files and folders are selected
+      const gatherAllPaths = (n: TreeNode): string[] => {
+        const paths: string[] = []
+        if (n.path !== '__ROOT__') {
+          paths.push(n.path)
+        }
+        if (n.children) {
+          n.children.forEach(child => {
+            paths.push(...gatherAllPaths(child))
+          })
+        }
+        return paths
+      }
+      
+      const allPaths = gatherAllPaths(node)
+      return allPaths.length > 0 && allPaths.every(path => selectedFiles.includes(path))
     }
+    
+    // For folders, check if the folder itself is selected OR if all its contents are selected
+    if (node.isFolder) {
+      // First check if the folder itself is explicitly selected
+      if (selectedSet.has(node.path)) {
+        return true
+      }
+      
+      // If not explicitly selected, check if all contents are selected
+      const gatherFiles = (n: TreeNode): string[] => {
+        if (!n.isFolder) return [n.path]
+        if (!n.children) return []
+        return n.children.flatMap(gatherFiles)
+      }
+      
+      const allFiles = gatherFiles(node)
+      return allFiles.length > 0 && allFiles.every(file => selectedFiles.includes(file))
+    }
+    
+    // For files, just check direct selection
     return selectedSet.has(node.path)
   }
 
@@ -327,7 +361,7 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
           const gatherAllPaths = (n: TreeNode): string[] => {
             const paths: string[] = []
             if (n.path !== '__ROOT__') {
-              paths.push(n.path)
+              paths.push(n.path) // Include both files and folders
             }
             if (n.children) {
               n.children.forEach(child => {
@@ -356,7 +390,7 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
             })
           }
         } else {
-          // For regular folders, gather all descendant files
+          // For regular folders, gather all descendant files AND include the folder itself
           const gatherFiles = (n: TreeNode): string[] => {
             if (!n.isFolder) return [n.path]
             if (!n.children) return []
@@ -364,20 +398,21 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
           }
           
           const allFiles = gatherFiles(nodeData)
-          const allSelected = allFiles.every(file => selectedFiles.includes(file))
+          const allPaths = [nodeData.path, ...allFiles] // Include the folder itself
+          const allSelected = allPaths.every(path => selectedFiles.includes(path))
           
           if (allSelected) {
-            // Unselect all
-            allFiles.forEach(file => {
-              if (selectedFiles.includes(file)) {
-                toggleSelectedFile(file)
+            // Unselect all (folder and its files)
+            allPaths.forEach(path => {
+              if (selectedFiles.includes(path)) {
+                toggleSelectedFile(path)
               }
             })
           } else {
-            // Select all
-            allFiles.forEach(file => {
-              if (!selectedFiles.includes(file)) {
-                toggleSelectedFile(file)
+            // Select all (folder and its files)
+            allPaths.forEach(path => {
+              if (!selectedFiles.includes(path)) {
+                toggleSelectedFile(path)
               }
             })
           }
@@ -392,9 +427,26 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
       <div
         ref={dragHandle}
         style={style}
-        className={`flex items-center py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 text-sm transition-colors group ${
+        className={`flex items-center py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 text-sm transition-colors group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1 focus-visible:ring-inset ${
           selected ? 'bg-blue-50 dark:bg-blue-900/30 font-medium' : ''
         }`}
+        role="treeitem"
+        tabIndex={0}
+        aria-selected={selected}
+        aria-expanded={nodeData.isFolder ? node.isOpen : undefined}
+        aria-label={`${nodeData.isFolder ? 'Folder' : 'File'}: ${nodeData.name}${selected ? ' (selected)' : ''}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            handleClick()
+          } else if (e.key === 'ArrowRight' && nodeData.isFolder && !node.isOpen) {
+            e.preventDefault()
+            node.toggle()
+          } else if (e.key === 'ArrowLeft' && nodeData.isFolder && node.isOpen) {
+            e.preventDefault()
+            node.toggle()
+          }
+        }}
       >
         {/* Expand/collapse arrow for folders */}
         {nodeData.isFolder ? (
@@ -403,7 +455,9 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
               e.stopPropagation()
               node.toggle()
             }}
-            className="w-5 h-5 flex items-center justify-center mr-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-all opacity-70 hover:opacity-100"
+            className="w-5 h-5 flex items-center justify-center mr-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-all opacity-70 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1"
+            aria-label={`${node.isOpen ? 'Collapse' : 'Expand'} folder ${nodeData.name}`}
+            aria-expanded={node.isOpen}
           >
             <svg
               width="8"
@@ -430,7 +484,8 @@ export function FileList({ isTreeCollapsed = false }: FileListProps) {
           checked={selected}
           onChange={() => {}}
           onClick={handleClick}
-          className="mr-2 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 cursor-pointer accent-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+          className="mr-2 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 cursor-pointer accent-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
+          aria-label={`${selected ? 'Unselect' : 'Select'} ${nodeData.isFolder ? 'folder' : 'file'} ${nodeData.name}`}
         />
         <div className="mr-2 flex-shrink-0">{icon}</div>
         <span 

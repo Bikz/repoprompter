@@ -110,19 +110,31 @@ export function DirectorySelector() {
               {groups.map((group) => (
                 <div
                   key={group.name}
-                  className={`group flex items-center gap-2 px-3 py-2 rounded-md transition-all cursor-pointer
+                  className={`group flex items-center gap-2 px-3 py-2 rounded-md transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1
                     ${activeGroupName === group.name 
                       ? 'bg-primary/10 text-primary' 
                       : 'hover:bg-black/5 dark:hover:bg-white/5 text-secondary'
                     }`}
                   onClick={() => selectGroup(group.name)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={activeGroupName === group.name}
+                  aria-label={`${activeGroupName === group.name ? 'Active' : 'Select'} file group ${group.name} with ${group.files.length} files`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      selectGroup(group.name)
+                    }
+                  }}
                 >
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       toggleGroup(group.name)
                     }}
-                    className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10"
+                    className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1"
+                    aria-label={`${activeGroupName === group.name ? 'Collapse' : 'Expand'} group ${group.name}`}
+                    aria-expanded={activeGroupName === group.name}
                   >
                     <svg 
                       className={`w-3 h-3 transition-transform ${
@@ -143,7 +155,8 @@ export function DirectorySelector() {
                       e.stopPropagation()
                       removeGroup(group.name)
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-danger/10 text-danger transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-0.5 rounded hover:bg-danger/10 text-danger transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:ring-offset-1"
+                    aria-label={`Delete group ${group.name}`}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
