@@ -32,7 +32,13 @@ function App() {
         {/* Modern glass header */}
         <header className="draggable glass-surface border-b border-surface backdrop-blur-lg z-10">
           <div className="flex items-center justify-between px-6 h-14">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/repoprompter-logo.png"
+                alt="RepoPrompter logo"
+                className="w-6 h-6 rounded-sm shadow-sm pointer-events-none select-none"
+                draggable={false}
+              />
               <h1 className="text-lg font-semibold text-primary">RepoPrompter</h1>
               <span className="text-xs text-secondary">Build AI prompts from your codebase</span>
             </div>

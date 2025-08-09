@@ -62,7 +62,8 @@
   "build": {
     "appId": "com.repoprompter.app",
     "mac": {
-      "category": "public.app-category.developer-tools"
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icons/icon.icns"
     },
     "directories": {
       "output": "release"

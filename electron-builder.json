@@ -9,7 +9,14 @@
     "electron/**/*"
   ],
   "mac": {
-    "category": "public.app-category.developer-tools"
+    "category": "public.app-category.developer-tools",
+    "icon": "public/repoprompter-logo.png"
+  },
+  "win": {
+    "icon": "public/repoprompter-logo.png"
+  },
+  "linux": {
+    "icon": "public/repoprompter-logo.png"
   },
   "publish": [
     {

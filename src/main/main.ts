@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { parseDiffXml, applyDiffPatches } from '../common/diffParser'
@@ -84,6 +84,13 @@ async function readDirRecursive(dirPath: string): Promise<string[]> {
   return files
 }
 
+function getAppIconPath() {
+  // In dev, use public/; in production, use the built renderer assets
+  return app.isPackaged
+    ? path.join(__dirname, '..', 'renderer', 'repoprompter-logo.png')
+    : path.join(process.cwd(), 'public', 'repoprompter-logo.png')
+}
+
 async function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -93,6 +100,7 @@ async function createMainWindow() {
     // Provide a normal background and enable mac's slight corner rounding
     backgroundColor: '#FFFFFF',
     roundedCorners: true,
+    icon: getAppIconPath(),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -261,6 +269,15 @@ app.whenReady().then(async () => {
     } catch (err) {
       console.log('An error occurred installing React DevTools: ', err)
     }
+  }
+  // Set Dock icon for macOS
+  try {
+    if (process.platform === 'darwin') {
+      const iconImg = nativeImage.createFromPath(getAppIconPath())
+      if (!iconImg.isEmpty()) app.dock.setIcon(iconImg)
+    }
+  } catch (e) {
+    console.warn('Failed to set dock icon:', e)
   }
   
   createAppMenu()
